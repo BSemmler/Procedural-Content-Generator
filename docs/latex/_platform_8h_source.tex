@@ -1,0 +1,33 @@
+\hypertarget{_platform_8h_source}{}\doxysection{Platform.\+h}
+\label{_platform_8h_source}\index{C:/Users/Brett/source/repos/KGVEngine/KVGEngine/Platform.h@{C:/Users/Brett/source/repos/KGVEngine/KVGEngine/Platform.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 }
+\DoxyCodeLine{2 \textcolor{preprocessor}{\#if defined(\_WIN32) || defined(\_WIN64)}}
+\DoxyCodeLine{3     \textcolor{comment}{// Debug definitions}}
+\DoxyCodeLine{4 \textcolor{preprocessor}{\#define KGV\_WIN 1}}
+\DoxyCodeLine{5 \textcolor{preprocessor}{\#define WIN32\_LEAN\_AND\_MEAN 1}}
+\DoxyCodeLine{6 }
+\DoxyCodeLine{7 \textcolor{preprocessor}{\#ifdef \_DEBUG   }}
+\DoxyCodeLine{8 \textcolor{preprocessor}{\#define KGV\_ASSERTIONS\_ENABLED}}
+\DoxyCodeLine{9 \textcolor{preprocessor}{\#define KGV\_SLOW\_ASSERTIONS\_ENABLED}}
+\DoxyCodeLine{10 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{11 }
+\DoxyCodeLine{12 \textcolor{preprocessor}{\#define WIN32\_LEAN\_AND\_MEAN }\textcolor{comment}{// Remove rarely used libraries from the windows header.}}
+\DoxyCodeLine{13 \textcolor{preprocessor}{\#include <Windows.h>}}
+\DoxyCodeLine{14 }
+\DoxyCodeLine{15 \textcolor{comment}{// Include directx libraries}}
+\DoxyCodeLine{16 \textcolor{preprocessor}{\#include <d3d11\_1.h>}}
+\DoxyCodeLine{17 \textcolor{preprocessor}{\#include <dxgi1\_2.h>}}
+\DoxyCodeLine{18 \textcolor{preprocessor}{\#include <d3dcommon.h>}}
+\DoxyCodeLine{19 \textcolor{preprocessor}{\#include <DirectXMath.h>}}
+\DoxyCodeLine{20 }
+\DoxyCodeLine{21 \textcolor{comment}{// Include COM libraries.}}
+\DoxyCodeLine{22 \textcolor{preprocessor}{\#include <wrl.h>}}
+\DoxyCodeLine{23 }
+\DoxyCodeLine{24 \textcolor{preprocessor}{\#elif defined(\_\_linux\_\_)}}
+\DoxyCodeLine{25 \textcolor{preprocessor}{\#define KGV\_LINUX 1}}
+\DoxyCodeLine{26 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{27 }
+
+\end{DoxyCode}

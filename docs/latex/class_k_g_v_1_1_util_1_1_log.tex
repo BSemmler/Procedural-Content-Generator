@@ -1,0 +1,138 @@
+\hypertarget{class_k_g_v_1_1_util_1_1_log}{}\doxysection{KGV\+::Util\+::Log Class Reference}
+\label{class_k_g_v_1_1_util_1_1_log}\index{KGV::Util::Log@{KGV::Util::Log}}
+
+
+This class is for internal logging of the application. Errors, warnings and other issues or information can be logged using this utility.  
+
+
+
+
+{\ttfamily \#include $<$Log.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_k_g_v_1_1_util_1_1_log_a48273d0ec450bd09fb78d9ed8b8f9807}\label{class_k_g_v_1_1_util_1_1_log_a48273d0ec450bd09fb78d9ed8b8f9807}} 
+{\bfseries Log} ()
+\begin{DoxyCompactList}\small\item\em Constructs a new \mbox{\hyperlink{class_k_g_v_1_1_util_1_1_log}{Log}} object with minimum verbosity level and all channels selected. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{class_k_g_v_1_1_util_1_1_log_af3b5dc2d67a0469eeccce79b87a419b3}{Log}} (Log\+Verbosity verbosity, Log\+Channel channel)
+\begin{DoxyCompactList}\small\item\em Constructs a new log object with the desired verbosity and channel parameters. See \mbox{\hyperlink{class_k_g_v_1_1_util_1_1_log_a0b1926e8cbf8b5066bda69f9ea7b1572}{set\+Filters()}} for further information. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{class_k_g_v_1_1_util_1_1_log_a5450c859babb137a44f7c7b3207bbee5}{write\+To\+Log}} (Log\+Verbosity verbosity, Log\+Channel channel, const std\+::string \&format,...)
+\begin{DoxyCompactList}\small\item\em A variadic method that outputs a formated message to the console. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{class_k_g_v_1_1_util_1_1_log_acd58b78bfdaa576766e7e9027f473f03}{write\+To\+Log}} (Log\+Verbosity verbosity, Log\+Channel channel, const std\+::string \&format, va\+\_\+list arg\+List)
+\begin{DoxyCompactList}\small\item\em A variadic method that outputs a formated message to the console. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_k_g_v_1_1_util_1_1_log_a0b1926e8cbf8b5066bda69f9ea7b1572}{set\+Filters}} (Log\+Verbosity verbosity\+Level, Log\+Channel channel\+Filter)
+\begin{DoxyCompactList}\small\item\em This method sets the desired output settings of this logging utility. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_k_g_v_1_1_util_1_1_log_add543c886c358496769d14a4e3335b9a}\label{class_k_g_v_1_1_util_1_1_log_add543c886c358496769d14a4e3335b9a}} 
+static void {\bfseries report\+Assertion\+Failure} (std\+::string expr, std\+::string file, S64 line)
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_k_g_v_1_1_util_1_1_log_ae36eab31d86d34b6b78059cc0a54daf9}\label{class_k_g_v_1_1_util_1_1_log_ae36eab31d86d34b6b78059cc0a54daf9}} 
+Log\+Channel {\bfseries channel\+Filter}
+\item 
+\mbox{\Hypertarget{class_k_g_v_1_1_util_1_1_log_a8810104997f6cfc4f83878cde0b6480c}\label{class_k_g_v_1_1_util_1_1_log_a8810104997f6cfc4f83878cde0b6480c}} 
+Log\+Verbosity {\bfseries verbosity\+Level}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This class is for internal logging of the application. Errors, warnings and other issues or information can be logged using this utility. 
+
+This class is for internal logging of the application. Errors, warnings and other issues or information can be logged using this utility. This class has filtering for specific systems and for an verbosity level. These filter settings can be configured with \mbox{\hyperlink{class_k_g_v_1_1_util_1_1_log_a0b1926e8cbf8b5066bda69f9ea7b1572}{Log\+::set\+Filters()}}. The verbosity level determines the minimum verbosity of the messages that can be sent and the channel is a bitmask of the 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_k_g_v_1_1_util_1_1_log_af3b5dc2d67a0469eeccce79b87a419b3}\label{class_k_g_v_1_1_util_1_1_log_af3b5dc2d67a0469eeccce79b87a419b3}} 
+\index{KGV::Util::Log@{KGV::Util::Log}!Log@{Log}}
+\index{Log@{Log}!KGV::Util::Log@{KGV::Util::Log}}
+\doxysubsubsection{\texorpdfstring{Log()}{Log()}}
+{\footnotesize\ttfamily KGV\+::\+Util\+::\+Log\+::\+Log (\begin{DoxyParamCaption}\item[{Log\+Verbosity}]{verbosity,  }\item[{Log\+Channel}]{channel }\end{DoxyParamCaption})}
+
+
+
+Constructs a new log object with the desired verbosity and channel parameters. See \mbox{\hyperlink{class_k_g_v_1_1_util_1_1_log_a0b1926e8cbf8b5066bda69f9ea7b1572}{set\+Filters()}} for further information. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em verbosity} & The desired minimum verbosity. \\
+\hline
+{\em channel} & The desired channel bitmask. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_k_g_v_1_1_util_1_1_log_a0b1926e8cbf8b5066bda69f9ea7b1572}\label{class_k_g_v_1_1_util_1_1_log_a0b1926e8cbf8b5066bda69f9ea7b1572}} 
+\index{KGV::Util::Log@{KGV::Util::Log}!setFilters@{setFilters}}
+\index{setFilters@{setFilters}!KGV::Util::Log@{KGV::Util::Log}}
+\doxysubsubsection{\texorpdfstring{setFilters()}{setFilters()}}
+{\footnotesize\ttfamily void KGV\+::\+Util\+::\+Log\+::set\+Filters (\begin{DoxyParamCaption}\item[{Log\+Verbosity}]{verbosity\+Level,  }\item[{Log\+Channel}]{channel\+Filter }\end{DoxyParamCaption})}
+
+
+
+This method sets the desired output settings of this logging utility. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em verbosity\+Filter} & The desired maximum verbosity. \\
+\hline
+{\em channel\+Filter} & A bitmask of the desired channels \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_k_g_v_1_1_util_1_1_log_acd58b78bfdaa576766e7e9027f473f03}\label{class_k_g_v_1_1_util_1_1_log_acd58b78bfdaa576766e7e9027f473f03}} 
+\index{KGV::Util::Log@{KGV::Util::Log}!writeToLog@{writeToLog}}
+\index{writeToLog@{writeToLog}!KGV::Util::Log@{KGV::Util::Log}}
+\doxysubsubsection{\texorpdfstring{writeToLog()}{writeToLog()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily int KGV\+::\+Util\+::\+Log\+::write\+To\+Log (\begin{DoxyParamCaption}\item[{Log\+Verbosity}]{verbosity,  }\item[{Log\+Channel}]{channel,  }\item[{const std\+::string \&}]{format,  }\item[{va\+\_\+list}]{arg\+List }\end{DoxyParamCaption})}
+
+
+
+A variadic method that outputs a formated message to the console. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em verbosity} & The verbosity of the message. \\
+\hline
+{\em channel} & The channel that the message is associated with. Note\+: Only 1 channel is allowed for a message. \\
+\hline
+{\em format} & A string that represents the desired formatting of the parameters \\
+\hline
+{\em parameters} & Any data that you wish to be outputed according to the format string. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The number of characters written to console. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_k_g_v_1_1_util_1_1_log_a5450c859babb137a44f7c7b3207bbee5}\label{class_k_g_v_1_1_util_1_1_log_a5450c859babb137a44f7c7b3207bbee5}} 
+\index{KGV::Util::Log@{KGV::Util::Log}!writeToLog@{writeToLog}}
+\index{writeToLog@{writeToLog}!KGV::Util::Log@{KGV::Util::Log}}
+\doxysubsubsection{\texorpdfstring{writeToLog()}{writeToLog()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily int KGV\+::\+Util\+::\+Log\+::write\+To\+Log (\begin{DoxyParamCaption}\item[{Log\+Verbosity}]{verbosity,  }\item[{Log\+Channel}]{channel,  }\item[{const std\+::string \&}]{format,  }\item[{}]{... }\end{DoxyParamCaption})}
+
+
+
+A variadic method that outputs a formated message to the console. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em verbosity} & The verbosity of the message. \\
+\hline
+{\em channel} & The channel that the message is associated with. Note\+: Only 1 channel is allowed for a message. \\
+\hline
+{\em format} & A string that represents the desired formatting of the parameters. \\
+\hline
+{\em parameters} & Any data that you wish to be outputed according to the format string. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The number of characters written to console. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Users/\+Brett/source/repos/\+KGVEngine/\+KVGEngine/Log.\+h\end{DoxyCompactItemize}

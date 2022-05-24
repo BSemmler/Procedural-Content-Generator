@@ -1,0 +1,58 @@
+\hypertarget{_log_8h_source}{}\doxysection{Log.\+h}
+\label{_log_8h_source}\index{C:/Users/Brett/source/repos/KGVEngine/KVGEngine/Log.h@{C:/Users/Brett/source/repos/KGVEngine/KVGEngine/Log.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{2 \textcolor{preprocessor}{\#include "{}pch.h"{}}}
+\DoxyCodeLine{3 }
+\DoxyCodeLine{4 \textcolor{keyword}{namespace }KGV::Util}
+\DoxyCodeLine{5 \{}
+\DoxyCodeLine{6     \textcolor{comment}{// As systems are added expand this enum}}
+\DoxyCodeLine{7     \textcolor{keyword}{enum class} LogChannel : U32 \{}
+\DoxyCodeLine{8         kRender = 0x01,}
+\DoxyCodeLine{9         kHID = 0x02,}
+\DoxyCodeLine{10         kProfiler = 0x04,}
+\DoxyCodeLine{11         kSystem = 0x08,}
+\DoxyCodeLine{12         kSound = 0x10,}
+\DoxyCodeLine{13         kPhysics = 0x20,}
+\DoxyCodeLine{14         kAllChannels = 0xFFFFFFFF}
+\DoxyCodeLine{15     \};}
+\DoxyCodeLine{16 }
+\DoxyCodeLine{17     \textcolor{keyword}{inline} LogChannel operator | ( LogChannel lhs, LogChannel rhs ) \{}
+\DoxyCodeLine{18         \textcolor{keywordflow}{return} \textcolor{keyword}{static\_cast<}LogChannel\textcolor{keyword}{>}(\textcolor{keyword}{static\_cast<}U32\textcolor{keyword}{>}(lhs) | \textcolor{keyword}{static\_cast<}U32\textcolor{keyword}{>}(rhs));}
+\DoxyCodeLine{19     \}}
+\DoxyCodeLine{20 }
+\DoxyCodeLine{21     \textcolor{keyword}{inline} LogChannel operator \& ( LogChannel lhs, LogChannel rhs ) \{}
+\DoxyCodeLine{22         \textcolor{keywordflow}{return} \textcolor{keyword}{static\_cast<}LogChannel\textcolor{keyword}{>}(\textcolor{keyword}{static\_cast<}U32\textcolor{keyword}{>}(lhs) \& \textcolor{keyword}{static\_cast<}U32\textcolor{keyword}{>}(rhs));}
+\DoxyCodeLine{23     \}}
+\DoxyCodeLine{24 }
+\DoxyCodeLine{25     \textcolor{keyword}{enum class} LogVerbosity : U32 \{}
+\DoxyCodeLine{26         kFatal = 6,}
+\DoxyCodeLine{27         kSevere = 5,}
+\DoxyCodeLine{28         kError = 4,}
+\DoxyCodeLine{29         kWarning = 3,}
+\DoxyCodeLine{30         kInfo = 2,}
+\DoxyCodeLine{31         kDebug = 1}
+\DoxyCodeLine{32     \};}
+\DoxyCodeLine{33 }
+\DoxyCodeLine{41     \textcolor{keyword}{class }\mbox{\hyperlink{class_k_g_v_1_1_util_1_1_log}{Log}} \{}
+\DoxyCodeLine{42     \textcolor{keyword}{public}:}
+\DoxyCodeLine{46         \mbox{\hyperlink{class_k_g_v_1_1_util_1_1_log_a48273d0ec450bd09fb78d9ed8b8f9807}{Log}}();}
+\DoxyCodeLine{47 }
+\DoxyCodeLine{54         \mbox{\hyperlink{class_k_g_v_1_1_util_1_1_log_af3b5dc2d67a0469eeccce79b87a419b3}{Log}}(LogVerbosity verbosity, LogChannel channel);}
+\DoxyCodeLine{55 }
+\DoxyCodeLine{64         \textcolor{keywordtype}{int} \mbox{\hyperlink{class_k_g_v_1_1_util_1_1_log_a5450c859babb137a44f7c7b3207bbee5}{writeToLog}}( LogVerbosity verbosity, LogChannel channel, \textcolor{keyword}{const} std::string\& format, ... );}
+\DoxyCodeLine{65 }
+\DoxyCodeLine{74         \textcolor{keywordtype}{int} \mbox{\hyperlink{class_k_g_v_1_1_util_1_1_log_acd58b78bfdaa576766e7e9027f473f03}{writeToLog}}( LogVerbosity verbosity, LogChannel channel, \textcolor{keyword}{const} std::string\& format, va\_list argList );}
+\DoxyCodeLine{75 }
+\DoxyCodeLine{76         \textcolor{keyword}{static} \textcolor{keywordtype}{void} reportAssertionFailure( std::string expr, std::string file, S64 line );}
+\DoxyCodeLine{77 }
+\DoxyCodeLine{83         \textcolor{keywordtype}{void} \mbox{\hyperlink{class_k_g_v_1_1_util_1_1_log_a0b1926e8cbf8b5066bda69f9ea7b1572}{setFilters}}( LogVerbosity verbosityLevel, LogChannel channelFilter );}
+\DoxyCodeLine{84 }
+\DoxyCodeLine{85     \textcolor{keyword}{protected}:}
+\DoxyCodeLine{86         LogChannel channelFilter;}
+\DoxyCodeLine{87         LogVerbosity verbosityLevel;}
+\DoxyCodeLine{88     \};}
+\DoxyCodeLine{89 \}}
+
+\end{DoxyCode}

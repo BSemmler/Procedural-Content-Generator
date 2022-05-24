@@ -1,0 +1,36 @@
+\hypertarget{_window_8h_source}{}\doxysection{Window.\+h}
+\label{_window_8h_source}\index{C:/Users/Brett/source/repos/KGVEngine/KVGEngine/Window.h@{C:/Users/Brett/source/repos/KGVEngine/KVGEngine/Window.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{2 \textcolor{preprocessor}{\#include "{}pch.h"{}}}
+\DoxyCodeLine{3 }
+\DoxyCodeLine{4 \textcolor{keyword}{namespace }KGV::System \{}
+\DoxyCodeLine{5     \textcolor{keyword}{enum} WindowStyles : U32 \{}
+\DoxyCodeLine{6         Overlapped = 0x01,}
+\DoxyCodeLine{7         Borderless = 0x02,}
+\DoxyCodeLine{8         Border = 0x04,}
+\DoxyCodeLine{9     \};}
+\DoxyCodeLine{10 }
+\DoxyCodeLine{11     \textcolor{keyword}{class }\mbox{\hyperlink{class_k_g_v_1_1_system_1_1_window}{Window}} \{}
+\DoxyCodeLine{12     \textcolor{keyword}{public}:}
+\DoxyCodeLine{13         \mbox{\hyperlink{class_k_g_v_1_1_system_1_1_window}{Window}}();}
+\DoxyCodeLine{14         \textcolor{keyword}{virtual} \mbox{\hyperlink{class_k_g_v_1_1_system_1_1_window}{\string~Window}}();}
+\DoxyCodeLine{15 }
+\DoxyCodeLine{16         \textcolor{keyword}{virtual} \textcolor{keywordtype}{bool} InstantiateWindow() = 0;}
+\DoxyCodeLine{17         \textcolor{keyword}{virtual} \textcolor{keywordtype}{void} ShutdownWindow() = 0;}
+\DoxyCodeLine{18 }
+\DoxyCodeLine{19         \textcolor{keyword}{virtual} \textcolor{keywordtype}{void} DisplayWindow( \textcolor{keywordtype}{bool} display );}
+\DoxyCodeLine{20 }
+\DoxyCodeLine{21     \textcolor{keyword}{protected}:}
+\DoxyCodeLine{22         S32 xRes;}
+\DoxyCodeLine{23         S32 yRes;}
+\DoxyCodeLine{24         S32 xPos;}
+\DoxyCodeLine{25         S32 yPos;}
+\DoxyCodeLine{26         WindowStyles styles;}
+\DoxyCodeLine{27         \textcolor{keyword}{const} \textcolor{keywordtype}{char}* windowName;}
+\DoxyCodeLine{28         \textcolor{keyword}{const} \textcolor{keywordtype}{char}* windowTitle;}
+\DoxyCodeLine{29     \};}
+\DoxyCodeLine{30 \}}
+
+\end{DoxyCode}

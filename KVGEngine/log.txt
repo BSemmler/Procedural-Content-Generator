@@ -1,0 +1,118 @@
+SYSTEM INFO Failed to create Window 1
+SYSTEM ERROR Hello World!
+SYSTEM INFO New Window is being instantiated. Caption: ê√ZM#, Width: 800, Height: 600, Position: (0,0)
+SYSTEM ERROR Failed to create window! Error code:  1407
+SYSTEM INFO New Window is being instantiated. Caption:  ≈ZM#, Width: 800, Height: 600, Position: (800,0)
+SYSTEM ERROR Failed to create window! Error code:  1407
+SYSTEM INFO Failed to create Window 1
+SYSTEM ERROR Hello World!
+SYSTEM INFO New Window is being instantiated. Caption:  ”j	&, Width: 800, Height: 600, Position: (0,0)
+SYSTEM ERROR Failed to create window! Error code:  1407
+SYSTEM INFO New Window is being instantiated. Caption: ¿”j	&, Width: 800, Height: 600, Position: (800,0)
+SYSTEM ERROR Failed to create window! Error code:  1407
+SYSTEM INFO Failed to create Window 1
+SYSTEM ERROR Hello World!
+SYSTEM INFO New Window is being instantiated. Caption: 0›≤B˙, Width: 800, Height: 600, Position: (0,0)
+SYSTEM ERROR Failed to create window! Error code:  1407
+SYSTEM ERROR Hello World!
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 1!, Width: 800, Height: 600, Position: (0,0)
+SYSTEM ERROR Failed to register window class! Error code:  87
+SYSTEM ERROR Failed to create window! Error code:  1407
+SYSTEM ERROR Hello World!
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 1!, Width: 800, Height: 600, Position: (0,0)
+SYSTEM ERROR Failed to register window class! Error code:  87
+SYSTEM ERROR Failed to create window! Error code:  1407
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 2!, Width: 800, Height: 600, Position: (800,0)
+SYSTEM ERROR Failed to register window class! Error code:  87
+SYSTEM ERROR Failed to create window! Error code:  1407
+SYSTEM INFO Failed to create Window 1
+SYSTEM ERROR Hello World!
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 1!, Width: 800, Height: 600, Position: (0,0)
+SYSTEM ERROR Failed to register window class! Error code:  87
+SYSTEM ERROR Failed to create window! Error code:  1407
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 2!, Width: 800, Height: 600, Position: (800,0)
+SYSTEM ERROR Failed to register window class! Error code:  87
+SYSTEM ERROR Failed to create window! Error code:  1407
+SYSTEM INFO Failed to create Window 1
+SYSTEM ERROR Hello World!
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 1!, Width: 800, Height: 600, Position: (0,0)
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 2!, Width: 800, Height: 600, Position: (800,0)
+SYSTEM ERROR Failed to register window class! Error code:  1410
+SYSTEM INFO Failed to create Window 2
+SYSTEM INFO Left mouse button clicked
+SYSTEM INFO Keydown Keycode: -573337294
+SYSTEM INFO Left mouse button clicked
+SYSTEM INFO Keydown Keycode: -573337294
+SYSTEM ERROR Hello World!
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 1!, Width: 800, Height: 600, Position: (0,0)
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 2!, Width: 800, Height: 600, Position: (800,0)
+SYSTEM ERROR Failed to register window class! Error code:  1410
+SYSTEM INFO Failed to create Window 2
+SYSTEM ERROR Hello World!
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 1!, Width: 800, Height: 600, Position: (0,0)
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 2!, Width: 800, Height: 600, Position: (800,0)
+SYSTEM ERROR Failed to register window class! Error code:  1410
+SYSTEM INFO Failed to create Window 2
+SYSTEM ERROR Hello World!
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 1!, Width: 800, Height: 600, Position: (0,0)
+SYSTEM ERROR Failed to register window class! Error code:  183
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 2!, Width: 800, Height: 600, Position: (800,0)
+SYSTEM INFO Failed to create Window 1
+SYSTEM INFO Left mouse button clicked
+SYSTEM INFO Keydown Keycode: 1016271240
+SYSTEM ERROR Hello World!
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 1!, Width: 800, Height: 600, Position: (0,0)
+SYSTEM ERROR Failed to register window class! Error code:  183
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 2!, Width: 800, Height: 600, Position: (800,0)
+SYSTEM INFO Failed to create Window 1
+SYSTEM INFO Left mouse button clicked
+SYSTEM INFO Keydown Keycode: -876135388
+SYSTEM INFO Left mouse button clicked
+SYSTEM INFO Keydown Keycode: -876135676
+SYSTEM INFO Left mouse button clicked
+SYSTEM INFO Keydown Keycode: -876137896
+SYSTEM ERROR Hello World!
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 1!, Width: 800, Height: 600, Position: (0,0)
+SYSTEM ERROR Failed to register window class! Error code:  183
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 2!, Width: 800, Height: 600, Position: (800,0)
+SYSTEM INFO Failed to create Window 1
+SYSTEM ERROR Hello World!
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 1!, Width: 800, Height: 600, Position: (0,0)
+SYSTEM ERROR Failed to register window class! Error code:  183
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 2!, Width: 800, Height: 600, Position: (800,0)
+SYSTEM INFO Failed to create Window 1
+SYSTEM ERROR Hello World!
+SYSTEM ERROR Class successfully registered 
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 1!, Width: 800, Height: 600, Position: (0,0)
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 2!, Width: 800, Height: 600, Position: (800,0)
+SYSTEM INFO Init Complete
+SYSTEM ERROR Hello World!
+SYSTEM ERROR Class successfully registered 
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 1!, Width: 800, Height: 600, Position: (0,0)
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 2!, Width: 800, Height: 600, Position: (800,0)
+SYSTEM INFO Init Complete
+SYSTEM ERROR Hello World!
+SYSTEM ERROR Class successfully registered 
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 1!, Width: 800, Height: 600, Position: (0,0)
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 2!, Width: 800, Height: 600, Position: (800,0)
+SYSTEM INFO Init Complete
+SYSTEM ERROR Hello World!
+SYSTEM ERROR Class successfully registered 
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 1!, Width: 800, Height: 600, Position: (0,0)
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 2!, Width: 800, Height: 600, Position: (800,0)
+SYSTEM INFO Init Complete
+SYSTEM ERROR Hello World!
+SYSTEM ERROR Class successfully registered 
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 1!, Width: 800, Height: 600, Position: (0,0)
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 2!, Width: 800, Height: 600, Position: (800,0)
+SYSTEM INFO Init Complete
+SYSTEM ERROR Hello World!
+SYSTEM ERROR Class successfully registered 
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 1!, Width: 800, Height: 600, Position: (0,0)
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 2!, Width: 800, Height: 600, Position: (800,0)
+SYSTEM INFO Init Complete
+SYSTEM ERROR Hello World!
+SYSTEM ERROR Class successfully registered 
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 1!, Width: 800, Height: 600, Position: (0,0)
+SYSTEM INFO New Window is being instantiated. Caption: Hello World 2!, Width: 800, Height: 600, Position: (800,0)
+SYSTEM INFO Init Complete

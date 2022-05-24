@@ -1,0 +1,26 @@
+\hypertarget{_vertex_buffer_d_x11_8h_source}{}\doxysection{Vertex\+Buffer\+DX11.\+h}
+\label{_vertex_buffer_d_x11_8h_source}\index{C:/Users/Brett/source/repos/KGVEngine/KVGEngine/VertexBufferDX11.h@{C:/Users/Brett/source/repos/KGVEngine/KVGEngine/VertexBufferDX11.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{2 \textcolor{preprocessor}{\#include "{}BufferDX11.h"{}}}
+\DoxyCodeLine{3 }
+\DoxyCodeLine{4 \textcolor{keyword}{namespace }KGV::Render \{}
+\DoxyCodeLine{5     \textcolor{keyword}{class }\mbox{\hyperlink{class_k_g_v_1_1_render_1_1_vertex_buffer_d_x11}{VertexBufferDX11}} : \textcolor{keyword}{public} \mbox{\hyperlink{class_k_g_v_1_1_render_1_1_buffer_d_x11}{BufferDX11}} \{}
+\DoxyCodeLine{6     \textcolor{keyword}{public}:}
+\DoxyCodeLine{7         \mbox{\hyperlink{class_k_g_v_1_1_render_1_1_vertex_buffer_d_x11}{VertexBufferDX11}}( Microsoft::WRL::ComPtr<ID3D11Buffer> buffer );}
+\DoxyCodeLine{8         \textcolor{keyword}{virtual} \mbox{\hyperlink{class_k_g_v_1_1_render_1_1_vertex_buffer_d_x11}{\string~VertexBufferDX11}}();}
+\DoxyCodeLine{9 }
+\DoxyCodeLine{10         S32  getVertexSize();}
+\DoxyCodeLine{11         \textcolor{keywordtype}{void} setVertexSize( S32 size );}
+\DoxyCodeLine{12         }
+\DoxyCodeLine{13         S32  getVertexCount();}
+\DoxyCodeLine{14         \textcolor{keywordtype}{void} setVertexCount( S32 count );}
+\DoxyCodeLine{15 }
+\DoxyCodeLine{16     \textcolor{keyword}{protected}:}
+\DoxyCodeLine{17         S32 vertexSize;}
+\DoxyCodeLine{18         S32 vertexCount;}
+\DoxyCodeLine{19     \};}
+\DoxyCodeLine{20 \}}
+
+\end{DoxyCode}

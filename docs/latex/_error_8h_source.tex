@@ -1,0 +1,63 @@
+\hypertarget{_error_8h_source}{}\doxysection{Error.\+h}
+\label{_error_8h_source}\index{C:/Users/Brett/source/repos/KGVEngine/KVGEngine/Error.h@{C:/Users/Brett/source/repos/KGVEngine/KVGEngine/Error.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#include "{}pch.h"{}}}
+\DoxyCodeLine{2 }
+\DoxyCodeLine{3 \textcolor{preprocessor}{\#ifdef \_WIN32}}
+\DoxyCodeLine{4 \textcolor{preprocessor}{\#include <intrin.h>}}
+\DoxyCodeLine{5 \textcolor{preprocessor}{\#define KGV\_debugBreak() \_\_debugbreak() }\textcolor{comment}{// X86 software breakpoint. Equalivalent to INT 3 in assembly}}
+\DoxyCodeLine{6 \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{7 \textcolor{preprocessor}{\#define KGV\_debugBreak()}}
+\DoxyCodeLine{8 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{9 }
+\DoxyCodeLine{10 \textcolor{comment}{// Derived from Section 3.2 of Game Engine Architecture (3rd Edition) By Jason Gregory}}
+\DoxyCodeLine{11 \textcolor{preprocessor}{\#ifdef KGV\_ASSERTIONS\_ENABLED}}
+\DoxyCodeLine{12 }
+\DoxyCodeLine{13 \textcolor{preprocessor}{\#define KGV\_ASSERT\_FALSE(expr) \(\backslash\)}}
+\DoxyCodeLine{14 \textcolor{preprocessor}{if (expr) \(\backslash\)}}
+\DoxyCodeLine{15 \textcolor{preprocessor}{\{ \(\backslash\)}}
+\DoxyCodeLine{16 \textcolor{preprocessor}{KGV::Util::Log::reportAssertionFailure(\#expr, \_\_FILE\_\_, \_\_LINE\_\_); \(\backslash\)}}
+\DoxyCodeLine{17 \textcolor{preprocessor}{KGV\_debugBreak(); \(\backslash\)}}
+\DoxyCodeLine{18 \textcolor{preprocessor}{\}}}
+\DoxyCodeLine{19 }
+\DoxyCodeLine{20 \textcolor{preprocessor}{\#define KGV\_ASSERT\_TRUE(expr) \(\backslash\)}}
+\DoxyCodeLine{21 \textcolor{preprocessor}{if (expr) \{\}\(\backslash\)}}
+\DoxyCodeLine{22 \textcolor{preprocessor}{else \(\backslash\)}}
+\DoxyCodeLine{23 \textcolor{preprocessor}{\{ \(\backslash\)}}
+\DoxyCodeLine{24 \textcolor{preprocessor}{KGV::Util::Log::reportAssertionFailure(\#expr, \_\_FILE\_\_, \_\_LINE\_\_); \(\backslash\)}}
+\DoxyCodeLine{25 \textcolor{preprocessor}{KGV\_debugBreak(); \(\backslash\)}}
+\DoxyCodeLine{26 \textcolor{preprocessor}{\}}}
+\DoxyCodeLine{27 }
+\DoxyCodeLine{28 }
+\DoxyCodeLine{29 \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{30 }
+\DoxyCodeLine{31 \textcolor{preprocessor}{\#define KGV\_ASSERT\_TRUE(expr)}}
+\DoxyCodeLine{32 \textcolor{preprocessor}{\#define KGV\_ASSERT\_FALSE(expr)}}
+\DoxyCodeLine{33 }
+\DoxyCodeLine{34 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{35 }
+\DoxyCodeLine{36 \textcolor{comment}{// Derived from Section 3.2 of Game Engine Architecture (3rd Edition) By Jason Gregory}}
+\DoxyCodeLine{37 \textcolor{preprocessor}{\#ifdef KGV\_SLOW\_ASSERTIONS\_ENABLED}}
+\DoxyCodeLine{38 }
+\DoxyCodeLine{39 \textcolor{preprocessor}{\#define KGV\_SLOW\_ASSERT\_TRUE(expr) \(\backslash\)}}
+\DoxyCodeLine{40 \textcolor{preprocessor}{if (expr) \{\} \(\backslash\)}}
+\DoxyCodeLine{41 \textcolor{preprocessor}{else \(\backslash\)}}
+\DoxyCodeLine{42 \textcolor{preprocessor}{\{ \(\backslash\)}}
+\DoxyCodeLine{43 \textcolor{preprocessor}{KGV::Util::Log::ReportAssertionFailure(\#expr, \_\_FILE\_\_, \_\_LINE\_\_); \(\backslash\)}}
+\DoxyCodeLine{44 \textcolor{preprocessor}{KGV\_debugBreak(); \(\backslash\)}}
+\DoxyCodeLine{45 \textcolor{preprocessor}{\}}}
+\DoxyCodeLine{46 }
+\DoxyCodeLine{47 \textcolor{preprocessor}{\#define KGV\_SLOW\_ASSERT\_FALSE(expr) \(\backslash\)}}
+\DoxyCodeLine{48 \textcolor{preprocessor}{if (expr) \{\} \(\backslash\)}}
+\DoxyCodeLine{49 \textcolor{preprocessor}{else \(\backslash\)}}
+\DoxyCodeLine{50 \textcolor{preprocessor}{\{ \(\backslash\)}}
+\DoxyCodeLine{51 \textcolor{preprocessor}{KGV::Util::Log::ReportAssertionFailure(\#expr, \_\_FILE\_\_, \_\_LINE\_\_); \(\backslash\)}}
+\DoxyCodeLine{52 \textcolor{preprocessor}{KGV\_debugBreak(); \(\backslash\)}}
+\DoxyCodeLine{53 \textcolor{preprocessor}{\}}}
+\DoxyCodeLine{54 }
+\DoxyCodeLine{55 \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{56 \textcolor{preprocessor}{\#define KGV\_SLOW\_ASSERT(expr)}}
+\DoxyCodeLine{57 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}
