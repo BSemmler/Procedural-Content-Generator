@@ -20,7 +20,6 @@ bool KGV::System::ApplicationWin32::init() {
 //    window2 = std::make_unique<WindowWin32>( this, "KGV_Win32", 800, 600, 800, 0, "Hello World 2!", true );
 
     if ( !window1->getWin32Handle() ) {
-        g_log->writeToLog(Util::LogVerbosity::kInfo, Util::LogChannel::kSystem, "%s", "Failed to create Window 1");
         return false;
     }
 //    } else if( !window2->getWin32Handle() )
@@ -30,7 +29,7 @@ bool KGV::System::ApplicationWin32::init() {
 //    }
 
     window1->showWindow( true );
-    g_log->writeToLog( Util::LogVerbosity::kInfo, Util::LogChannel::kSystem, "%s", "Init Complete" );
+    spdlog::get("engine")->info("Initialization complete!");
 
     return true;
 }
@@ -63,27 +62,25 @@ LRESULT KGV::System::ApplicationWin32::wndProc( HWND hWnd, UINT msg, WPARAM wPar
     case WM_LBUTTONDOWN:
         if (hWnd == window1->getWin32Handle() )
             MessageBox( nullptr, "Hello, World 1", "Hello", MB_OK );
-        if ( hWnd == window2->getWin32Handle() )
-            MessageBox( nullptr, "Hello, World 2", "Hello", MB_OK );
+//        if ( hWnd == window2->getWin32Handle() )
+//            MessageBox( nullptr, "Hello, World 2", "Hello", MB_OK );
 
-        g_log->writeToLog( Util::LogVerbosity::kInfo, Util::LogChannel::kSystem, "%s", "Left mouse button clicked" );
+
     case WM_KEYDOWN:
         if ( wParam == VK_ESCAPE ) {
             DestroyWindow( hWnd );
-            g_log->writeToLog( Util::LogVerbosity::kInfo, Util::LogChannel::kSystem, "%s", "Escape Key Pressed. Exiting!" );
+            spdlog::get("engine")->info("Escape Key Pressed, exiting.", wParam);
         }
-        g_log->writeToLog( Util::LogVerbosity::kInfo, Util::LogChannel::kSystem, "%s Keycode: %d", "Keydown" );
+        spdlog::get("engine")->info("Keydown, Keycode: {}", wParam);
         break;
     case WM_DESTROY:
         DestroyWindow( hWnd );
-        if ( window1 && window2 )
+        if ( window1 )
             PostQuitMessage( 0 );
         else if ( window1->getWin32Handle() == hWnd )
             window1.release();
-        else if ( window2->getWin32Handle() == hWnd )
-            window2.release();
-
-
+//        else if ( window2->getWin32Handle() == hWnd )
+//            window2.release();
         return 0;
     default:
         break;

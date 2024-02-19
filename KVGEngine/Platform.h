@@ -1,14 +1,12 @@
 
 #if defined(_WIN32) || defined(_WIN64)
 	// Debug definitions
-#define KGV_WIN
-#define WIN32_LEAN_AND_MEAN
-
+#define KGV_WIN 1
 #ifdef _DEBUG	
 #define KGV_ASSERTIONS_ENABLED
 #define KGV_SLOW_ASSERTIONS_ENABLED
 #endif
-
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 // Include directx libraries

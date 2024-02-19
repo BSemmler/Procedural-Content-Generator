@@ -29,9 +29,9 @@ WindowWin32::WindowWin32(IWndProc *procObj, const std::string &className, S32 wi
     // Check that all the numeric values are non-negative.
     KGV_ASSERT_TRUE(width > 0 && height > 0 && xPos >= 0 && yPos >= 0);
 
-    g_log->writeToLog(LogVerbosity::kInfo, LogChannel::kSystem,
-                      "New Window is being instantiated. Caption: %s, Width: %d, Height: %d, Position: (%d,%d)",
-                      caption.c_str(), width, height, xPos, yPos);
+//    spdlog::get("window"),
+//                      "New Window is being instantiated. Caption: %s, Width: %d, Height: %d, Position: (%d,%d)",
+//                      caption.c_str(), width, height, xPos, yPos);
 
     isVisible = showWindow;
 
@@ -49,8 +49,7 @@ WindowWin32::WindowWin32(IWndProc *procObj, const std::string &className, S32 wi
                                nullptr);
 
     if (!wndHandle) {
-        g_log->writeToLog(Util::LogVerbosity::kError, Util::LogChannel::kSystem, "%s %d",
-                          "Failed to create window! Error code: ", GetLastError());
+        spdlog::get("engine")->error("Failed to create window! Error code: {}", GetLastError());
         return;
     }
     // Store our window procedure object inside the extra window bytes.
@@ -110,13 +109,11 @@ bool KGV::System::WindowWin32::registerClass(WNDCLASSEX &wc) {
     wc.lpfnWndProc = internalWndProc; // Set the proper procedure.
 
     if (!RegisterClassEx(&wc)) {
-        g_log->writeToLog(Util::LogVerbosity::kError, Util::LogChannel::kSystem, "%s %d",
-                          "Failed to register window class! Error code: ", GetLastError());
+        spdlog::get("engine")->error("Failed to register window! Error code: {}", GetLastError());
         return false;
     }
 
-    g_log->writeToLog(Util::LogVerbosity::kError, Util::LogChannel::kSystem, "%s",
-                      "Class successfully registered ");
+    spdlog::get("engine")->info("Successfully registered window!");
 
     return true;
 }

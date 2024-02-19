@@ -6,7 +6,7 @@ namespace KGV::Render
 {
 	class Resource
 	{
-		Resource(U32 resourceId, BufferConfigDX11 config, )
+		Resource(U32 resourceId, BufferConfigDX11 config )
 	protected:
 		U32 resourceId;
 		U16 srvId;

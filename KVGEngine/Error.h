@@ -13,7 +13,7 @@
 #define KGV_ASSERT_FALSE(expr) \
 if (expr) \
 { \
-KGV::Util::Log::reportAssertionFailure(#expr, __FILE__, __LINE__); \
+spdlog::debug("DEBUG Assertion tripped: {}, file: {}, line: {}", #expr, __FILE__, __LINE__); \
 KGV_debugBreak(); \
 }
 
@@ -21,7 +21,7 @@ KGV_debugBreak(); \
 if (expr) {}\
 else \
 { \
-KGV::Util::Log::reportAssertionFailure(#expr, __FILE__, __LINE__); \
+spdlog::debug("DEBUG Assertion tripped: {}, file: {}, line: {}", #expr, __FILE__, __LINE__); \
 KGV_debugBreak(); \
 }
 
@@ -40,7 +40,7 @@ KGV_debugBreak(); \
 if (expr) {} \
 else \
 { \
-KGV::Util::Log::reportAssertionFailure(#expr, __FILE__, __LINE__); \
+spdlog::debug("DEBUG Assertion tripped: {}, file: {}, line: {}", #expr, __FILE__, __LINE__); \
 KGV_debugBreak(); \
 }
 
@@ -48,7 +48,7 @@ KGV_debugBreak(); \
 if (expr) {} \
 else \
 { \
-KGV::Util::Log::reportAssertionFailure(#expr, __FILE__, __LINE__); \
+spdlog::debug("DEBUG Assertion tripped: {}, file: {}, line: {}", #expr, __FILE__, __LINE__); \
 KGV_debugBreak(); \
 }
 

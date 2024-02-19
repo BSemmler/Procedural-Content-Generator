@@ -16,6 +16,9 @@
 #include <fstream>
 #include <vector>
 
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/sink.h>
+
 // Internal
 #include "Types.h"
 #include "Platform.h"
@@ -23,5 +26,5 @@
 #include "StringUtil.h"
 #include "Log.h"
 
-extern std::shared_ptr<KGV::Util::Log> g_log;
+
 #endif //PCH_H

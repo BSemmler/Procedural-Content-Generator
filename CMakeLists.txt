@@ -3,6 +3,8 @@ project(Engine)
 
 set(CMAKE_CXX_STANDARD 20)
 
+set(SUBSYSTEM_LINKER_OPTIONS "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+
 #include_directories(Dependencies/glfw-3.3.2.bin.WIN64)
 #include_directories(Dependencies/glfw-3.3.2.bin.WIN64/include)
 #include_directories(Dependencies/glfw-3.3.2.bin.WIN64/include/GLFW)
@@ -16,7 +18,12 @@ include_directories($ENV{UniversalCRTSdkDir}/Include/ucrt)
 include_directories($ENV{UniversalCRTSdkDir}/Include/10.0.10056.0/ucrt)
 include_directories(KVGEngine)
 
-add_executable(Engine WIN32
+if(NOT TARGET spdlog)
+    # Stand-alone build
+    find_package(spdlog REQUIRED)
+endif()
+
+add_executable(Engine
         KVGEngine/Application.cpp
         KVGEngine/Application.h
         KVGEngine/ApplicationWin32.cpp
@@ -56,3 +63,5 @@ add_executable(Engine WIN32
         KVGEngine/Window.h
         KVGEngine/WindowWin32.cpp
         KVGEngine/WindowWin32.h)
+
+target_link_libraries(Engine PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
