@@ -29,7 +29,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
 	g_log->writeToLog( KGV::Util::LogVerbosity::kError, KGV::Util::LogChannel::kSystem, "%s", "Hello World!" );
 
 	KGV::System::ApplicationWin32 app;
-	app.init();
+	if (!app.init())
+        return 1;
+
 	app.run();
 
 	return 0;

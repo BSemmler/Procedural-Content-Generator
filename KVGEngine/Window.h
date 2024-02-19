@@ -16,7 +16,7 @@ namespace KGV::System
 		 * @param caption [OPTIONAL] Sets the desired text (caption) at the top of the window. Default = "Hello World"
 		 * @param showState [OPTIONAL] Sets the window as visible if true and hidden if false.
 		*/
-		Window( S32 width = 800, S32 height = 600,
+		explicit Window( S32 width = 800, S32 height = 600,
 				S32 xPos = 0, S32 yPos = 0, const std::string& caption = "Hello World",
 				bool showWindow = false);
 

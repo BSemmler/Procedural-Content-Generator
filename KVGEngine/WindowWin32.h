@@ -22,18 +22,18 @@ namespace KGV::System
 		 * @param caption [OPTIONAL] Sets the desired text (caption) at the top of the window. Default = "Hello World"
 		 * @param showState [OPTIONAL] Sets the window as visible if true and hidden if false. 
 		*/
-		WindowWin32( IWndProc* procObj, const std::wstring& className, S32 width = 800, S32 height = 600,
+		WindowWin32( IWndProc* procObj, const std::string& className, S32 width = 800, S32 height = 600,
 					 S32 xPos = 0, S32 yPos = 0, const std::string& caption = "Hello World", 
 					 bool showWindow = false );
 
-		virtual ~WindowWin32();
+		~WindowWin32() override;
 
 		// Inherited via Window
-		virtual bool isWindowVisible()								override;
-		virtual void showWindow( bool showState )					override;
-		virtual void resizeWindow( S32 width, S32 height )			override;
-		virtual void repositionWindow( S32 xPos, S32 yPos )			override;
-		virtual void setWindowCaption( const std::string& caption ) override;
+		bool isWindowVisible()								override;
+		void showWindow( bool showState )					override;
+		void resizeWindow( S32 width, S32 height )			override;
+		void repositionWindow( S32 xPos, S32 yPos )			override;
+		void setWindowCaption( const std::string& caption ) override;
 		virtual HWND getWin32Handle();
 		static	bool registerClass(WNDCLASSEX &wc);
 	protected:
