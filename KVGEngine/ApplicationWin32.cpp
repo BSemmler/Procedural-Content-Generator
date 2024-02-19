@@ -43,13 +43,23 @@ int KGV::System::ApplicationWin32::run() {
     memset(&msg, 0, sizeof(MSG));
 
     BOOL bRet = 1;
-    while ( ( bRet = GetMessage(&msg, 0, 0, 0 )) != 0) {
-        if ( bRet == -1 ) {
-            MessageBox(nullptr, "GetMessage FAILED", "Error", MB_OK );
-            break;
-        } else {
-            TranslateMessage( &msg );
-            DispatchMessage( &msg );
+//    while ( ( bRet = GetMessage(&msg, 0, 0, 0 )) != 0) {
+//        if ( bRet == -1 ) {
+//            MessageBox(nullptr, "GetMessage FAILED", "Error", MB_OK );
+//            break;
+//        } else {
+//            TranslateMessage( &msg );
+//            DispatchMessage( &msg );
+//        }
+//    }
+
+    while(msg.message != WM_QUIT) {
+        if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+
+            if (msg.message == WM_QUIT)
+                break;
         }
     }
 
