@@ -1,7 +1,7 @@
-#pragma once
+#ifndef VERTEX_BUFFER_DX11_H_
+#define VERTEX_BUFFER_DX11_H_
 #include "BufferDX11.h"
 
-#include <utility>
 
 namespace KGV::Render {
 	class VertexBufferDX11 : public BufferDX11 {
@@ -54,3 +54,5 @@ namespace KGV::Render {
         friend RenderDeviceDX11;
 	};
 }
+
+#endif // VERTEX_BUFFER_DX11_H_

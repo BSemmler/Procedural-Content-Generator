@@ -1,7 +1,5 @@
 #include "IndexBufferDX11.h"
 
-#include <utility>
-
 KGV::Render::IndexBufferDX11::IndexBufferDX11( Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer, S32 _indexSize, S32 _indexCount )
 {
 	this->buffer = std::move(indexBuffer);
