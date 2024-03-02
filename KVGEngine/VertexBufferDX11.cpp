@@ -7,27 +7,26 @@ KGV::Render::VertexBufferDX11::VertexBufferDX11( Microsoft::WRL::ComPtr<ID3D11Bu
 	this->vertexCount = vertexCount;
 }
 
-KGV::Render::VertexBufferDX11::~VertexBufferDX11() 
-{
-	// Empty
-}
-
-S32 KGV::Render::VertexBufferDX11::getVertexSize() 
+S32 KGV::Render::VertexBufferDX11::getVertexSize() const
 {
 	return vertexSize;
 }
 
-void KGV::Render::VertexBufferDX11::setVertexSize( S32 vertexSize ) 
+void KGV::Render::VertexBufferDX11::setVertexSize( S32 _vertexSize )
 {
-	this->vertexSize = vertexSize;
+	this->vertexSize = _vertexSize;
 }
 
-S32 KGV::Render::VertexBufferDX11::getVertexCount() 
+S32 KGV::Render::VertexBufferDX11::getVertexCount() const
 {
 	return vertexCount;
 }
 
-void KGV::Render::VertexBufferDX11::setVertexCount( S32 vertexCount ) 
+void KGV::Render::VertexBufferDX11::setVertexCount( S32 _vertexCount )
 {
-	this->vertexCount = vertexCount;
+	this->vertexCount = _vertexCount;
+}
+
+KGV::Render::eResourceType KGV::Render::VertexBufferDX11::getResourceType() {
+    return eResourceType::kVertexBuffer;
 }

@@ -1,5 +1,8 @@
-#pragma once
+#ifndef TEXTURE_2D_DX11_H_
+#define TEXTURE_2D_DX11_H_
+
 #include "pch.h"
+#include "ResourceDX11.h"
 
 namespace KGV::Render {
 	/**
@@ -10,7 +13,7 @@ namespace KGV::Render {
 	 * <p>All of the getters with class retrieve the current description while all of the setters set the desired 
 	 * buffer description.</p>
 	*/
-	class Texture2dDX11 {
+	class Texture2dDX11 : public ResourceDX11 {
 	public:
 		Texture2dDX11();
 		virtual ~Texture2dDX11();
@@ -19,37 +22,11 @@ namespace KGV::Render {
 		D3D11_TEXTURE2D_DESC	getDesiredDesc();
 		void					setDesiredDesc( D3D11_TEXTURE2D_DESC desc );
 
-		U32						getWidth();
-		void					setWidth( U32 width );
+        eResourceType getResourceType() override;
 
-		U32						getHeight();
-		void					setHeight( U32 height );
+        ID3D11Resource *getResource() override;
 
-		U32						getMipLevels();
-		void					setMipLevels( U32 levels );
-
-		U32						getArraySize();
-		void					setArraySize( U32 arraySize );
-
-		DXGI_FORMAT				getFormat();
-		void					setFormat( DXGI_FORMAT format );
-
-		DXGI_SAMPLE_DESC		getSampleDesc();
-		void					setSampleDesc( DXGI_SAMPLE_DESC desc );
-
-		D3D11_USAGE				getUsage();
-		void					setUsage( D3D11_USAGE usage );
-
-		U32						getBindFlags();
-		void					setBindFlags( U32 flags );
-
-		U32						getCPUAccessFlags();
-		void					setCPUAccessFlags( U32 flags );
-
-		U32						getMiscFlags();
-		void					setMiscFlags( U32 flags );
-
-	protected:
+    protected:
 		D3D11_TEXTURE2D_DESC actualDesc;
 		D3D11_TEXTURE2D_DESC desiredDesc;
 
@@ -58,3 +35,5 @@ namespace KGV::Render {
 		friend class RenderDeviceDX11;
 	};
 }
+
+#endif // TEXTURE_2D_DX11_H_

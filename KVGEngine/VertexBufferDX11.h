@@ -1,6 +1,8 @@
 #pragma once
 #include "BufferDX11.h"
 
+#include <utility>
+
 namespace KGV::Render {
 	class VertexBufferDX11 : public BufferDX11 {
 	public:
@@ -8,7 +10,7 @@ namespace KGV::Render {
 		 * @brief Instantiates a new vertex buffer object.
 		 * @param vertexBuffer An ID3D11Buffer object configured as a vertex buffer.
 		*/
-		VertexBufferDX11( Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer ) : VertexBufferDX11( vertexBuffer, 0, 0 ) {}
+		explicit VertexBufferDX11( Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer ) : VertexBufferDX11( std::move(vertexBuffer), 0, 0 ) {}
 
 		/**
 		 * @brief Instantiates a new vertex buffer object with vertex data.
@@ -17,15 +19,15 @@ namespace KGV::Render {
 		 * @param vertexCount Number of vertices in the buffer.
 		*/
 		VertexBufferDX11( Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer, S32 vertexSize, S32 vertexCount );
+        ~VertexBufferDX11() override = default;
 
+        eResourceType getResourceType() override;
 
-		virtual ~VertexBufferDX11();
-
-		/**
-		 * @brief Returns the number of bytes which a vertex occupies in the buffer.
-		 * @return Size of the vertex.
-		*/
-		S32	 getVertexSize();
+        /**
+         * @brief Returns the number of bytes which a vertex occupies in the buffer.
+         * @return Size of the vertex.
+        */
+		S32	 getVertexSize() const;
 
 		/**
 		 * @brief Sets the number of bytes which a vertex occupies in the buffer.
@@ -37,7 +39,7 @@ namespace KGV::Render {
 		 * @brief Returns the number of vertices contained with the buffer.
 		 * @return Number of vertices
 		*/
-		S32	 getVertexCount();
+		S32	 getVertexCount() const;
 
 		/**
 		 * @brief Sets the number of vertices contained with the buffer.
@@ -48,5 +50,7 @@ namespace KGV::Render {
 	protected:
 		S32 vertexSize;
 		S32	vertexCount;
+
+        friend RenderDeviceDX11;
 	};
 }

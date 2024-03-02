@@ -1,5 +1,7 @@
-#pragma once
+#ifndef BUFFER_DX11_H_
+#define BUFFER_DX11_H_
 #include "pch.h"
+#include "ResourceDX11.h"
 
 namespace KGV::Render 
 {
@@ -11,15 +13,15 @@ namespace KGV::Render
 	 * <p>All of the getters with class retrieve the current description while all of the setters set the desired 
 	 * buffer description.</p>
 	*/
-	class BufferDX11 
+	class BufferDX11 : public ResourceDX11
 	{
 	public:
-
 		BufferDX11();
 		virtual ~BufferDX11();
 
+        ID3D11Resource *getResource() override;
 
-		D3D11_BUFFER_DESC	getActualDesc();
+        D3D11_BUFFER_DESC	getActualDesc();
 		D3D11_BUFFER_DESC	getDesiredDesc();
 		void				setDesiredDesc(D3D11_BUFFER_DESC desc );
 
@@ -49,3 +51,5 @@ namespace KGV::Render
 		friend class RenderDeviceDX11;
 	};
 }
+
+#endif // BUFFER_DX11_H_
