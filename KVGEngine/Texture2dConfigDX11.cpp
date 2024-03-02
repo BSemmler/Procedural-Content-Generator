@@ -68,7 +68,7 @@ namespace KGV::Render
         desc.SampleDesc = sampleDesc;
     }
 
-    void Texture2dConfigDX11::setUsage(DXGI_USAGE usage) {
+    void Texture2dConfigDX11::setUsage(D3D11_USAGE usage) {
         desc.Usage = usage;
     }
 

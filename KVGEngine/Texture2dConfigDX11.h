@@ -16,7 +16,7 @@ namespace KGV::Render
 		void setArraySize(U32 arrSize);
         void setFormat(DXGI_FORMAT format);
         void setSampleDesc(DXGI_SAMPLE_DESC sampleDesc);
-        void setUsage(DXGI_USAGE usage);
+        void setUsage(D3D11_USAGE usage);
         void setBindflags(U32 flags);
         void setCPUAccessFlags(U32 flags);
         void setMiscFlags(U32 flags);
