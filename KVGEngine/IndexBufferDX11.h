@@ -1,14 +1,18 @@
-#pragma once
+#ifndef INDEX_BUFFER_DX11_H_
+#define INDEX_BUFFER_DX11_H_
+
 #include "BufferDX11.h"
 
 namespace KGV::Render {
 	class IndexBufferDX11 : public BufferDX11 {
 	public:
-		/**
-		 * @brief Contructs a new vertex buffer object. 
-		 * @param indexBuffer An ID3D11Buffer configured as an index buffer.
-		*/
-		IndexBufferDX11( ComPtr<ID3D11Buffer> indexBuffer ) : IndexBufferDX11( indexBuffer, 0, 0 ) {}
+        eResourceType getResourceType() override;
+
+        /**
+         * @brief Contructs a new vertex buffer object.
+         * @param indexBuffer An ID3D11Buffer configured as an index buffer.
+        */
+		IndexBufferDX11( ComPtr<ID3D11Buffer> indexBuffer ) : IndexBufferDX11( std::move(indexBuffer), 0, 0 ) {}
 
 		/**
 		 * @brief 
@@ -18,16 +22,13 @@ namespace KGV::Render {
 		*/
 		IndexBufferDX11( ComPtr<ID3D11Buffer> indexBuffer, S32 indexSize, S32 indexCount );
 
-		/**
-		 * @brief Deconstructor...
-		*/
-		virtual ~IndexBufferDX11();
+		~IndexBufferDX11() override = default;
 
 		/**
 		 * @brief Returns the number of bytes which a index occupies in the buffer.
 		 * @return Size of an index.
 		*/
-		S32	 getIndexSize();
+		S32	 getIndexSize() const;
 
 		/**
 		 * @brief Sets the number of bytes which a index occupies in the buffer.
@@ -39,7 +40,7 @@ namespace KGV::Render {
 		 * @brief Returns the number of indices contained with the buffer.
 		 * @return Number of indices
 		*/
-		S32	 getIndexCount();
+		S32	 getIndexCount() const;
 
 		/**
 		 * @brief Sets the number of indices contained with the buffer.
@@ -52,3 +53,5 @@ namespace KGV::Render {
 		S32	indexCount;
 	};
 }
+
+#endif // INDEX_BUFFER_DX11_H_
