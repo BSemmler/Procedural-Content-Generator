@@ -4,7 +4,7 @@
 
 #include "RenderTargetViewConfigDX11.h"
 
-D3D11_RENDER_TARGET_VIEW_DESC KGV::Render::RenderTargetViewConfigDX11::getDesc() {
+D3D11_RENDER_TARGET_VIEW_DESC& KGV::Render::RenderTargetViewConfigDX11::getDesc() {
     return desc;
 }
 

@@ -10,7 +10,7 @@
 namespace KGV::Render {
     class ShaderResourceViewConfigDX11 {
     public:
-        D3D11_SHADER_RESOURCE_VIEW_DESC getDesc();
+        D3D11_SHADER_RESOURCE_VIEW_DESC& getDesc();
 
         void setFormat(DXGI_FORMAT format);
         void setViewDimension(D3D11_SRV_DIMENSION dimension);

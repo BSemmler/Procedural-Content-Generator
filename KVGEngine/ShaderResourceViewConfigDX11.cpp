@@ -4,7 +4,7 @@
 
 #include "ShaderResourceViewConfigDX11.h"
 
-D3D11_SHADER_RESOURCE_VIEW_DESC KGV::Render::ShaderResourceViewConfigDX11::getDesc() {
+D3D11_SHADER_RESOURCE_VIEW_DESC& KGV::Render::ShaderResourceViewConfigDX11::getDesc() {
     return desc;
 }
 

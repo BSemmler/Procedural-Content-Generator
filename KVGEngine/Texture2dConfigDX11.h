@@ -22,7 +22,7 @@ namespace KGV::Render
         void setMiscFlags(U32 flags);
 
 
-        D3D11_TEXTURE2D_DESC getDesc();
+        D3D11_TEXTURE2D_DESC& getDesc();
 
     protected:
 		D3D11_TEXTURE2D_DESC desc{};

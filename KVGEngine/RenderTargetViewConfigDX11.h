@@ -9,7 +9,7 @@
 namespace KGV::Render {
     class RenderTargetViewConfigDX11 {
     public:
-        D3D11_RENDER_TARGET_VIEW_DESC getDesc();
+        D3D11_RENDER_TARGET_VIEW_DESC& getDesc();
 
         void setFormat(DXGI_FORMAT format);
         void setViewDimension(D3D11_RTV_DIMENSION dimension);
