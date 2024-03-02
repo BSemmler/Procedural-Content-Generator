@@ -37,8 +37,6 @@ add_executable(Engine
         KVGEngine/IndexBufferDX11.h
         KVGEngine/IRenderContextDX11.h
         KVGEngine/IWndProc.h
-        KVGEngine/Log.cpp
-        KVGEngine/Log.h
         KVGEngine/main.cpp
         KVGEngine/pch.cpp
         KVGEngine/pch.h

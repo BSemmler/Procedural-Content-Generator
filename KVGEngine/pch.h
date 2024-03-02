@@ -24,7 +24,7 @@
 #include "Types.h"
 #include "Platform.h"
 #include "Error.h"
-#include "Log.h"
+
 
 
 #endif //PCH_H
