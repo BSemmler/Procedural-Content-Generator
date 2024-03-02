@@ -54,5 +54,9 @@ namespace KGV::Render {
         }
     }
 
+    S32 ResourceViewDX11::getResourceId() const {
+        return resourceId;
+    }
+
 
 }

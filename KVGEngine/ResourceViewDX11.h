@@ -7,11 +7,14 @@
 
 namespace KGV::Render {
     class ResourceViewDX11 {
+    public:
         ResourceViewDX11(S32 _resourceId, BufferConfigDX11 &_config, RenderDeviceDX11 &_device,
                          ShaderResourceViewConfigDX11 *_srvConfig = nullptr, RenderTargetViewConfigDX11 *_rtvConfig = nullptr);
 
         ResourceViewDX11(S32 _resourceId, Texture2dConfigDX11 &_config, RenderDeviceDX11 &_device,
                          ShaderResourceViewConfigDX11 *_srvConfig = nullptr, RenderTargetViewConfigDX11 *_rtvConfig = nullptr);
+
+        S32 getResourceId() const;
 
     protected:
         void initResource(U32 _bindFlags, S32 _resourceId, RenderDeviceDX11 &_device,
