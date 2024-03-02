@@ -60,4 +60,28 @@ namespace KGV::Render
         return desc;
     }
 
+    void Texture2dConfigDX11::setFormat(DXGI_FORMAT format) {
+        desc.Format = format;
+    }
+
+    void Texture2dConfigDX11::setSampleDesc(DXGI_SAMPLE_DESC sampleDesc) {
+        desc.SampleDesc = sampleDesc;
+    }
+
+    void Texture2dConfigDX11::setUsage(DXGI_USAGE usage) {
+        desc.Usage = usage;
+    }
+
+    void Texture2dConfigDX11::setBindflags(U32 flags) {
+        desc.BindFlags = flags;
+    }
+
+    void Texture2dConfigDX11::setCPUAccessFlags(U32 flags) {
+        desc.CPUAccessFlags = flags;
+    }
+
+    void Texture2dConfigDX11::setMiscFlags(U32 flags) {
+        desc.MiscFlags = flags;
+    }
+
 }
