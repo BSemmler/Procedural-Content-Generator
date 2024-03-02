@@ -23,7 +23,6 @@
 #include "Types.h"
 #include "Platform.h"
 #include "Error.h"
-#include "StringUtil.h"
 #include "Log.h"
 
 
