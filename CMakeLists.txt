@@ -46,12 +46,10 @@ add_executable(Engine
         KVGEngine/RenderDeviceDX11.cpp
         KVGEngine/RenderDeviceDX11.h
         KVGEngine/RenderTargetViewDX11.h
-        KVGEngine/Resource.h
+        KVGEngine/ResourceViewDX11.h
         KVGEngine/ResourceData.h
         KVGEngine/ShaderResourceViewDX11.h
-        KVGEngine/StringUtil.cpp
-        KVGEngine/StringUtil.h
-        KVGEngine/SwapchainConfigDX11.h
+        KVGEngine/SwapChainConfigDX11.h
         KVGEngine/Texture2dConfigDX11.cpp
         KVGEngine/Texture2dConfigDX11.h
         KVGEngine/Texture2dDX11.cpp
@@ -62,6 +60,15 @@ add_executable(Engine
         KVGEngine/Window.cpp
         KVGEngine/Window.h
         KVGEngine/WindowWin32.cpp
-        KVGEngine/WindowWin32.h)
+        KVGEngine/WindowWin32.h
+        KVGEngine/SwapChainConfigDX11.cpp
+        KVGEngine/ShaderResourceViewConfigDX11.cpp
+        KVGEngine/ShaderResourceViewConfigDX11.h
+        KVGEngine/RenderTargetViewConfigDX11.cpp
+        KVGEngine/RenderTargetViewConfigDX11.h
+        KVGEngine/ResourceViewDX11.cpp
+        KVGEngine/ResourceDX11.cpp
+        KVGEngine/ResourceDX11.h
+        KVGEngine/RenderTargetViewDX11.cpp)
 
 target_link_libraries(Engine PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
