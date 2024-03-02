@@ -64,8 +64,7 @@ namespace KGV::Render {
         return alphaMode;
     }
 
-    const DXGI_SWAP_CHAIN_DESC1 &SwapChainConfigDX11::getDesc() const {
-        DXGI_SWAP_CHAIN_DESC1 desc;
+    DXGI_SWAP_CHAIN_DESC1 &SwapChainConfigDX11::getDesc() {
         desc.Width = width;
         desc.Height = height;
         desc.AlphaMode = alphaMode;
@@ -78,6 +77,8 @@ namespace KGV::Render {
         desc.Stereo = false;
         desc.SwapEffect = swapEffect;
         desc.Scaling = scaling;
+
+        return desc;
     }
 
     void SwapChainConfigDX11::setScaling(DXGI_SCALING scaling) {
@@ -111,5 +112,7 @@ namespace KGV::Render {
         sampleQuality = 0;
         sampleCount = 1;
         swapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+        desc = {};
+        memset(&desc, 0, sizeof(DXGI_SWAP_CHAIN_DESC1));
     }
 }

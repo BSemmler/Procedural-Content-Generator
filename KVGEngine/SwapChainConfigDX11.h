@@ -47,7 +47,7 @@ namespace KGV::Render {
 
         void setScaling(DXGI_SCALING scaling);
 
-        const DXGI_SWAP_CHAIN_DESC1 &getDesc() const;
+        DXGI_SWAP_CHAIN_DESC1 &getDesc();
 
     protected:
         int width = 0;
@@ -60,6 +60,7 @@ namespace KGV::Render {
         DXGI_ALPHA_MODE alphaMode;
         DXGI_SWAP_EFFECT swapEffect;
         DXGI_SCALING scaling;
+        DXGI_SWAP_CHAIN_DESC1 desc{};
 
         friend class RenderDeviceDX11;
     };
