@@ -69,6 +69,7 @@ add_executable(Engine
         KVGEngine/ResourceViewDX11.cpp
         KVGEngine/ResourceDX11.cpp
         KVGEngine/ResourceDX11.h
-        KVGEngine/RenderTargetViewDX11.cpp)
+        KVGEngine/RenderTargetViewDX11.cpp
+        KVGEngine/ShaderResourceViewDX11.cpp)
 
 target_link_libraries(Engine PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
