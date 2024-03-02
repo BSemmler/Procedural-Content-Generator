@@ -4,7 +4,6 @@
 
 
 using namespace KGV::System;
-using namespace KGV::Util;
 
 /**
  * @brief This function provides us a hook to the window message procedure. The window
