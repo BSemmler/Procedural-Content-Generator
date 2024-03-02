@@ -15,6 +15,7 @@
 #include <memory>
 #include <fstream>
 #include <vector>
+#include <utility>
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/sink.h>
