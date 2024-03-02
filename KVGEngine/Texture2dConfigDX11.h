@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TEXTURE_2D_CONFIG_DX11_H_
+#define TEXTURE_2D_CONFIG_DX11_H_
 #include "pch.h"
 
 namespace KGV::Render
@@ -14,9 +15,12 @@ namespace KGV::Render
 		void setMipLevels( U32 levels );
 		void setArraySize( U32 arrSize );
 
-	protected:
-		D3D11_TEXTURE2D_DESC desc;
+        D3D11_TEXTURE2D_DESC getDesc();
+
+    protected:
+		D3D11_TEXTURE2D_DESC desc{};
 
 		friend class RenderDeviceDX11;
-	};
+    };
 }
+#endif // TEXTURE_2D_CONFIG_DX11_H_

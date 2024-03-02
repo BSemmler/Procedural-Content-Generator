@@ -56,4 +56,8 @@ namespace KGV::Render
 		desc.ArraySize = arrSize;
 	}
 
+    D3D11_TEXTURE2D_DESC Texture2dConfigDX11::getDesc() {
+        return desc;
+    }
+
 }
