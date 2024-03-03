@@ -265,9 +265,8 @@ namespace KGV::Render {
             return false;
 
         this->resources[index].reset(nullptr);
+        this->availableIds.push_back(index);
 
         return true;
     }
-
-
 }
