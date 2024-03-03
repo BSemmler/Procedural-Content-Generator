@@ -58,5 +58,28 @@ namespace KGV::Render {
         return resourceId;
     }
 
+    S32 ResourceViewDX11::getSrvId() const {
+        return srvId;
+    }
 
+    S32 ResourceViewDX11::getRtvId() const {
+        return rtvId;
+    }
+
+    const ShaderResourceViewConfigDX11* ResourceViewDX11::getSrvConfig() const {
+        return srvConfig.get();
+    }
+
+    const RenderTargetViewConfigDX11* ResourceViewDX11::getRtvConfig() const {
+        return rtvConfig.get();
+    }
+
+    const BufferConfigDX11* ResourceViewDX11::getBufferConfig() const {
+        return bufferConfig.get();
+    }
+
+
+    const Texture2dConfigDX11* ResourceViewDX11::getTexture2DConfig() const {
+        return texture2dConfig.get();
+    }
 }

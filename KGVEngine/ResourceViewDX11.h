@@ -15,6 +15,14 @@ namespace KGV::Render {
                          ShaderResourceViewConfigDX11 *_srvConfig = nullptr, RenderTargetViewConfigDX11 *_rtvConfig = nullptr);
 
         S32 getResourceId() const;
+        S32 getSrvId() const;
+        S32 getRtvId() const;
+
+        const ShaderResourceViewConfigDX11* getSrvConfig() const;
+        const RenderTargetViewConfigDX11* getRtvConfig() const;
+        const BufferConfigDX11* getBufferConfig() const;
+        const Texture2dConfigDX11* getTexture2DConfig() const;
+
 
     protected:
         void initResource(U32 _bindFlags, S32 _resourceId, RenderDeviceDX11 &_device,
