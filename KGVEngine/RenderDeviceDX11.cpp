@@ -1,10 +1,12 @@
 #include "RenderDeviceDX11.h"
+
+#include <utility>
 #include "StringUtil.h"
 #include "VertexBufferDX11.h"
 #include "IndexBufferDX11.h"
 
 namespace KGV::Render {
-    RenderDeviceDX11::RenderDeviceDX11(spdlog::logger logger) : logger(std::move(logger)) {
+    RenderDeviceDX11::RenderDeviceDX11(std::shared_ptr<spdlog::logger> logger) : logger(std::move(logger)) {
 
     }
 
@@ -21,7 +23,7 @@ namespace KGV::Render {
         auto adapters = getAdapters(pFactory);
 
         if (adapters.empty()) {
-            logger.error("Couldn't retrieve any IDXGIAdapters");
+            logger->error("Couldn't retrieve any IDXGIAdapters");
             return nullptr;
         }
 
@@ -40,18 +42,16 @@ namespace KGV::Render {
             for (auto i = 0; DXGI_ERROR_NOT_FOUND != pFactory6->EnumAdapterByGpuPreference(
                     i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, __uuidof(IDXGIAdapter1), &adapters[i]); i++) {
                 DXGI_ADAPTER_DESC1 desc;
-                pAdapter->GetDesc1(&desc);
-
-                // Ignore the software adapter.
-                if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) {
-                    continue;
-                }
+                if (adapters[i])
+                    adapters[i]->GetDesc1(&desc);
 
                 std::wstring wStr(desc.Description);
-                logger.info("Found the adapter: {}, video memory: {}MB", utf8_encode(wStr), desc.DedicatedVideoMemory / 1024 / 1024);
+
+                logger->info("Found the adapter: {}, video memory: {}MB", utf8_encode(wStr), desc.DedicatedVideoMemory / 1024 / 1024);
+                adapters.emplace_back();
             }
         } else {
-            logger.critical("Couldn't create IDXGIFactory6, ({:0X})", hr);
+            logger->critical("Couldn't create IDXGIFactory6, ({:0X})", hr);
         }
 
         return adapters;
@@ -60,16 +60,16 @@ namespace KGV::Render {
 
     void RenderDeviceDX11::init(D3D_FEATURE_LEVEL featureLevel, const ComPtr<IDXGIAdapter1> &_pAdapter) {
         ComPtr<IDXGIFactory2> pFactory2;
-        const ComPtr<IDXGIAdapter1> &pAdapter1 = _pAdapter;
+        ComPtr<IDXGIAdapter1> pAdapter1 = _pAdapter;
 
         HRESULT hr;
         if (!pAdapter1) {
             hr = CreateDXGIFactory2(0, __uuidof(IDXGIFactory2), &pFactory2);
-            getOptimalAdapter(pFactory2);
+            pAdapter1 = getOptimalAdapter(pFactory2);
         }
 
-        if (pAdapter1) {
-            logger.critical("Failed to acquire an adapter, aborting! ({:0X})");
+        if (!pAdapter1) {
+            logger->critical("Failed to acquire an adapter, aborting! ({:0X})");
             throw std::exception("Failed to acquire an adapter, aborting!");
         }
 
@@ -80,20 +80,20 @@ namespace KGV::Render {
         D3D_FEATURE_LEVEL createdLevel;
         ComPtr<IDXGIAdapter> pAdapter;
         pAdapter1.As(&pAdapter);
-        if (FAILED(hr = D3D11CreateDevice(pAdapter.Get(), D3D_DRIVER_TYPE_HARDWARE, nullptr, deviceCreateFlags,
+        if (FAILED(hr = D3D11CreateDevice(pAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, deviceCreateFlags,
                           &featureLevel, 1, D3D11_SDK_VERSION,device.GetAddressOf(),
                           &createdLevel, context.GetAddressOf()))) {
-            logger.critical("Failed to create ID3D11Device. ({:0X})", hr);
+            logger->critical("Failed to create ID3D11Device. ({:0X})", hr);
             throw std::exception("Failed to create ID3D11Device");
         }
 
         if(FAILED(hr = device.As(&device1))) {
-            logger.critical("Failed to create ID3D11Device1. ({:0X})", hr);
+            logger->critical("Failed to create ID3D11Device1. ({:0X})", hr);
             throw std::exception("Failed to create ID3D11Device1");
         }
 
         if(FAILED(hr = context.As(&context1))) {
-            logger.critical("Failed to create ID3D11DeviceContext1. ({:0X})", hr);
+            logger->critical("Failed to create ID3D11DeviceContext1. ({:0X})", hr);
             throw std::exception("Failed to create ID3D11DeviceContext1");
         }
     }
@@ -105,7 +105,7 @@ namespace KGV::Render {
         HRESULT hr = device->CreateTexture2D(&texConfig.desc, reinterpret_cast<D3D11_SUBRESOURCE_DATA *>(&data), tex.GetAddressOf());
 
         if (FAILED(hr)) {
-            logger.error("Failed to create D3D11 Texture2D");
+            logger->error("Failed to create D3D11 Texture2D");
 
             // Trigger a breakpoint if we're in a debug build.
             KGV_debugBreak();
@@ -122,7 +122,7 @@ namespace KGV::Render {
 //        HRESULT hr = device->CreateBuffer(&config.desc, reinterpret_cast<D3D11_SUBRESOURCE_DATA *>(&data), &buff->buffer);
 //
 //        if (FAILED(hr)) {
-//            logger.error("Failed to create D3D11 Buffer!");
+//            logger->error("Failed to create D3D11 Buffer!");
 //            // Trigger a breakpoint if we're in a debug build.
 //            KGV_debugBreak();
 //            delete buff;
@@ -140,14 +140,14 @@ namespace KGV::Render {
     S32 RenderDeviceDX11::createSwapChain(void *hwnd, SwapChainConfigDX11 &config) {
         ComPtr<IDXGIDevice> dxgiDevice;
         if (FAILED(device.CopyTo(dxgiDevice.GetAddressOf()))) {
-            logger.error("Failed to acquire DXGIDevice, reason: {}", GetLastError());
+            logger->error("Failed to acquire DXGIDevice, reason: {}", GetLastError());
             return -1;
         }
 
         ComPtr<IDXGIFactory2> dxgiFactory2;
         if (FAILED(CreateDXGIFactory2(
                 0, __uuidof(IDXGIFactory2), reinterpret_cast<void **>(dxgiFactory2.GetAddressOf())))) {
-            logger.error("Failed to acquire DXGIFactory2 interface, reason: {}", GetLastError());
+            logger->error("Failed to acquire DXGIFactory2 interface, reason: {}", GetLastError());
             return -1;
         }
 
@@ -155,7 +155,7 @@ namespace KGV::Render {
         ComPtr<IDXGISwapChain1> swapChain;
         if (FAILED(hr = dxgiFactory2->CreateSwapChainForHwnd(device.Get(), static_cast<HWND>(hwnd), &config.getDesc(), nullptr, nullptr,
                                                              swapChain.GetAddressOf()))) {
-            logger.error("Failed to create DXGI swap chain, reason: {}", GetLastError());
+            logger->error("Failed to create DXGI swap chain, reason: {}", GetLastError());
             return -1;
         }
 
@@ -167,7 +167,7 @@ namespace KGV::Render {
         hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void **>(backBuffer.GetAddressOf()));
 
         if (FAILED(hr)) {
-            logger.error("Failed to get back buffer of swap chain. ({})", hr);
+            logger->error("Failed to get back buffer of swap chain. ({})", hr);
             return -1;
         }
 
@@ -199,14 +199,14 @@ namespace KGV::Render {
                     ShaderResourceViewDX11 srv(view);
                     shaderResourceViews.push_back(srv);
                     auto srvId = shaderResourceViews.size() - 1;
-                    logger.trace("Successfully created Shader Resource View {} for resource {}", srvId, resourceId);
+                    logger->trace("Successfully created Shader Resource View {} for resource {}", srvId, resourceId);
                     return static_cast<S32>(srvId);
                 }
             }
 
         }
 
-        logger.debug("Failed to create Shader Resource View, resource {}, valid resource: {}, resource initialized: {}, HRESULT: {}",
+        logger->debug("Failed to create Shader Resource View, resource {}, valid resource: {}, resource initialized: {}, HRESULT: {}",
                      resourceId, isResourceIdValid, isResourceInitialized, hr);
 
         return -1;
@@ -230,14 +230,14 @@ namespace KGV::Render {
                     RenderTargetViewDX11 rtv(view);
                     renderTargetViews.push_back(rtv);
                     auto rtvId = renderTargetViews.size() - 1;
-                    logger.trace("Successfully created Render Target View {} for resource {}", rtvId, resourceId);
+                    logger->trace("Successfully created Render Target View {} for resource {}", rtvId, resourceId);
                     return static_cast<S32>(rtvId);
                 }
             }
 
         }
 
-        logger.debug("Failed to create Render Target View, resource {}, valid resource: {}, resource initialized: {}, HRESULT: {}",
+        logger->debug("Failed to create Render Target View, resource {}, valid resource: {}, resource initialized: {}, HRESULT: {}",
                      resourceId, isResourceIdValid, isResourceInitialized, hr);
 
         return -1;
@@ -276,7 +276,7 @@ namespace KGV::Render {
     }
 
     std::shared_ptr<ResourceViewDX11> RenderDeviceDX11::createIndexBuffer(BufferConfigDX11 &config, ResourceData &data) {
-        logger.trace("Creating new index buffer.");
+        logger->trace("Creating new index buffer.");
 
         ComPtr<ID3D11Buffer> buffer;
         HRESULT hr = device->CreateBuffer(&config.desc,
@@ -291,12 +291,12 @@ namespace KGV::Render {
             return resourceView;
         }
 
-        logger.error("Failed to create index buffer. ({})", hr);
+        logger->error("Failed to create index buffer. ({})", hr);
         return {};
     }
 
     std::shared_ptr<ResourceViewDX11> RenderDeviceDX11::createVertexBuffer(BufferConfigDX11 &config, ResourceData &data) {
-        logger.trace("Creating new vertex buffer.");
+        logger->trace("Creating new vertex buffer.");
 
         ComPtr<ID3D11Buffer> buffer;
         HRESULT hr = device->CreateBuffer(&config.desc,
@@ -311,7 +311,7 @@ namespace KGV::Render {
             return resourceView;
         }
 
-        logger.error("Failed to create vertex buffer. ({})", hr);
+        logger->error("Failed to create vertex buffer. ({})", hr);
         return {};
     }
 }

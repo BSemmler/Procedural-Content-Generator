@@ -24,7 +24,7 @@ namespace KGV::Render {
 
     class RenderDeviceDX11 {
     public:
-        RenderDeviceDX11(spdlog::logger logger);
+        explicit RenderDeviceDX11(std::shared_ptr<spdlog::logger> logger);
 
         virtual ~RenderDeviceDX11();
 
@@ -63,7 +63,7 @@ namespace KGV::Render {
         std::vector<RenderTargetViewDX11> renderTargetViews;
         std::vector<std::unique_ptr<ResourceDX11>> resources;
         std::vector<S32> availableIds;
-        spdlog::logger logger;
+        std::shared_ptr<spdlog::logger> logger;
 
     private:
 
