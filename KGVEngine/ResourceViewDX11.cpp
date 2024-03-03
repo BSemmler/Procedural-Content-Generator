@@ -4,25 +4,25 @@
 #include "ResourceViewDX11.h"
 
 namespace KGV::Render {
-    ResourceViewDX11::ResourceViewDX11(S32 _resourceId, BufferConfigDX11& _config, RenderDeviceDX11& _device,
+    ResourceViewDX11::ResourceViewDX11(S32 _resourceId, BufferConfigDX11* _config, RenderDeviceDX11* _device,
                                        ShaderResourceViewConfigDX11* _srvConfig, RenderTargetViewConfigDX11* _rtvConfig) {
-        D3D11_BUFFER_DESC desc = _config.getDesc();
+        D3D11_BUFFER_DESC desc = _config->getDesc();
         initResource(desc.BindFlags, _resourceId, _device, _srvConfig, _rtvConfig);
 
         bufferConfig = std::make_unique<BufferConfigDX11>();
-        *bufferConfig = _config;
+        *bufferConfig = *_config;
     }
 
-    ResourceViewDX11::ResourceViewDX11(S32 _resourceId, Texture2dConfigDX11 &_config, RenderDeviceDX11 &_device, ShaderResourceViewConfigDX11 *_srvConfig,
+    ResourceViewDX11::ResourceViewDX11(S32 _resourceId, Texture2dConfigDX11 *_config, RenderDeviceDX11 *_device, ShaderResourceViewConfigDX11 *_srvConfig,
                                        RenderTargetViewConfigDX11 *_rtvConfig) {
-        D3D11_TEXTURE2D_DESC desc = _config.getDesc();
+        D3D11_TEXTURE2D_DESC desc = _config->getDesc();
         initResource(desc.BindFlags, _resourceId, _device, _srvConfig, _rtvConfig);
 
         texture2dConfig = std::make_unique<Texture2dConfigDX11>();
-        *texture2dConfig = _config;
+        *texture2dConfig = *_config;
     }
 
-    void ResourceViewDX11::initResource(U32 _bindFlags, S32 _resourceId, RenderDeviceDX11 &_device, ShaderResourceViewConfigDX11 *_srvConfig,
+    void ResourceViewDX11::initResource(U32 _bindFlags, S32 _resourceId, RenderDeviceDX11 *_device, ShaderResourceViewConfigDX11 *_srvConfig,
                                         RenderTargetViewConfigDX11 *_rtvConfig) {
         texture2dConfig = nullptr;
         bufferConfig    = nullptr;
