@@ -8,13 +8,19 @@
 #include "Texture2dConfigDX11.h"
 #include "ResourceData.h"
 #include "SwapChainConfigDX11.h"
-#include "ShaderResourceViewDX11.h"
-#include "RenderTargetViewDX11.h"
 #include "ResourceDX11.h"
+#include "SwapChainDX11.h"
 #include "ResourceViewDX11.h"
+#include "ShaderResourceViewConfigDX11.h"
+#include "RenderTargetViewConfigDX11.h"
+#include "RenderTargetViewDX11.h"
+#include "ShaderResourceViewDX11.h"
 
 namespace KGV::Render {
     class ResourceViewDX11;
+    class SwapChainDX11;
+//    class ShaderResourceViewConfigDX11;
+//    class RenderTargetViewConfigDX11;
 
     class RenderDeviceDX11 {
     public:
@@ -30,10 +36,11 @@ namespace KGV::Render {
         std::vector<ComPtr<IDXGIAdapter1>> getAdapters(const ComPtr<IDXGIFactory2>& pFactory = nullptr);
 
         //bool createTexture1D();
-        Texture2dDX11 * createTexture2D(Texture2dConfigDX11 &config, ResourceData &data, eResourceType type);
+        std::shared_ptr<ResourceViewDX11> createTexture2D(Texture2dConfigDX11 &texConfig, ResourceData &data,
+                                                           ShaderResourceViewConfigDX11 &srvConfig, RenderTargetViewConfigDX11 &rtvConfig);
         //bool createTexture3D();
 
-//        BufferDX11 * createBuffer(BufferConfigDX11 &config, ResourceData &data, eResourceType type);
+//        std::shared_ptr<ResourceViewDX11> createBuffer(BufferConfigDX11 &config, ResourceData &data, ShaderResourceViewConfigDX11 srvConfig, RenderTargetViewConfigDX11 rtvConfig);
 
         S32 createSwapChain(void* windowHandle, SwapChainConfigDX11& config);
 
@@ -41,8 +48,8 @@ namespace KGV::Render {
 
         S32 createRenderTargetView(S32 resourceId, D3D11_RENDER_TARGET_VIEW_DESC* desc);
 
+        S32 storeResource(std::unique_ptr<ResourceDX11> resource);
         ResourceDX11* getResourceById(S32 index);
-
         bool deleteResource(const std::shared_ptr<ResourceViewDX11>& resource);
         bool deleteResource(S32 index);
 
@@ -52,9 +59,7 @@ namespace KGV::Render {
         ComPtr<ID3D11DeviceContext> context;
         ComPtr<ID3D11DeviceContext1> context1;
 
-        std::vector<ComPtr<IDXGISwapChain1>> swapChains;
-        std::vector<BufferDX11> buffers;
-        std::vector<Texture2dDX11> textures;
+        std::vector<std::unique_ptr<SwapChainDX11>> swapChains;
         std::vector<ShaderResourceViewDX11> shaderResourceViews;
         std::vector<RenderTargetViewDX11> renderTargetViews;
         std::vector<std::unique_ptr<ResourceDX11>> resources;

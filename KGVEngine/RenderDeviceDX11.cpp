@@ -96,26 +96,23 @@ namespace KGV::Render {
         }
     }
 
-    Texture2dDX11 *RenderDeviceDX11::createTexture2D(Texture2dConfigDX11 &config, ResourceData &data, eResourceType type) {
-        auto *texture = new Texture2dDX11();
-        HRESULT hr = device->CreateTexture2D(&config.desc, reinterpret_cast<D3D11_SUBRESOURCE_DATA *>(&data), &texture->texture);
+    std::shared_ptr<ResourceViewDX11> RenderDeviceDX11::createTexture2D(
+            Texture2dConfigDX11 &texConfig, ResourceData &data,
+            ShaderResourceViewConfigDX11 &srvConfig, RenderTargetViewConfigDX11 &rtvConfig) {
+        ComPtr<ID3D11Texture2D> tex;
+        HRESULT hr = device->CreateTexture2D(&texConfig.desc, reinterpret_cast<D3D11_SUBRESOURCE_DATA *>(&data), tex.GetAddressOf());
 
         if (FAILED(hr)) {
             logger.error("Failed to create D3D11 Texture2D");
 
             // Trigger a breakpoint if we're in a debug build.
             KGV_debugBreak();
-
-            delete texture;
-            texture = nullptr;
         }
 
-        if (texture) {
-            texture->actualDesc = config.desc;
-            texture->desiredDesc = texture->actualDesc;
-        }
-
-        return texture;
+        auto texture = std::make_unique<Texture2dDX11>(tex);
+        texture->desiredDesc = texConfig.desc;
+        S32 resourceId = storeResource(std::move(texture));
+        return std::make_shared<ResourceViewDX11>(resourceId, &texConfig, this, &srvConfig, &rtvConfig);
     }
 
 //    BufferDX11 * RenderDeviceDX11::createBuffer(BufferConfigDX11 &config, ResourceData &data, eResourceType type) {
@@ -149,6 +146,7 @@ namespace KGV::Render {
         if (FAILED(CreateDXGIFactory2(
                 0, __uuidof(IDXGIFactory2), reinterpret_cast<void **>(dxgiFactory2.GetAddressOf())))) {
             logger.error("Failed to acquire DXGIFactory2 interface, reason: {}", GetLastError());
+            return -1;
         }
 
         HRESULT hr;
@@ -156,35 +154,29 @@ namespace KGV::Render {
         if (FAILED(hr = dxgiFactory2->CreateSwapChainForHwnd(device.Get(), static_cast<HWND>(hwnd), &config.getDesc(), nullptr, nullptr,
                                                              swapChain.GetAddressOf()))) {
             logger.error("Failed to create DXGI swap chain, reason: {}", GetLastError());
-            MessageBox(nullptr, "Failed to create swap chain!", "Error!", MB_OK);
-            return false;
+            return -1;
         }
 
-        config.setWidth(config.getDesc().Width);
-        config.setHeight(config.getDesc().Height);
+        config.setWidth(static_cast<S32>(config.getDesc().Width));
+        config.setHeight(static_cast<S32>(config.getDesc().Height));
 
-//        D3D11_VIEWPORT viewport;
-//        memset(&viewport, 0, sizeof(D3D11_VIEWPORT));
-//        viewport.TopLeftX = 0.0f;                             // left hand bounds of the viewport.
-//        viewport.TopLeftY = 0.0f;                             // top bounds of the view port
-//        viewport.Width = static_cast< float >( gWidth );   // width of the viewport
-//        viewport.Height = static_cast< float >( gHeight );  // height of the view port
-//
-//        // Bind the viewport.
-//        gpImmediateContext->RSSetViewports(1, &viewport);
 
-        // Get the surface of the backbuffer and then create a render target view for that surface.
         ComPtr<ID3D11Texture2D> backBuffer;
-        swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void **>(backBuffer.GetAddressOf()));
+        hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void **>(backBuffer.GetAddressOf()));
 
-//        // Get the resource view for our back buffer.
-//        if (FAILED(hr = device->CreateRenderTargetView(gpBackBuffer.Get(), nullptr, &gpBackBufferTarget))) {
-//            OutputDebugStringA("Error: Failed to create create render target! Line: " + __LINE__);
-//            MessageBox(0, L"Failed to create render target!", L"Error!", MB_OK);
-//            return false;
-//        }
+        if (FAILED(hr)) {
+            logger.error("Failed to get back buffer of swap chain. ({})", hr);
+            return -1;
+        }
 
-        return true;
+        S32 resourceId = storeResource(std::make_unique<Texture2dDX11>(backBuffer));
+        Texture2dConfigDX11 texConfig;
+        backBuffer->GetDesc(&texConfig.desc);
+        auto backBufferRes = std::make_shared<ResourceViewDX11>(resourceId, &texConfig, this);
+
+        swapChains.emplace_back(new SwapChainDX11(swapChain, backBufferRes));
+
+        return static_cast<S32>(swapChains.size() - 1);
     }
 
     S32 RenderDeviceDX11::createShaderResourceView(S32 resourceId, D3D11_SHADER_RESOURCE_VIEW_DESC *desc) {
@@ -268,5 +260,16 @@ namespace KGV::Render {
         this->availableIds.push_back(index);
 
         return true;
+    }
+
+    S32 RenderDeviceDX11::storeResource(std::unique_ptr<ResourceDX11> resource) {
+        S32 nextId;
+        if (!availableIds.empty())
+            nextId = availableIds.back();
+        else
+            nextId = resources.size();
+
+        resources.emplace_back(std::move(resource));
+        return nextId;
     }
 }
