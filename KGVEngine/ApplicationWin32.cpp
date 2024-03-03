@@ -29,6 +29,9 @@ bool KGV::System::ApplicationWin32::init() {
 //    }
 
     window1->showWindow( true );
+    auto log = spdlog::get("render");
+    device = std::move(std::make_unique<Render::RenderDeviceDX11>(log));
+    device->init();
     spdlog::get("engine")->info("Initialization complete!");
 
     return true;

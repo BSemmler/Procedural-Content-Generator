@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "Application.h"
 #include "WindowWin32.h"
+#include "RenderDeviceDX11.h"
 
 namespace KGV::System
 {
@@ -18,5 +19,6 @@ namespace KGV::System
 
 		std::unique_ptr<WindowWin32> window1;
 		std::unique_ptr<WindowWin32> window2;
+        std::unique_ptr<Render::RenderDeviceDX11> device;
 	};
 }

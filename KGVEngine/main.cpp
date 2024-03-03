@@ -13,14 +13,22 @@ int main(int argc, const char **argv) {
     auto fileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>("log", 5 * 1024 * 1024, 5);
     fileSink->set_level(spdlog::level::trace);
     std::vector<spdlog::sink_ptr> sinks{consoleSink, fileSink};
-    auto logger = std::make_shared<spdlog::async_logger>(
+    auto engineLogger = std::make_shared<spdlog::async_logger>(
             "engine",
             sinks.begin(),
             sinks.end(),
             spdlog::thread_pool(),
             spdlog::async_overflow_policy::block);
 
-    spdlog::register_logger(logger);
+    auto renderLogger = std::make_shared<spdlog::async_logger>(
+            "render",
+            sinks.begin(),
+            sinks.end(),
+            spdlog::thread_pool(),
+            spdlog::async_overflow_policy::block);
+
+    spdlog::register_logger(engineLogger);
+    spdlog::register_logger(renderLogger);
 
     spdlog::cfg::load_env_levels();
     spdlog::cfg::load_argv_levels(argc, argv);
