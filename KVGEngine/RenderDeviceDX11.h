@@ -18,13 +18,16 @@ namespace KGV::Render {
 
     class RenderDeviceDX11 {
     public:
-        RenderDeviceDX11();
+        RenderDeviceDX11(spdlog::logger logger);
 
         virtual ~RenderDeviceDX11();
 
-        bool init();
+        void init(D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_1, const ComPtr<IDXGIAdapter1>& _pAdapter = nullptr);
 
         void shutdown();
+
+        ComPtr<IDXGIAdapter1> getOptimalAdapter(const ComPtr<IDXGIFactory2>& _pFactory = nullptr);
+        std::vector<ComPtr<IDXGIAdapter1>> getAdapters(const ComPtr<IDXGIFactory2>& pFactory = nullptr);
 
         //bool createTexture1D();
         Texture2dDX11 * createTexture2D(Texture2dConfigDX11 &config, ResourceData &data, eResourceType type);
@@ -44,7 +47,11 @@ namespace KGV::Render {
         bool deleteResource(S32 index);
 
     protected:
-        ComPtr<ID3D11Device1> device;
+        ComPtr<ID3D11Device> device;
+        ComPtr<ID3D11Device1> device1;
+        ComPtr<ID3D11DeviceContext> context;
+        ComPtr<ID3D11DeviceContext1> context1;
+
         std::vector<ComPtr<IDXGISwapChain1>> swapChains;
         std::vector<BufferDX11> buffers;
         std::vector<Texture2dDX11> textures;

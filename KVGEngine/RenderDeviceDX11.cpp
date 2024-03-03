@@ -1,11 +1,102 @@
 #include "RenderDeviceDX11.h"
+#include "StringUtil.h"
 
 namespace KGV::Render {
-    bool RenderDeviceDX11::init() {
-        return false;
+    RenderDeviceDX11::RenderDeviceDX11(spdlog::logger logger) : logger(std::move(logger)) {
+
     }
 
-    Texture2dDX11 * RenderDeviceDX11::createTexture2D(Texture2dConfigDX11 &config, ResourceData &data, eResourceType type) {
+    RenderDeviceDX11::~RenderDeviceDX11() {
+
+    }
+
+    void RenderDeviceDX11::shutdown() {
+
+    }
+
+    ComPtr<IDXGIAdapter1> RenderDeviceDX11::getOptimalAdapter(const ComPtr<IDXGIFactory2> &pFactory) {
+        HRESULT hr;
+        auto adapters = getAdapters(pFactory);
+
+        if (adapters.empty()) {
+            logger.error("Couldn't retrieve any IDXGIAdapters");
+            return nullptr;
+        }
+
+        return adapters[0];
+    }
+
+    std::vector<ComPtr<IDXGIAdapter1>> RenderDeviceDX11::getAdapters(const ComPtr<IDXGIFactory2> &pFactory) {
+        ComPtr<IDXGIAdapter1> pAdapter;
+        ComPtr<IDXGIFactory6> pFactory6;
+
+        std::vector<ComPtr<IDXGIAdapter1>> adapters;
+
+        HRESULT hr;
+        if (SUCCEEDED(hr = pFactory.As(&pFactory6))) {
+            adapters.emplace_back();
+            for (auto i = 0; DXGI_ERROR_NOT_FOUND != pFactory6->EnumAdapterByGpuPreference(
+                    i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, __uuidof(IDXGIAdapter1), &adapters[i]); i++) {
+                DXGI_ADAPTER_DESC1 desc;
+                pAdapter->GetDesc1(&desc);
+
+                // Ignore the software adapter.
+                if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) {
+                    continue;
+                }
+
+                std::wstring wStr(desc.Description);
+                logger.info("Found the adapter: {}, video memory: {}MB", utf8_encode(wStr), desc.DedicatedVideoMemory / 1024 / 1024);
+            }
+        } else {
+            logger.critical("Couldn't create IDXGIFactory6, ({:0X})", hr);
+        }
+
+        return adapters;
+    }
+
+
+    void RenderDeviceDX11::init(D3D_FEATURE_LEVEL featureLevel, const ComPtr<IDXGIAdapter1> &_pAdapter) {
+        ComPtr<IDXGIFactory2> pFactory2;
+        const ComPtr<IDXGIAdapter1> &pAdapter1 = _pAdapter;
+
+        HRESULT hr;
+        if (!pAdapter1) {
+            hr = CreateDXGIFactory2(0, __uuidof(IDXGIFactory2), &pFactory2);
+            getOptimalAdapter(pFactory2);
+        }
+
+        if (pAdapter1) {
+            logger.critical("Failed to acquire an adapter, aborting! ({:0X})");
+            throw std::exception("Failed to acquire an adapter, aborting!");
+        }
+
+        S32 deviceCreateFlags = 0;
+#ifdef _DEBUG
+        deviceCreateFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+        D3D_FEATURE_LEVEL createdLevel;
+        ComPtr<IDXGIAdapter> pAdapter;
+        pAdapter1.As(&pAdapter);
+        if (FAILED(hr = D3D11CreateDevice(pAdapter.Get(), D3D_DRIVER_TYPE_HARDWARE, nullptr, deviceCreateFlags,
+                          &featureLevel, 1, D3D11_SDK_VERSION,device.GetAddressOf(),
+                          &createdLevel, context.GetAddressOf()))) {
+            logger.critical("Failed to create ID3D11Device. ({:0X})", hr);
+            throw std::exception("Failed to create ID3D11Device");
+        }
+
+        if(FAILED(hr = device.As(&device1))) {
+            logger.critical("Failed to create ID3D11Device1. ({:0X})", hr);
+            throw std::exception("Failed to create ID3D11Device1");
+        }
+
+        if(FAILED(hr = context.As(&context1))) {
+            logger.critical("Failed to create ID3D11DeviceContext1. ({:0X})", hr);
+            throw std::exception("Failed to create ID3D11DeviceContext1");
+        }
+    }
+
+    Texture2dDX11 *RenderDeviceDX11::createTexture2D(Texture2dConfigDX11 &config, ResourceData &data, eResourceType type) {
         auto *texture = new Texture2dDX11();
         HRESULT hr = device->CreateTexture2D(&config.desc, reinterpret_cast<D3D11_SUBRESOURCE_DATA *>(&data), &texture->texture);
 
@@ -47,7 +138,7 @@ namespace KGV::Render {
 //        return buff;
 //    }
 
-    S32 RenderDeviceDX11::createSwapChain(void* hwnd, SwapChainConfigDX11& config) {
+    S32 RenderDeviceDX11::createSwapChain(void *hwnd, SwapChainConfigDX11 &config) {
         ComPtr<IDXGIDevice> dxgiDevice;
         if (FAILED(device.CopyTo(dxgiDevice.GetAddressOf()))) {
             logger.error("Failed to acquire DXGIDevice, reason: {}", GetLastError());
@@ -62,7 +153,8 @@ namespace KGV::Render {
 
         HRESULT hr;
         ComPtr<IDXGISwapChain1> swapChain;
-        if (FAILED(hr = dxgiFactory2->CreateSwapChainForHwnd(device.Get(), static_cast<HWND>(hwnd), &config.getDesc(), nullptr, nullptr, swapChain.GetAddressOf()))) {
+        if (FAILED(hr = dxgiFactory2->CreateSwapChainForHwnd(device.Get(), static_cast<HWND>(hwnd), &config.getDesc(), nullptr, nullptr,
+                                                             swapChain.GetAddressOf()))) {
             logger.error("Failed to create DXGI swap chain, reason: {}", GetLastError());
             MessageBox(nullptr, "Failed to create swap chain!", "Error!", MB_OK);
             return false;
@@ -157,14 +249,14 @@ namespace KGV::Render {
         return -1;
     }
 
-    ResourceDX11* RenderDeviceDX11::getResourceById(S32 index) {
+    ResourceDX11 *RenderDeviceDX11::getResourceById(S32 index) {
         if (index < 0 || index >= resources.size())
             return nullptr;
 
         return resources[index].get();
     }
 
-    bool RenderDeviceDX11::deleteResource(const std::shared_ptr<ResourceViewDX11>& resource) {
+    bool RenderDeviceDX11::deleteResource(const std::shared_ptr<ResourceViewDX11> &resource) {
         return this->deleteResource(resource->getResourceId());
     }
 
@@ -176,4 +268,6 @@ namespace KGV::Render {
 
         return true;
     }
+
+
 }
