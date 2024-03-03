@@ -45,12 +45,12 @@ namespace KGV::Render {
 
         if ((_bindFlags & D3D11_BIND_RENDER_TARGET) == D3D11_BIND_RENDER_TARGET ) {
             D3D11_RENDER_TARGET_VIEW_DESC* desc = rtvConfig ? &rtvConfig->getDesc() : nullptr;
-            rtvId = _device.createRenderTargetView(resourceId, desc);
+            rtvId = _device->createRenderTargetView(resourceId, desc);
         }
 
         if ((_bindFlags & D3D11_BIND_SHADER_RESOURCE) == D3D11_BIND_SHADER_RESOURCE ) {
             D3D11_SHADER_RESOURCE_VIEW_DESC* desc = srvConfig ? &srvConfig->getDesc() : nullptr;
-            rtvId = _device.createShaderResourceView(resourceId, desc);
+            rtvId = _device->createShaderResourceView(resourceId, desc);
         }
     }
 
