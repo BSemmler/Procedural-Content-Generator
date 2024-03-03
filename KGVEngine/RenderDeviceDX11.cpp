@@ -1,5 +1,7 @@
 #include "RenderDeviceDX11.h"
 #include "StringUtil.h"
+#include "VertexBufferDX11.h"
+#include "IndexBufferDX11.h"
 
 namespace KGV::Render {
     RenderDeviceDX11::RenderDeviceDX11(spdlog::logger logger) : logger(std::move(logger)) {
@@ -271,5 +273,45 @@ namespace KGV::Render {
 
         resources.emplace_back(std::move(resource));
         return nextId;
+    }
+
+    std::shared_ptr<ResourceViewDX11> RenderDeviceDX11::createIndexBuffer(BufferConfigDX11 &config, ResourceData &data) {
+        logger.trace("Creating new index buffer.");
+
+        ComPtr<ID3D11Buffer> buffer;
+        HRESULT hr = device->CreateBuffer(&config.desc,
+                                          reinterpret_cast<D3D11_SUBRESOURCE_DATA*>(&data), buffer.GetAddressOf());
+
+        if (buffer) {
+            auto b = std::make_unique<IndexBufferDX11>(buffer);
+            b->setDesiredDesc(config.getDesc());
+            int resourceId = storeResource(std::move(b));
+            auto resourceView = std::make_shared<ResourceViewDX11>(resourceId, &config, this);
+
+            return resourceView;
+        }
+
+        logger.error("Failed to create index buffer. ({})", hr);
+        return {};
+    }
+
+    std::shared_ptr<ResourceViewDX11> RenderDeviceDX11::createVertexBuffer(BufferConfigDX11 &config, ResourceData &data) {
+        logger.trace("Creating new vertex buffer.");
+
+        ComPtr<ID3D11Buffer> buffer;
+        HRESULT hr = device->CreateBuffer(&config.desc,
+                                          reinterpret_cast<D3D11_SUBRESOURCE_DATA*>(&data), buffer.GetAddressOf());
+
+        if (buffer) {
+            auto b = std::make_unique<VertexBufferDX11>(buffer);
+            b->setDesiredDesc(config.getDesc());
+            int resourceId = storeResource(std::move(b));
+            auto resourceView = std::make_shared<ResourceViewDX11>(resourceId, &config, this);
+
+            return resourceView;
+        }
+
+        logger.error("Failed to create vertex buffer. ({})", hr);
+        return {};
     }
 }

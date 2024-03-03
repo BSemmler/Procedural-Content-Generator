@@ -35,12 +35,11 @@ namespace KGV::Render {
         ComPtr<IDXGIAdapter1> getOptimalAdapter(const ComPtr<IDXGIFactory2>& _pFactory = nullptr);
         std::vector<ComPtr<IDXGIAdapter1>> getAdapters(const ComPtr<IDXGIFactory2>& pFactory = nullptr);
 
-        //bool createTexture1D();
         std::shared_ptr<ResourceViewDX11> createTexture2D(Texture2dConfigDX11 &texConfig, ResourceData &data,
                                                            ShaderResourceViewConfigDX11 &srvConfig, RenderTargetViewConfigDX11 &rtvConfig);
-        //bool createTexture3D();
 
-//        std::shared_ptr<ResourceViewDX11> createBuffer(BufferConfigDX11 &config, ResourceData &data, ShaderResourceViewConfigDX11 srvConfig, RenderTargetViewConfigDX11 rtvConfig);
+        std::shared_ptr<ResourceViewDX11> createVertexBuffer(BufferConfigDX11 &config, ResourceData &data);
+        std::shared_ptr<ResourceViewDX11> createIndexBuffer(BufferConfigDX11 &config, ResourceData &data);
 
         S32 createSwapChain(void* windowHandle, SwapChainConfigDX11& config);
 
