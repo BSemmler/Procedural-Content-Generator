@@ -9,6 +9,8 @@
 #include "ResourceViewDX11.h"
 
 namespace KGV::Render {
+    class ResourceViewDX11;
+
     class SwapChainDX11 {
     public:
         SwapChainDX11(const ComPtr<IDXGISwapChain1> &swapChain, const std::shared_ptr<ResourceViewDX11> &resource);
