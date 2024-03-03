@@ -1,19 +1,16 @@
 #include "Texture2dDX11.h"
 
-KGV::Render::Texture2dDX11::Texture2dDX11() 
+KGV::Render::Texture2dDX11::Texture2dDX11(ComPtr<ID3D11Texture2D> resource)
 {
+    texture = resource;
 	// Initialize both texture2D descriptions to a clean slate.
 	ZeroMemory( &actualDesc, sizeof( D3D11_TEXTURE2D_DESC ) );
 	ZeroMemory( &desiredDesc, sizeof( D3D11_TEXTURE2D_DESC ) );
 }
 
-KGV::Render::Texture2dDX11::~Texture2dDX11() 
-{
-	// Empty
-}
-
 D3D11_TEXTURE2D_DESC KGV::Render::Texture2dDX11::getActualDesc() 
 {
+    texture->GetDesc(&actualDesc);
 	return actualDesc;
 }
 

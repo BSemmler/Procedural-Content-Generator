@@ -15,8 +15,8 @@ namespace KGV::Render {
 	*/
 	class Texture2dDX11 : public ResourceDX11 {
 	public:
-		Texture2dDX11();
-		virtual ~Texture2dDX11();
+		explicit Texture2dDX11(ComPtr<ID3D11Texture2D> resource);
+		virtual ~Texture2dDX11() = default;
 
 		D3D11_TEXTURE2D_DESC	getActualDesc();
 		D3D11_TEXTURE2D_DESC	getDesiredDesc();
@@ -30,7 +30,7 @@ namespace KGV::Render {
 		D3D11_TEXTURE2D_DESC actualDesc;
 		D3D11_TEXTURE2D_DESC desiredDesc;
 
-		Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+		ComPtr<ID3D11Texture2D> texture;
 
 		friend class RenderDeviceDX11;
 	};
