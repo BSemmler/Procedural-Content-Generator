@@ -71,6 +71,12 @@ add_executable(Engine
         KGVEngine/ShaderResourceViewDX11.cpp
         KGVEngine/StringUtil.h
         KGVEngine/SwapChainDX11.cpp
-        KGVEngine/SwapChainDX11.h)
+        KGVEngine/SwapChainDX11.h
+        KGVEngine/ShaderDX11.cpp
+        KGVEngine/ShaderDX11.h
+        KGVEngine/VertexShaderDX11.cpp
+        KGVEngine/VertexShaderDX11.h
+        KGVEngine/PixelShaderDX11.cpp
+        KGVEngine/PixelShaderDX11.h)
 
 target_link_libraries(Engine PRIVATE spdlog::spdlog d3d11.lib dxgi.lib)
