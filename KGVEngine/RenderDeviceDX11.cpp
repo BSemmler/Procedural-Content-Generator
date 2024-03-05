@@ -4,6 +4,8 @@
 #include "StringUtil.h"
 #include "VertexBufferDX11.h"
 #include "IndexBufferDX11.h"
+#include "VertexShaderDX11.h"
+#include "PixelShaderDX11.h"
 
 namespace KGV::Render {
     RenderDeviceDX11::RenderDeviceDX11(std::shared_ptr<spdlog::logger> logger) : logger(std::move(logger)) {
@@ -259,15 +261,15 @@ namespace KGV::Render {
             return false;
 
         this->resources[index].reset(nullptr);
-        this->availableIds.push_back(index);
+        this->availableResourceIds.push_back(index);
 
         return true;
     }
 
     S32 RenderDeviceDX11::storeResource(std::unique_ptr<ResourceDX11> resource) {
         S32 nextId;
-        if (!availableIds.empty())
-            nextId = availableIds.back();
+        if (!availableResourceIds.empty())
+            nextId = availableResourceIds.back();
         else
             nextId = resources.size();
 
@@ -313,5 +315,125 @@ namespace KGV::Render {
 
         logger->error("Failed to create vertex buffer. ({})", hr);
         return {};
+    }
+
+    S32 RenderDeviceDX11::loadShader(const std::string& file, eShaderType type, bool isPreCompiled,
+                                     const std::string& function, const std::string& shaderModel) {
+
+        ComPtr<ID3DBlob> compiledShader;
+        if (isPreCompiled)
+            compiledShader = loadPrecompiledShader(file);
+        else
+            compiledShader = compileShaderFromFile(file, function, shaderModel);
+
+        if (!compiledShader)
+            return -1;
+
+        HRESULT hr = S_OK;
+        std::unique_ptr<ShaderDX11> shaderWrapper;
+        switch (type) {
+            case kVertex: {
+                ComPtr<ID3D11VertexShader> shader;
+                hr = device->CreateVertexShader(
+                        compiledShader->GetBufferPointer(),
+                        compiledShader->GetBufferSize(),
+                        nullptr,
+                        shader.GetAddressOf());
+
+                shaderWrapper = std::make_unique<VertexShaderDX11>(file, function, shaderModel, compiledShader, shader);
+                break;
+            }
+            case kPixel: {
+                ComPtr<ID3D11PixelShader> shader;
+                hr = device->CreatePixelShader(
+                        compiledShader->GetBufferPointer(),
+                        compiledShader->GetBufferSize(),
+                        nullptr,
+                        shader.GetAddressOf());
+
+                shaderWrapper = std::make_unique<PixelShaderDX11>(file, function, shaderModel, compiledShader, shader);
+                break;
+            }
+        }
+
+        if (FAILED(hr)) {
+            logger->error("Failed to create shader from {} {} {}", file, function, shaderModel);
+            return -1;
+        }
+
+        shaders.emplace_back(std::move(shaderWrapper));
+    }
+
+    std::pair<std::unique_ptr<char[]>, S32> loadFile(const std::string& file, const std::shared_ptr<spdlog::logger>& logger) {
+        std::ifstream fileReader(file, std::ifstream::binary);
+
+        if (!fileReader.is_open()) {
+            logger->error("Failed to open the file {}", file);
+            return { nullptr, -1 };
+        }
+
+        fileReader.seekg(0, std::ios::end);
+        auto length = fileReader.tellg();
+
+        fileReader.seekg(0, std::ios::beg);
+        auto buffer = std::make_unique<char[]>(length);
+        fileReader.read(buffer.get(), length);
+
+        fileReader.close();
+        return { std::move(buffer), length };
+    }
+
+    ComPtr<ID3DBlob> RenderDeviceDX11::loadPrecompiledShader(const std::string& file) {
+        auto shaderFile = loadFile(file, logger);
+
+        if (shaderFile.second == -1)
+            return nullptr;
+
+        ComPtr<ID3DBlob> blob;
+        HRESULT hr = D3DCreateBlob(shaderFile.second, blob.GetAddressOf());
+
+        if (FAILED(hr)) {
+            logger->error("Failed to load compiled shader into blob, file: {}", file);
+            return nullptr;
+        }
+
+
+        memcpy(blob->GetBufferPointer(), shaderFile.first.get(), shaderFile.second);
+        return blob;
+    }
+
+    ComPtr<ID3DBlob> RenderDeviceDX11::compileShaderFromFile(const std::string& file, const std::string& function,
+                                                             const std::string& shaderModel) {
+        auto shaderFile = loadFile(file, logger);
+
+        if (shaderFile.second == -1)
+            return nullptr;
+
+        ComPtr<ID3DBlob> compiledShader;
+        ComPtr<ID3DBlob> errorMessages;
+
+        U32 flags = D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
+#ifdef _DEBUG
+        flags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+
+        HRESULT hr = D3DCompile(shaderFile.first.get(),
+                                shaderFile.second,
+                                nullptr,
+                                nullptr,
+                                nullptr,
+                                function.c_str(),
+                                shaderModel.c_str(),
+                                flags,
+                                0,
+                                &compiledShader,
+                                &errorMessages);
+
+        if (FAILED(hr)) {
+            logger->error("Failed to compile shader {} {} with the following message: {}", file, function, (const char*)errorMessages->GetBufferPointer());
+            return nullptr;
+        }
+
+        return compiledShader;
     }
 }

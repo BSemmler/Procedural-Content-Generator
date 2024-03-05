@@ -14,6 +14,7 @@
 #include <dxgi1_6.h>
 #include <d3dcommon.h>
 #include <DirectXMath.h>
+#include <d3dcompiler.h>
 
 // Include COM libraries.
 #include <wrl.h>
