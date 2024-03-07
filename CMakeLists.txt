@@ -83,6 +83,8 @@ add_executable(Engine
         KGVEngine/ShaderStageState.cpp
         KGVEngine/ShaderStageState.h
         KGVEngine/RasterizerStageState.cpp
-        KGVEngine/RasterizerStageState.h)
+        KGVEngine/RasterizerStageState.h
+        KGVEngine/OutputMergerStageState.cpp
+        KGVEngine/OutputMergerStageState.h)
 
 target_link_libraries(Engine PRIVATE spdlog::spdlog d3d11.lib dxgi.lib d3dcompiler.lib)
