@@ -492,4 +492,9 @@ namespace KGV::Render {
 
         return {};
     }
+
+    void RenderDeviceDX11::presentSwapChain(S32 id, U32 syncInterval, U32 flags) {
+        if (id >= 0 && id < swapChains.size())
+            swapChains[id]->getSwapChain()->Present(syncInterval, flags);
+    }
 }

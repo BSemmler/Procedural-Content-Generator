@@ -71,6 +71,8 @@ namespace KGV::Render {
 
         S32 createInputLayout( S32 shaderId, std::vector<D3D11_INPUT_ELEMENT_DESC> &inputElements);
 
+        void presentSwapChain(S32 id, U32 syncInterval, U32 flags);
+
     protected:
         ComPtr<ID3D11Device> device;
         ComPtr<ID3D11Device1> device1;
