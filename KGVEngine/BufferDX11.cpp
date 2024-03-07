@@ -94,3 +94,7 @@ void KGV::Render::BufferDX11::setByteStride( U32 stride )
 ID3D11Resource *KGV::Render::BufferDX11::getResource() {
     return buffer.Get();
 }
+
+ComPtr<ID3D11Buffer> KGV::Render::BufferDX11::getBuffer() {
+    return buffer;
+}

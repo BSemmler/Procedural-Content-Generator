@@ -16,6 +16,10 @@ namespace KGV::Render {
 
         eShaderType getShaderType() override;
 
+        const ComPtr<ID3D11VertexShader> &getVertexShader() const;
+
+        void setVertexShader(const ComPtr<ID3D11VertexShader> &vertexShader);
+
     protected:
         ComPtr<ID3D11VertexShader> vertexShader;
     };

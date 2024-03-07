@@ -10,7 +10,11 @@ namespace KGV::Render
 		explicit ShaderResourceViewDX11(ComPtr<ID3D11ShaderResourceView> view);
 		~ShaderResourceViewDX11() = default;
 
-	protected:
+        const ComPtr<ID3D11ShaderResourceView> &getView() const;
+
+        void setView(const ComPtr<ID3D11ShaderResourceView> &view);
+
+    protected:
 		ComPtr<ID3D11ShaderResourceView> view;
 	};
 }

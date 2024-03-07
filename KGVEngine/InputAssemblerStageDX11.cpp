@@ -20,14 +20,13 @@ void KGV::Render::InputAssemblerStageDX11::setDesiredState(const KGV::Render::In
     InputAssemblerStageDX11::desiredState = desiredState;
 }
 
-void KGV::Render::InputAssemblerStageDX11::applyDesiredState(const ComPtr<ID3D11DeviceContext>& context, RenderDeviceDX11* device) {
-    auto inputLayout = device->getInputLayoutById(desiredState.getInputLayout());
-    context->IASetInputLayout(inputLayout.Get());
+void KGV::Render::InputAssemblerStageDX11::applyDesiredState(ComPtr<ID3D11DeviceContext> context, RenderDeviceDX11* device) {
+    context->IASetInputLayout(device->getInputLayoutById(desiredState.getInputLayout()).Get());
 
     std::vector<ID3D11Buffer*> vertexBuffers;
     for (S32 id : desiredState.getVertexBuffers()) {
         auto* buff = dynamic_cast<VertexBufferDX11 *>(device->getResourceById(id));
-        vertexBuffers.emplace_back(dynamic_cast<ID3D11Buffer *>(buff->getResource()));
+        vertexBuffers.emplace_back(buff->getBuffer().Get());
     }
     context->IASetVertexBuffers(0, vertexBuffers.size(), vertexBuffers.data(),
                                 reinterpret_cast<const UINT *>(desiredState.getStrides().data()),

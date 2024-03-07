@@ -2,13 +2,13 @@
 // Created by Brett on 2024-03-06.
 //
 
-#ifndef ENGINE_SHADERSTAGESTATE_H
-#define ENGINE_SHADERSTAGESTATE_H
+#ifndef ENGINE_SHADERSTAGESTATEDX11_H
+#define ENGINE_SHADERSTAGESTATEDX11_H
 
 #include "pch.h"
 
 namespace KGV::Render {
-    class ShaderStageState {
+    class ShaderStageStateDX11 {
     public:
         S32 getShaderId() const;
 
@@ -31,4 +31,4 @@ namespace KGV::Render {
 
 
 
-#endif //ENGINE_SHADERSTAGESTATE_H
+#endif //ENGINE_SHADERSTAGESTATEDX11_H

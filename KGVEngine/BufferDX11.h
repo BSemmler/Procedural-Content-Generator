@@ -43,6 +43,8 @@ namespace KGV::Render
 		U32					getByteStride();
 		void				setByteStride( U32 stride );
 
+        ComPtr<ID3D11Buffer> getBuffer();
+
 	protected:
 		D3D11_BUFFER_DESC actualDesc;
 		D3D11_BUFFER_DESC desiredDesc;

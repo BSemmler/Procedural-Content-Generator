@@ -13,3 +13,11 @@ KGV::Render::VertexShaderDX11::VertexShaderDX11(const std::string &fileName, con
 KGV::Render::eShaderType KGV::Render::VertexShaderDX11::getShaderType() {
     return kVertex;
 }
+
+const ComPtr<ID3D11VertexShader> &KGV::Render::VertexShaderDX11::getVertexShader() const {
+    return vertexShader;
+}
+
+void KGV::Render::VertexShaderDX11::setVertexShader(const ComPtr<ID3D11VertexShader> &vertexShader) {
+    VertexShaderDX11::vertexShader = vertexShader;
+}

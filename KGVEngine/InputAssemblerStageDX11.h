@@ -8,9 +8,10 @@
 #include "pch.h"
 #include "RenderDeviceDX11.h"
 #include "InputAssemblerStateDX11.h"
+#include "IPipelineStageDX11.h"
 
 namespace KGV::Render {
-    class InputAssemblerStageDX11 {
+    class InputAssemblerStageDX11 : public IPipelineStageDX11 {
     public:
         const InputAssemblerStateDX11 &getCurrentState() const;
 
@@ -20,7 +21,7 @@ namespace KGV::Render {
 
         void setDesiredState(const InputAssemblerStateDX11 &desiredState);
 
-        void applyDesiredState(const ComPtr<ID3D11DeviceContext>& context, RenderDeviceDX11* device);
+        void applyDesiredState(ComPtr<ID3D11DeviceContext> context, RenderDeviceDX11* device) override;
 
     protected:
         InputAssemblerStateDX11 currentState;
