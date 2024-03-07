@@ -2,25 +2,25 @@
 // Created by Brett on 2024-03-06.
 //
 
-#include "InputAssemblerStage.h"
+#include "InputAssemblerStageDX11.h"
 
-const KGV::Render::InputAssemblerState &KGV::Render::InputAssemblerStage::getCurrentState() const {
+const KGV::Render::InputAssemblerStateDX11 &KGV::Render::InputAssemblerStageDX11::getCurrentState() const {
     return currentState;
 }
 
-void KGV::Render::InputAssemblerStage::setCurrentState(const KGV::Render::InputAssemblerState &currentState) {
-    InputAssemblerStage::currentState = currentState;
+void KGV::Render::InputAssemblerStageDX11::setCurrentState(const KGV::Render::InputAssemblerStateDX11 &currentState) {
+    InputAssemblerStageDX11::currentState = currentState;
 }
 
-const KGV::Render::InputAssemblerState &KGV::Render::InputAssemblerStage::getDesiredState() const {
+const KGV::Render::InputAssemblerStateDX11 &KGV::Render::InputAssemblerStageDX11::getDesiredState() const {
     return desiredState;
 }
 
-void KGV::Render::InputAssemblerStage::setDesiredState(const KGV::Render::InputAssemblerState &desiredState) {
-    InputAssemblerStage::desiredState = desiredState;
+void KGV::Render::InputAssemblerStageDX11::setDesiredState(const KGV::Render::InputAssemblerStateDX11 &desiredState) {
+    InputAssemblerStageDX11::desiredState = desiredState;
 }
 
-void KGV::Render::InputAssemblerStage::applyDesiredState(const ComPtr<ID3D11DeviceContext>& context, RenderDeviceDX11* device) {
+void KGV::Render::InputAssemblerStageDX11::applyDesiredState(const ComPtr<ID3D11DeviceContext>& context, RenderDeviceDX11* device) {
     auto inputLayout = device->getInputLayoutById(desiredState.getInputLayout());
     context->IASetInputLayout(inputLayout.Get());
 

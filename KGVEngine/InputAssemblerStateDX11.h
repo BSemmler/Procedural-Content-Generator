@@ -2,15 +2,15 @@
 // Created by Brett on 2024-03-06.
 //
 
-#ifndef ENGINE_INPUTASSEMBLERSTATE_H
-#define ENGINE_INPUTASSEMBLERSTATE_H
+#ifndef ENGINE_INPUTASSEMBLERSTATEDX11_H
+#define ENGINE_INPUTASSEMBLERSTATEDX11_H
 
 #include "pch.h"
 #include "VertexBufferDX11.h"
 #include "IndexBufferDX11.h"
 
 namespace KGV::Render {
-    class InputAssemblerState {
+    class InputAssemblerStateDX11 {
     public:
         static constexpr S32 maxSlots = 16;
 
@@ -57,4 +57,4 @@ namespace KGV::Render {
 
 
 
-#endif //ENGINE_INPUTASSEMBLERSTATE_H
+#endif //ENGINE_INPUTASSEMBLERSTATEDX11_H
