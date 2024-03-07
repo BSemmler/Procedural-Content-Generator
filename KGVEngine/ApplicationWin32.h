@@ -20,5 +20,7 @@ namespace KGV::System
 		std::unique_ptr<WindowWin32> window1;
 		std::unique_ptr<WindowWin32> window2;
         std::unique_ptr<Render::RenderDeviceDX11> device;
+        S32 swapChainId;
+        S32 rtvId;
 	};
 }

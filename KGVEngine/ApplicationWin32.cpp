@@ -34,6 +34,14 @@ bool KGV::System::ApplicationWin32::init() {
     device->init();
     spdlog::get("engine")->info("Initialization complete!");
 
+    Render::SwapChainConfigDX11 swapChainConf;
+    swapChainConf.setWidth(window1->getWidth());
+    swapChainConf.setHeight(window1->getHeight());
+    swapChainId = device->createSwapChain(window1->getWin32Handle(), swapChainConf);
+    auto swapChain = device->getSwapChainById(swapChainId);
+
+    rtvId = device->createRenderTargetView(swapChain->getResource()->getResourceId(), nullptr);
+
     return true;
 }
 
@@ -64,6 +72,8 @@ int KGV::System::ApplicationWin32::run() {
             if (msg.message == WM_QUIT)
                 break;
         }
+
+        device->presentSwapChain(swapChainId, 0, 0);
     }
 
     return ( int ) msg.wParam;
