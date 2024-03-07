@@ -51,7 +51,18 @@ namespace KGV::Render {
         S32 createRenderTargetView(S32 resourceId, D3D11_RENDER_TARGET_VIEW_DESC* desc);
 
         S32 storeResource(std::unique_ptr<ResourceDX11> resource);
-        ResourceDX11* getResourceById(S32 index);
+        ResourceDX11* getResourceById(S32 id);
+
+        ShaderDX11* getShaderById(S32 id);
+
+        SwapChainDX11* getSwapChainById(S32 id);
+
+        RenderTargetViewDX11* getRtvById(S32 id);
+
+        ShaderResourceViewDX11* getSrvById(S32 id);
+
+        ComPtr<ID3D11InputLayout> getInputLayoutById(S32 id);
+
         bool deleteResource(const std::shared_ptr<ResourceViewDX11>& resource);
         bool deleteResource(S32 index);
 

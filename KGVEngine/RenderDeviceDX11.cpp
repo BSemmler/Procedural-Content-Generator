@@ -457,4 +457,39 @@ namespace KGV::Render {
         inputLayouts.emplace_back(inputLayout);
         return static_cast<S32>(inputLayouts.size() - 1);
     }
+
+    ShaderDX11 *RenderDeviceDX11::getShaderById(S32 id) {
+        if (id < shaders.size() && id >= 0)
+            return shaders[id].get();
+
+        return nullptr;
+    }
+
+    SwapChainDX11 *RenderDeviceDX11::getSwapChainById(S32 id) {
+        if (id < swapChains.size() && id >= 0)
+            return swapChains[id].get();
+
+        return nullptr;
+    }
+
+    RenderTargetViewDX11 *RenderDeviceDX11::getRtvById(S32 id) {
+        if (id < renderTargetViews.size() && id >= 0)
+            return &renderTargetViews[id];
+
+        return nullptr;
+    }
+
+    ShaderResourceViewDX11* RenderDeviceDX11::getSrvById(S32 id) {
+        if (id < shaderResourceViews.size() && id >= 0)
+            return &shaderResourceViews[id];
+
+        return nullptr;
+    }
+
+    ComPtr<ID3D11InputLayout> RenderDeviceDX11::getInputLayoutById(S32 id) {
+        if (id < inputLayouts.size() && id >= 0)
+            return inputLayouts[id];
+
+        return {};
+    }
 }
