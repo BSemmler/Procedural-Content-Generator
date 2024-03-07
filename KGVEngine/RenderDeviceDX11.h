@@ -58,6 +58,8 @@ namespace KGV::Render {
         S32 loadShader(const std::string& file, eShaderType type, bool isPreCompiled,
                        const std::string& function = "", const std::string& shaderModel = "");
 
+        S32 createInputLayout( S32 shaderId, std::vector<D3D11_INPUT_ELEMENT_DESC> &inputElements);
+
     protected:
         ComPtr<ID3D11Device> device;
         ComPtr<ID3D11Device1> device1;
@@ -68,6 +70,7 @@ namespace KGV::Render {
         std::vector<std::unique_ptr<SwapChainDX11>> swapChains;
         std::vector<ShaderResourceViewDX11> shaderResourceViews;
         std::vector<RenderTargetViewDX11> renderTargetViews;
+        std::vector<ComPtr<ID3D11InputLayout>> inputLayouts;
         std::vector<std::unique_ptr<ResourceDX11>> resources;
         std::vector<S32> availableResourceIds;
         std::shared_ptr<spdlog::logger> logger;

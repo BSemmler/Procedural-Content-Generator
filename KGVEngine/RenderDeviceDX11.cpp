@@ -436,4 +436,23 @@ namespace KGV::Render {
 
         return compiledShader;
     }
+
+    S32 RenderDeviceDX11::createInputLayout(S32 shaderId, std::vector<D3D11_INPUT_ELEMENT_DESC> &inputElements) {
+        auto compiledShader = shaders[shaderId]->getCompiledShader();
+        ComPtr<ID3D11InputLayout> inputLayout;
+
+        HRESULT hr = device->CreateInputLayout(inputElements.data(),
+                                               inputElements.size(),
+                                               compiledShader->GetBufferPointer(),
+                                               compiledShader->GetBufferSize(),
+                                               inputLayout.GetAddressOf());
+
+        if (FAILED(hr)) {
+            logger->error("Failed to create input layout for shader ID {}", shaderId);
+            return -1;
+        }
+
+        inputLayouts.emplace_back(inputLayout);
+        return static_cast<S32>(inputLayouts.size() - 1);
+    }
 }
