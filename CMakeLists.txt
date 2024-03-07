@@ -77,6 +77,8 @@ add_executable(Engine
         KGVEngine/VertexShaderDX11.cpp
         KGVEngine/VertexShaderDX11.h
         KGVEngine/PixelShaderDX11.cpp
-        KGVEngine/PixelShaderDX11.h)
+        KGVEngine/PixelShaderDX11.h
+        KGVEngine/InputAssemblerState.cpp
+        KGVEngine/InputAssemblerState.h)
 
-target_link_libraries(Engine PRIVATE spdlog::spdlog d3d11.lib dxgi.lib)
+target_link_libraries(Engine PRIVATE spdlog::spdlog d3d11.lib dxgi.lib d3dcompiler.lib)

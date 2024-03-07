@@ -362,6 +362,8 @@ namespace KGV::Render {
         }
 
         shaders.emplace_back(std::move(shaderWrapper));
+
+        return static_cast<S32>(shaders.size() - 1);
     }
 
     std::pair<std::unique_ptr<char[]>, S32> loadFile(const std::string& file, const std::shared_ptr<spdlog::logger>& logger) {
