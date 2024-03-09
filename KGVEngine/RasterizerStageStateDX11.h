@@ -18,14 +18,14 @@ namespace KGV::Render {
 
         void setViewportIds(const std::vector<S32> &viewportIds);
 
-        const std::vector<D3D11_RECT> &getScissorRectIds() const;
+        const std::vector<D3D11_RECT> &getScissorRect() const;
 
-        void setScissorRectIds(const std::vector<D3D11_RECT> &scissorRectIds);
+        void setScissorRect(const std::vector<D3D11_RECT> &scissorRects);
 
     protected:
         S32 rasterizerState;
         std::vector<S32> viewportIds;
-        std::vector<D3D11_RECT> scissorRectIds;
+        std::vector<D3D11_RECT> scissorRects;
     };
 }
 

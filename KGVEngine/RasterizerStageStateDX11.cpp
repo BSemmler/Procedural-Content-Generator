@@ -20,10 +20,10 @@ void KGV::Render::RasterizerStageStateDX11::setViewportIds(const std::vector<S32
     RasterizerStageStateDX11::viewportIds = viewportIds;
 }
 
-const std::vector<D3D11_RECT> &KGV::Render::RasterizerStageStateDX11::getScissorRectIds() const {
-    return scissorRectIds;
+const std::vector<D3D11_RECT> &KGV::Render::RasterizerStageStateDX11::getScissorRect() const {
+    return scissorRects;
 }
 
-void KGV::Render::RasterizerStageStateDX11::setScissorRectIds(const std::vector<D3D11_RECT> &scissorRectIds) {
-    RasterizerStageStateDX11::scissorRectIds = scissorRectIds;
+void KGV::Render::RasterizerStageStateDX11::setScissorRect(const std::vector<D3D11_RECT> &scissorRectIds) {
+    RasterizerStageStateDX11::scissorRects = scissorRectIds;
 }
