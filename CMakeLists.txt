@@ -98,6 +98,8 @@ add_executable(Engine
         KGVEngine/PixelShaderStageDX11.cpp
         KGVEngine/PixelShaderStageDX11.h
         KGVEngine/RasterizerStageDX11.cpp
-        KGVEngine/RasterizerStageDX11.h)
+        KGVEngine/RasterizerStageDX11.h
+        KGVEngine/OutputMergerStageDX11.cpp
+        KGVEngine/OutputMergerStageDX11.h)
 
 target_link_libraries(Engine PRIVATE spdlog::spdlog d3d11.lib dxgi.lib d3dcompiler.lib)

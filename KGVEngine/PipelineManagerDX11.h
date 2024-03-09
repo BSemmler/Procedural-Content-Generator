@@ -10,6 +10,7 @@
 #include "VertexShaderStageDX11.h"
 #include "PixelShaderStageDX11.h"
 #include "RasterizerStageDX11.h"
+#include "OutputMergerStageDX11.h"
 
 namespace KGV::Render {
     class PipelineManagerDX11 {
@@ -18,6 +19,7 @@ namespace KGV::Render {
         VertexShaderStageDX11 vertexShaderStage;
         RasterizerStageDX11 rasterStage;
         PixelShaderStageDX11 pixelShaderStage;
+        OutputMergerStageDX11 outputMergerStage;
     };
 }
 

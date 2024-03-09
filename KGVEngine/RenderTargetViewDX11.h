@@ -11,7 +11,11 @@ namespace KGV::Render
 		explicit RenderTargetViewDX11(ComPtr<ID3D11RenderTargetView> view);
 		~RenderTargetViewDX11() = default;
 
-	protected:
+        const ComPtr<ID3D11RenderTargetView> &getView() const;
+
+        void setView(const ComPtr<ID3D11RenderTargetView> &view);
+
+    protected:
 		ComPtr<ID3D11RenderTargetView> view;
 	};
 }
