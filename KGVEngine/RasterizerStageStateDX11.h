@@ -2,13 +2,13 @@
 // Created by Brett on 2024-03-06.
 //
 
-#ifndef ENGINE_RASTERIZERSTAGESTATE_H
-#define ENGINE_RASTERIZERSTAGESTATE_H
+#ifndef ENGINE_RASTERIZERSTAGESTATEDX11_H
+#define ENGINE_RASTERIZERSTAGESTATEDX11_H
 
 #include "pch.h"
 
 namespace KGV::Render {
-    class RasterizerStageState {
+    class RasterizerStageStateDX11 {
     public:
         S32 getRasterizerState() const;
 
@@ -31,4 +31,4 @@ namespace KGV::Render {
 
 
 
-#endif //ENGINE_RASTERIZERSTAGESTATE_H
+#endif //ENGINE_RASTERIZERSTAGESTATEDX11_H

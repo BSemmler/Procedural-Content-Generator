@@ -71,6 +71,18 @@ namespace KGV::Render {
 
         S32 createInputLayout( S32 shaderId, std::vector<D3D11_INPUT_ELEMENT_DESC> &inputElements);
 
+        S32 createRasterizerState(D3D11_RASTERIZER_DESC &desc);
+
+        ComPtr<ID3D11RasterizerState> getRasterizerStateById(S32 id);
+
+        D3D11_VIEWPORT* getViewPortById(S32 id);
+
+        D3D11_RECT* getScissorRectById(S32 id);
+
+        S32 createViewPort(D3D11_VIEWPORT& viewPort);
+
+        S32 createScissorRect(D3D11_RECT &rect);
+
         void presentSwapChain(S32 id, U32 syncInterval, U32 flags);
 
     protected:
@@ -84,6 +96,9 @@ namespace KGV::Render {
         std::vector<ShaderResourceViewDX11> shaderResourceViews;
         std::vector<RenderTargetViewDX11> renderTargetViews;
         std::vector<ComPtr<ID3D11InputLayout>> inputLayouts;
+        std::vector<ComPtr<ID3D11RasterizerState>> rasterStates;
+        std::vector<D3D11_VIEWPORT> viewPorts;
+        std::vector<D3D11_RECT> scissorRects;
         std::vector<std::unique_ptr<ResourceDX11>> resources;
         std::vector<S32> availableResourceIds;
         std::shared_ptr<spdlog::logger> logger;

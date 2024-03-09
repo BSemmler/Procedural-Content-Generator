@@ -2,8 +2,8 @@
 // Created by Brett on 2024-03-06.
 //
 
-#ifndef ENGINE_VERTEXSTAGEDX11_H
-#define ENGINE_VERTEXSTAGEDX11_H
+#ifndef ENGINE_VERTEXSHADERSTAGEDX11_H
+#define ENGINE_VERTEXSHADERSTAGEDX11_H
 
 #include "pch.h"
 #include "RenderDeviceDX11.h"
@@ -11,7 +11,7 @@
 #include "IPipelineStageDX11.h"
 
 namespace KGV::Render {
-    class VertexStageDX11 : public IPipelineStageDX11 {
+    class VertexShaderStageDX11 : public IPipelineStageDX11 {
     public:
         const ShaderStageStateDX11 &getCurrentState() const;
 
@@ -31,4 +31,4 @@ namespace KGV::Render {
 
 
 
-#endif //ENGINE_VERTEXSTAGEDX11_H
+#endif //ENGINE_VERTEXSHADERSTAGEDX11_H

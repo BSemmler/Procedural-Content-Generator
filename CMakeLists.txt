@@ -82,16 +82,22 @@ add_executable(Engine
         KGVEngine/InputAssemblerStateDX11.h
         KGVEngine/ShaderStageStateDX11.cpp
         KGVEngine/ShaderStageStateDX11.h
-        KGVEngine/RasterizerStageState.cpp
-        KGVEngine/RasterizerStageState.h
+        KGVEngine/RasterizerStageStateDX11.cpp
+        KGVEngine/RasterizerStageStateDX11.h
         KGVEngine/OutputMergerStageState.cpp
         KGVEngine/OutputMergerStageState.h
         KGVEngine/InputAssemblerStageDX11.cpp
         KGVEngine/InputAssemblerStageDX11.h
-        KGVEngine/VertexStageDX11.cpp
-        KGVEngine/VertexStageDX11.h
+        KGVEngine/VertexShaderStageDX11.cpp
+        KGVEngine/VertexShaderStageDX11.h
         KGVEngine/IPipelineStageDX11.h
         KGVEngine/ConstantBufferDX11.cpp
-        KGVEngine/ConstantBufferDX11.h)
+        KGVEngine/ConstantBufferDX11.h
+        KGVEngine/PipelineManagerDX11.cpp
+        KGVEngine/PipelineManagerDX11.h
+        KGVEngine/PixelShaderStageDX11.cpp
+        KGVEngine/PixelShaderStageDX11.h
+        KGVEngine/RasterizerStageDX11.cpp
+        KGVEngine/RasterizerStageDX11.h)
 
 target_link_libraries(Engine PRIVATE spdlog::spdlog d3d11.lib dxgi.lib d3dcompiler.lib)

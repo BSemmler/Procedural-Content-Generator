@@ -16,6 +16,10 @@ namespace KGV::Render {
 
         eShaderType getShaderType() override;
 
+        const ComPtr<ID3D11PixelShader> &getPixelShader() const;
+
+        void setPixelShader(const ComPtr<ID3D11PixelShader> &pixelShader);
+
     protected:
         ComPtr<ID3D11PixelShader> pixelShader;
     };

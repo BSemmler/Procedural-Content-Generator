@@ -497,4 +497,48 @@ namespace KGV::Render {
         if (id >= 0 && id < swapChains.size())
             swapChains[id]->getSwapChain()->Present(syncInterval, flags);
     }
+
+    S32 RenderDeviceDX11::createRasterizerState(D3D11_RASTERIZER_DESC &desc) {
+        ComPtr<ID3D11RasterizerState> rasterState;
+        HRESULT hr = device->CreateRasterizerState(&desc, rasterState.GetAddressOf());
+
+        if (FAILED(hr)) {
+            logger->error("Failed to create rasterizer state!");
+            return -1;
+        }
+
+        rasterStates.emplace_back(rasterState);
+
+        return static_cast<S32>(rasterStates.size() - 1);
+    }
+
+    S32 RenderDeviceDX11::createViewPort(D3D11_VIEWPORT &viewPort) {
+        viewPorts.emplace_back(viewPort);
+
+        return static_cast<S32>(viewPorts.size() - 1);
+    }
+
+    S32 RenderDeviceDX11::createScissorRect(D3D11_RECT &rect) {
+        scissorRects.emplace_back(rect);
+
+        return static_cast<S32>(scissorRects.size() - 1);
+    }
+
+    ComPtr<ID3D11RasterizerState> RenderDeviceDX11::getRasterizerStateById(S32 id) {
+        if (id < rasterStates.size() && id >= 0)
+            return rasterStates[id];
+        return nullptr;
+    }
+
+    D3D11_VIEWPORT *RenderDeviceDX11::getViewPortById(S32 id) {
+        if (id < viewPorts.size() && id >= 0)
+            return &viewPorts[id];
+        return nullptr;
+    }
+
+    D3D11_RECT *RenderDeviceDX11::getScissorRectById(S32 id) {
+        if (id < scissorRects.size() && id >= 0)
+            return &scissorRects[id];
+        return nullptr;
+    }
 }
