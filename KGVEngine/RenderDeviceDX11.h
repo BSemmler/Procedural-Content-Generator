@@ -43,6 +43,7 @@ namespace KGV::Render {
 
         std::shared_ptr<ResourceViewDX11> createVertexBuffer(BufferConfigDX11 &config, ResourceData &data);
         std::shared_ptr<ResourceViewDX11> createIndexBuffer(BufferConfigDX11 &config, ResourceData &data);
+        std::shared_ptr<ResourceViewDX11> createConstantBuffer(BufferConfigDX11 &config, ResourceData &data);
 
 
 

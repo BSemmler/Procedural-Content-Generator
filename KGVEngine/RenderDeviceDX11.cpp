@@ -6,6 +6,7 @@
 #include "IndexBufferDX11.h"
 #include "VertexShaderDX11.h"
 #include "PixelShaderDX11.h"
+#include "ConstantBufferDX11.h"
 
 namespace KGV::Render {
     RenderDeviceDX11::RenderDeviceDX11(std::shared_ptr<spdlog::logger> logger) : logger(std::move(logger)) {
@@ -320,6 +321,26 @@ namespace KGV::Render {
         return {};
     }
 
+    std::shared_ptr<ResourceViewDX11> RenderDeviceDX11::createConstantBuffer(BufferConfigDX11 &config, ResourceData &data) {
+        logger->trace("Creating new vertex buffer.");
+
+        ComPtr<ID3D11Buffer> buffer;
+        HRESULT hr = device->CreateBuffer(&config.desc,
+                                          reinterpret_cast<D3D11_SUBRESOURCE_DATA*>(&data), buffer.GetAddressOf());
+
+        if (buffer) {
+            auto b = std::make_unique<ConstantBufferDX11>(buffer);
+            b->setDesiredDesc(config.getDesc());
+            int resourceId = storeResource(std::move(b));
+            auto resourceView = std::make_shared<ResourceViewDX11>(resourceId, &config, this);
+
+            return resourceView;
+        }
+
+        logger->error("Failed to create vertex buffer. ({})", hr);
+        return {};
+    }
+
     S32 RenderDeviceDX11::loadShader(const std::string& file, eShaderType type, bool isPreCompiled,
                                      const std::string& function, const std::string& shaderModel) {
 
@@ -549,4 +570,6 @@ namespace KGV::Render {
         RenderDeviceDX11* dev = this;
         return std::make_shared<PipelineManagerDX11>(dev, context, context1);
     }
+
+
 }

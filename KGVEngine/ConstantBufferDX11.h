@@ -12,6 +12,10 @@ namespace KGV::Render {
     // TODO: Fill in this stub mapping.
     class ConstantBufferDX11 : public BufferDX11 {
     public:
+        explicit ConstantBufferDX11( ComPtr<ID3D11Buffer> constantBuffer );
+
+        eResourceType getResourceType() override;
+
     protected:
 
     };
