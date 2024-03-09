@@ -63,3 +63,10 @@ void KGV::Render::InputAssemblerStateDX11::setTopology(D3D11_PRIMITIVE_TOPOLOGY 
 S32 KGV::Render::InputAssemblerStateDX11::getAvailableSlots() const {
     return static_cast<S32>(maxSlots - vertexBuffers.size());
 }
+
+void KGV::Render::InputAssemblerStateDX11::setVertexBuffers(const std::vector<S32> &vertexBuffers, const std::vector<S32> &strides,
+                                                            const std::vector<S32> &offsets) {
+    InputAssemblerStateDX11::vertexBuffers = vertexBuffers;
+    InputAssemblerStateDX11::strides = strides;
+    InputAssemblerStateDX11::offsets = offsets;
+}

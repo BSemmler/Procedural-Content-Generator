@@ -6,10 +6,12 @@
 #define ENGINE_IPIPELINESTAGEDX11_H
 
 #include "pch.h"
-#include "RenderDeviceDX11.h"
 
 namespace KGV::Render {
+    class RenderDeviceDX11;
+
     class IPipelineStageDX11 {
+    public:
         virtual void applyDesiredState(ComPtr<ID3D11DeviceContext> context, RenderDeviceDX11* device) = 0;
     };
 }

@@ -10,7 +10,8 @@
 #include "ShaderStageStateDX11.h"
 
 namespace KGV::Render {
-    class PixelShaderStageDX11 : IPipelineStageDX11 {
+    class IPipelineStageDX11;
+    class PixelShaderStageDX11 : public IPipelineStageDX11 {
     public:
         const ShaderStageStateDX11 &getCurrentState() const;
 
@@ -20,7 +21,6 @@ namespace KGV::Render {
 
         void setDesiredState(const ShaderStageStateDX11 &desiredState);
 
-    private:
         void applyDesiredState(ComPtr<ID3D11DeviceContext> context, RenderDeviceDX11 *device) override;
 
     protected:

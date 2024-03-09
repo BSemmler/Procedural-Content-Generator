@@ -2,7 +2,8 @@
 
 #ifdef _WIN32
 #include <intrin.h>
-#define KGV_debugBreak() __debugbreak() // X86 software breakpoint. Equalivalent to INT 3 in assembly
+// TODO: Look into why this causes an exception.
+#define KGV_debugBreak()  asm { INT 3 }// __debugbreak() // X86 software breakpoint. Equalivalent to INT 3 in assembly
 #else
 #define KGV_debugBreak()
 #endif
@@ -14,7 +15,7 @@
 if (expr) \
 { \
 spdlog::debug("DEBUG Assertion tripped: {}, file: {}, line: {}", #expr, __FILE__, __LINE__); \
-KGV_debugBreak(); \
+ KGV_debugBreak(); \
 }
 
 #define KGV_ASSERT_TRUE(expr) \
@@ -22,7 +23,7 @@ if (expr) {}\
 else \
 { \
 spdlog::debug("DEBUG Assertion tripped: {}, file: {}, line: {}", #expr, __FILE__, __LINE__); \
-KGV_debugBreak(); \
+ KGV_debugBreak(); \
 }
 
 
@@ -41,7 +42,7 @@ if (expr) {} \
 else \
 { \
 spdlog::debug("DEBUG Assertion tripped: {}, file: {}, line: {}", #expr, __FILE__, __LINE__); \
-KGV_debugBreak(); \
+ KGV_debugBreak(); \
 }
 
 #define KGV_SLOW_ASSERT_FALSE(expr) \
@@ -49,9 +50,10 @@ if (expr) {} \
 else \
 { \
 spdlog::debug("DEBUG Assertion tripped: {}, file: {}, line: {}", #expr, __FILE__, __LINE__); \
-KGV_debugBreak(); \
+ KGV_debugBreak(); \
 }
 
 #else
-#define KGV_SLOW_ASSERT(expr)
+#define KGV_SLOW_ASSERT_TRUE(expr)
+#define KGV_SLOW_ASSERT_FALSE(expr)
 #endif

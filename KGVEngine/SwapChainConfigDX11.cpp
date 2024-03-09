@@ -108,10 +108,10 @@ namespace KGV::Render {
         bufferCount = 2;
         usage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        scaling = DXGI_SCALING_NONE;
+        scaling = DXGI_SCALING_STRETCH; // Cannot be DXGI_SCALING_NONE unless its with FLIP_DISCARD.
         sampleQuality = 0;
         sampleCount = 1;
-        swapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+        swapEffect = DXGI_SWAP_EFFECT_DISCARD; // DXGI_SWAP_EFFECT_FLIP_DISCARD;
         desc = {};
         memset(&desc, 0, sizeof(DXGI_SWAP_CHAIN_DESC1));
     }

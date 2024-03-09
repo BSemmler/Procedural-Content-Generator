@@ -18,7 +18,7 @@ namespace KGV::Render {
 		 * @brief 
 		 * @param indexBuffer An ID3D11Buffer configured as an index buffer.
 		 * @param indexSize Size in bytes of an index.
-		 * @param indexCount Number of indices in the buffer.
+		 * @param indexCount Number of gTriangleIndices in the buffer.
 		*/
 		IndexBufferDX11( ComPtr<ID3D11Buffer> indexBuffer, S32 indexSize, S32 indexCount );
 
@@ -37,14 +37,14 @@ namespace KGV::Render {
 		void setIndexSize( S32 indexSize );
 
 		/**
-		 * @brief Returns the number of indices contained with the buffer.
-		 * @return Number of indices
+		 * @brief Returns the number of gTriangleIndices contained with the buffer.
+		 * @return Number of gTriangleIndices
 		*/
 		S32	 getIndexCount() const;
 
 		/**
-		 * @brief Sets the number of indices contained with the buffer.
-		 * @param indexCount Number of indices
+		 * @brief Sets the number of gTriangleIndices contained with the buffer.
+		 * @param indexCount Number of gTriangleIndices
 		*/
 		void setIndexCount( S32 indexCount );
 

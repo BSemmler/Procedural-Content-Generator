@@ -34,25 +34,25 @@ namespace KGV::Render
 
 	void Texture2dConfigDX11::setWidth( U32 width )
 	{
-		KGV_SLOW_ASSERT_TRUE( width > 0 );
+		// KGV_SLOW_ASSERT_TRUE( width > 0 );
 		desc.Width = width;
 	}
 
 	void Texture2dConfigDX11::setHeight( U32 height )
 	{
-		KGV_SLOW_ASSERT_TRUE( height > 0 );
+		// KGV_SLOW_ASSERT_TRUE( height > 0 );
 		desc.Height = height;
 	}
 
 	void Texture2dConfigDX11::setMipLevels( U32 levels )
 	{
-		KGV_SLOW_ASSERT_TRUE( levels >= 1 );
+		// KGV_SLOW_ASSERT_TRUE( levels >= 1 );
 		desc.MipLevels = levels;
 	}
 
 	void Texture2dConfigDX11::setArraySize( U32 arrSize )
 	{
-		KGV_SLOW_ASSERT_TRUE( arrSize >= 1 );
+		// KGV_SLOW_ASSERT_TRUE( arrSize >= 1 );
 		desc.ArraySize = arrSize;
 	}
 

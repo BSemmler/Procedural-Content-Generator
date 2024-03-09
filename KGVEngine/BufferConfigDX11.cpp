@@ -2,7 +2,7 @@
 
 namespace KGV::Render {
     void BufferConfigDX11::setDefaultConstantBuffer(U32 size, bool dynamic) {
-        KGV_ASSERT_FALSE(size > 0);
+        // KGV_ASSERT_FALSE(size > 0);
         desc.ByteWidth = size;
         desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
         desc.MiscFlags = 0;
@@ -18,9 +18,9 @@ namespace KGV::Render {
     }
 
     void BufferConfigDX11::setDefaultVertexBuffer(U32 size, bool dynamic) {
-        KGV_ASSERT_FALSE(size > 0);
+        // KGV_ASSERT_FALSE(size > 0);
         desc.ByteWidth = size;
-        desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+        desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
         desc.MiscFlags = 0;
         desc.StructureByteStride = 0;
 
@@ -34,9 +34,9 @@ namespace KGV::Render {
     }
 
     void BufferConfigDX11::setDefaultIndexBuffer(U32 size, bool dynamic) {
-        KGV_ASSERT_FALSE(size > 0);
+        // KGV_ASSERT_FALSE(size > 0);
         desc.ByteWidth = size;
-        desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
         desc.MiscFlags = 0;
         desc.StructureByteStride = 0;
 

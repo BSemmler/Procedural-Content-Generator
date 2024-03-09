@@ -17,20 +17,32 @@ void KGV::Render::PipelineManagerDX11::applyState(InputAssemblerStateDX11 *iaSta
                                                   KGV::Render::ShaderStageStateDX11 *psState,
                                                   KGV::Render::OutputMergerStageStateDX11 *omState) {
 
-    if (iaState)
+    if (iaState) {
         inputAsmStage.setDesiredState(*iaState);
+        inputAsmStage.applyDesiredState(context, device);
+    } else {
 
-    if (vsState)
+    }
+
+    if (vsState) {
         vertexShaderStage.setDesiredState(*vsState);
+        vertexShaderStage.applyDesiredState(context, device);
+    }
 
-    if (vsState)
+    if (rsState) {
         rasterStage.setDesiredState(*rsState);
+        rasterStage.applyDesiredState(context, device);
+    }
 
-    if (vsState)
+    if (psState) {
         pixelShaderStage.setDesiredState(*psState);
+        pixelShaderStage.applyDesiredState(context, device);
+    }
 
-    if (vsState)
+    if (omState) {
         outputMergerStage.setDesiredState(*omState);
+        outputMergerStage.applyDesiredState(context, device);
+    }
 }
 
 void KGV::Render::PipelineManagerDX11::clearColorBuffers(DirectX::XMFLOAT4 color) {
@@ -65,6 +77,8 @@ void KGV::Render::PipelineManagerDX11::unmapResource(KGV::Render::ResourceDX11 *
 
 }
 
-KGV::Render::PipelineManagerDX11::PipelineManagerDX11(KGV::Render::RenderDeviceDX11 *device) {
-    device = device;
+KGV::Render::PipelineManagerDX11::PipelineManagerDX11(KGV::Render::RenderDeviceDX11* device, ComPtr<ID3D11DeviceContext> context, ComPtr<ID3D11DeviceContext1> context1) {
+    this->device = device;
+    this->context = context;
+    this->context1 = context1;
 }

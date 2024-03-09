@@ -1,5 +1,36 @@
 #include "ApplicationWin32.h"
 
+struct BasicVertex {
+    DirectX::XMFLOAT4 position;
+    DirectX::XMFLOAT4 color;
+};
+
+/*
+*              Triangle vertex coordinates (2D)
+*                       
+*                           x (0.0, 1.0)  
+*                         /  \
+*                        /    \
+*                       /      \
+*                      /        \
+*                     /          \
+*                    /            \
+*                   /______________\
+*     (-1.0, -1.0) x                x (1.0, -1.0)
+* 
+*/
+
+constexpr S32 gNumVertices = 3;
+const BasicVertex gTriangle[gNumVertices] = {
+        // pos(x, y z, 1)   color(r,g,b,a)
+    { DirectX::XMFLOAT4( 1.0f, -1.0f, 0.0f, 1.0f ),  DirectX::XMFLOAT4( 1.0f, 0.0f, 0.0f, 1.0f ) }, // Bottom right.
+    { DirectX::XMFLOAT4( -1.0f, -1.0f, 0.0f, 1.0f ), DirectX::XMFLOAT4( 0.0f, 1.0f, 0.0f, 1.0f ) }, // Bottom left.
+    { DirectX::XMFLOAT4( 0.0f, 1.0f, 0.0f, 1.0f ),   DirectX::XMFLOAT4( 0.0f, 0.0f, 1.0f, 1.0f ) }, // Top.
+};
+
+constexpr S32 gNumIndices = 3;
+const S32 gTriangleIndices[gNumVertices] = {1, 2, 0 }; // Clockwise order.
+
 bool KGV::System::ApplicationWin32::init() {
     WNDCLASSEX wc;
     memset( &wc, 0, sizeof( WNDCLASSEX ) );
@@ -32,6 +63,7 @@ bool KGV::System::ApplicationWin32::init() {
     auto log = spdlog::get("render");
     device = std::move(std::make_unique<Render::RenderDeviceDX11>(log));
     device->init();
+    immediateContext = device->getPipelineManager();
     spdlog::get("engine")->info("Initialization complete!");
 
     Render::SwapChainConfigDX11 swapChainConf;
@@ -41,6 +73,61 @@ bool KGV::System::ApplicationWin32::init() {
     auto swapChain = device->getSwapChainById(swapChainId);
 
     rtvId = device->createRenderTargetView(swapChain->getResource()->getResourceId(), nullptr);
+
+    vertexShaderId = device->loadShader("../KGVEngine/shaders/basicVertex.hlsl", Render::eShaderType::kVertex, false, "main", "vs_5_0");
+    pixelShaderId = device->loadShader("../KGVEngine/shaders/basicPixel.hlsl", Render::eShaderType::kPixel, false, "main", "ps_5_0");
+
+    std::vector<D3D11_INPUT_ELEMENT_DESC> inputElements = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0}
+    };
+
+    inputLayoutId = device->createInputLayout(vertexShaderId, inputElements);
+
+    Render::BufferConfigDX11 vertexBufferConf;
+    vertexBufferConf.setDefaultVertexBuffer(sizeof(BasicVertex) * gNumVertices, false);
+    ResourceData vertices = {.Data = gTriangle, .memPitch = 0, .memSlicePitch = 0};
+    vertexBufferId = device->createVertexBuffer(vertexBufferConf, vertices);
+
+    Render::BufferConfigDX11 indexBufferConf;
+    indexBufferConf.setDefaultIndexBuffer(sizeof(S32) * gNumIndices, false);
+    ResourceData indices = { .Data = gTriangleIndices, .memPitch = 0, .memSlicePitch = 0};
+    indexBufferId = device->createIndexBuffer(indexBufferConf, indices);
+    D3D11_VIEWPORT viewport;
+    viewport.Width = static_cast<FLOAT>(window1->getWidth());
+    viewport.Height = static_cast<FLOAT>(window1->getHeight()),
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+    viewport.TopLeftX = 0.0f;
+    viewport.TopLeftY = 0.0f;
+
+
+    Render::InputAssemblerStateDX11 ia;
+    ia.setInputLayout(inputLayoutId);
+    ia.setIndexBuffer(indexBufferId->getResourceId());
+    ia.setIndexFormat(DXGI_FORMAT_R32_UINT);
+    ia.setVertexBuffers({vertexBufferId->getResourceId()}, {sizeof(BasicVertex)}, {0});
+    ia.setTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    pipelineState.iaState = &ia;
+
+    Render::ShaderStageStateDX11 vs;
+    vs.setShaderId(vertexShaderId);
+    pipelineState.vsState = &vs;
+
+    Render::RasterizerStageStateDX11 rs;
+    viewPortId = device->createViewPort(viewport);
+    rs.setViewportIds({viewPortId});
+    pipelineState.rsState = &rs;
+
+    Render::ShaderStageStateDX11 ps;
+    ps.setShaderId(pixelShaderId);
+    pipelineState.psState = &ps;
+
+    Render::OutputMergerStageStateDX11 om;
+    om.setRtvIds({rtvId});
+    pipelineState.omState = &om;
+
+    immediateContext->applyState(pipelineState);
 
     return true;
 }
@@ -73,6 +160,7 @@ int KGV::System::ApplicationWin32::run() {
                 break;
         }
 
+        immediateContext->drawIndexed(gNumIndices, 0, 0);
         device->presentSwapChain(swapChainId, 0, 0);
     }
 

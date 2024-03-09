@@ -3,6 +3,7 @@
 //
 
 #include "PixelShaderStageDX11.h"
+#include "RenderDeviceDX11.h"
 #include "PixelShaderDX11.h"
 #include "ConstantBufferDX11.h"
 

@@ -3,6 +3,7 @@
 //
 
 #include "OutputMergerStageDX11.h"
+#include "RenderDeviceDX11.h"
 
 const KGV::Render::OutputMergerStageStateDX11 &KGV::Render::OutputMergerStageDX11::getCurrentState() const {
     return currentState;

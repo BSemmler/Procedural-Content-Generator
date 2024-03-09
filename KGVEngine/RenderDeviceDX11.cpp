@@ -110,7 +110,7 @@ namespace KGV::Render {
             logger->error("Failed to create D3D11 Texture2D");
 
             // Trigger a breakpoint if we're in a debug build.
-            KGV_debugBreak();
+            // KGV_debugBreak();
         }
 
         auto texture = std::make_unique<Texture2dDX11>(tex);
@@ -141,23 +141,26 @@ namespace KGV::Render {
 
     S32 RenderDeviceDX11::createSwapChain(void *hwnd, SwapChainConfigDX11 &config) {
         ComPtr<IDXGIDevice> dxgiDevice;
-        if (FAILED(device.CopyTo(dxgiDevice.GetAddressOf()))) {
-            logger->error("Failed to acquire DXGIDevice, reason: {}", GetLastError());
+
+        HRESULT hr;
+        if (FAILED(hr = device.CopyTo(dxgiDevice.GetAddressOf()))) {
+            logger->error("Failed to acquire DXGIDevice, reason: {:0X}", hr);
             return -1;
         }
 
         ComPtr<IDXGIFactory2> dxgiFactory2;
-        if (FAILED(CreateDXGIFactory2(
+        if (FAILED(hr = CreateDXGIFactory2(
                 0, __uuidof(IDXGIFactory2), reinterpret_cast<void **>(dxgiFactory2.GetAddressOf())))) {
-            logger->error("Failed to acquire DXGIFactory2 interface, reason: {}", GetLastError());
+            logger->error("Failed to acquire DXGIFactory2 interface, reason: {:0X}", hr);
             return -1;
         }
 
-        HRESULT hr;
+        
         ComPtr<IDXGISwapChain1> swapChain;
-        if (FAILED(hr = dxgiFactory2->CreateSwapChainForHwnd(device.Get(), static_cast<HWND>(hwnd), &config.getDesc(), nullptr, nullptr,
+        auto desc = config.getDesc();
+        if (FAILED(hr = dxgiFactory2->CreateSwapChainForHwnd(device.Get(), static_cast<HWND>(hwnd), &desc, nullptr, nullptr,
                                                              swapChain.GetAddressOf()))) {
-            logger->error("Failed to create DXGI swap chain, reason: {}", GetLastError());
+            logger->error("Failed to create DXGI swap chain, reason: {:0X}", hr);
             return -1;
         }
 
@@ -169,7 +172,7 @@ namespace KGV::Render {
         hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void **>(backBuffer.GetAddressOf()));
 
         if (FAILED(hr)) {
-            logger->error("Failed to get back buffer of swap chain. ({})", hr);
+            logger->error("Failed to get back buffer of swap chain. ({:0X})", hr);
             return -1;
         }
 
@@ -540,5 +543,10 @@ namespace KGV::Render {
         if (id < scissorRects.size() && id >= 0)
             return &scissorRects[id];
         return nullptr;
+    }
+
+    std::shared_ptr<PipelineManagerDX11> RenderDeviceDX11::getPipelineManager() {
+        RenderDeviceDX11* dev = this;
+        return std::make_shared<PipelineManagerDX11>(dev, context, context1);
     }
 }

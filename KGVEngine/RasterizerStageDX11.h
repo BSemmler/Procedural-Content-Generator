@@ -10,7 +10,8 @@
 #include "RasterizerStageStateDX11.h"
 
 namespace KGV::Render {
-    class RasterizerStageDX11 : public IPipelineStageDX11{
+    class IPipelineStageDX11;
+    class RasterizerStageDX11 : public IPipelineStageDX11 {
     public:
         const RasterizerStageStateDX11 &getCurrentState() const;
 
@@ -20,7 +21,6 @@ namespace KGV::Render {
 
         void setDesiredState(const RasterizerStageStateDX11 &desiredState);
 
-    private:
         void applyDesiredState(ComPtr<ID3D11DeviceContext> context, RenderDeviceDX11 *device) override;
 
     protected:

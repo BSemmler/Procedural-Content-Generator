@@ -10,6 +10,7 @@
 #include "OutputMergerStageStateDX11.h"
 
 namespace KGV::Render {
+    class IPipelineStageDX11;
     class OutputMergerStageDX11 : public IPipelineStageDX11 {
     public:
         const OutputMergerStageStateDX11 &getCurrentState() const;
@@ -20,7 +21,6 @@ namespace KGV::Render {
 
         void setDesiredState(const OutputMergerStageStateDX11 &desiredState);
 
-    private:
         void applyDesiredState(ComPtr<ID3D11DeviceContext> context, RenderDeviceDX11 *device) override;
 
     protected:

@@ -20,6 +20,8 @@ namespace KGV::Render {
 
         void setVertexBuffers(const std::vector<S32> &vertexBuffers);
 
+        void setVertexBuffers(const std::vector<S32> &vertexBuffers, const std::vector<S32> &strides, const std::vector<S32> &offsets);
+
         const std::vector<S32> &getStrides() const;
 
         void setStrides(const std::vector<S32> &strides);

@@ -16,10 +16,12 @@
 #include "RenderTargetViewDX11.h"
 #include "ShaderResourceViewDX11.h"
 #include "ShaderDX11.h"
+#include "PipelineManagerDX11.h"
 
 namespace KGV::Render {
     class ResourceViewDX11;
     class SwapChainDX11;
+    class PipelineManagerDX11;
 //    class ShaderResourceViewConfigDX11;
 //    class RenderTargetViewConfigDX11;
 
@@ -84,6 +86,8 @@ namespace KGV::Render {
         S32 createScissorRect(D3D11_RECT &rect);
 
         void presentSwapChain(S32 id, U32 syncInterval, U32 flags);
+
+        std::shared_ptr<PipelineManagerDX11> getPipelineManager();
 
     protected:
         ComPtr<ID3D11Device> device;

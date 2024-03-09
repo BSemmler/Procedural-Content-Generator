@@ -6,6 +6,7 @@
 #define ENGINE_PIPELINEMANAGERDX11_H
 
 #include "pch.h"
+#include "RenderDeviceDX11.h"
 #include "InputAssemblerStageDX11.h"
 #include "VertexShaderStageDX11.h"
 #include "PixelShaderStageDX11.h"
@@ -14,14 +15,15 @@
 #include "PipelineStateDX11.h"
 
 namespace KGV::Render {
+    class ResourceViewDX11;
     class PipelineManagerDX11 {
     public:
-        explicit PipelineManagerDX11(RenderDeviceDX11* device);
+        explicit PipelineManagerDX11(RenderDeviceDX11* device, ComPtr<ID3D11DeviceContext> context, ComPtr<ID3D11DeviceContext1> context1);
         void drawIndexed(S32 indexCount, S32 startIndex, S32 vertexOffset);
 
         void applyState(PipelineStateDX11 state);
-        void applyState(InputAssemblerStateDX11 *iaState, ShaderStageStateDX11 *vsState, RasterizerStageStateDX11 *rsState,
-                        ShaderStageStateDX11 *psState, OutputMergerStageStateDX11 *omState);
+        void applyState(InputAssemblerStateDX11 *iaState = nullptr, ShaderStageStateDX11 *vsState = nullptr, RasterizerStageStateDX11 *rsState = nullptr,
+                        ShaderStageStateDX11 *psState = nullptr, OutputMergerStageStateDX11 *omState = nullptr);
 
         void clearColorBuffers(DirectX::XMFLOAT4 color);
 

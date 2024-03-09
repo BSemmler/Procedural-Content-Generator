@@ -6,11 +6,11 @@
 #define ENGINE_VERTEXSHADERSTAGEDX11_H
 
 #include "pch.h"
-#include "RenderDeviceDX11.h"
 #include "ShaderStageStateDX11.h"
 #include "IPipelineStageDX11.h"
 
 namespace KGV::Render {
+    class IPipelineStageDX11;
     class VertexShaderStageDX11 : public IPipelineStageDX11 {
     public:
         const ShaderStageStateDX11 &getCurrentState() const;

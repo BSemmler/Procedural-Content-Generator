@@ -3,6 +3,7 @@
 //
 
 #include "InputAssemblerStageDX11.h"
+#include "RenderDeviceDX11.h"
 
 const KGV::Render::InputAssemblerStateDX11 &KGV::Render::InputAssemblerStageDX11::getCurrentState() const {
     return currentState;
@@ -33,7 +34,7 @@ void KGV::Render::InputAssemblerStageDX11::applyDesiredState(ComPtr<ID3D11Device
                                 reinterpret_cast<const UINT *>(desiredState.getOffsets().data()));
 
     auto indexBuffer = dynamic_cast<IndexBufferDX11*>(device->getResourceById(desiredState.getIndexBuffer()));
-    context->IASetIndexBuffer(dynamic_cast<ID3D11Buffer *>(indexBuffer->getResource()), desiredState.getIndexFormat(), 0);
+    context->IASetIndexBuffer(indexBuffer->getBuffer().Get(), desiredState.getIndexFormat(), 0);
 
     context->IASetPrimitiveTopology(desiredState.getTopology());
 

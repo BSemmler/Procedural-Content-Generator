@@ -14,11 +14,21 @@
 namespace KGV::Render {
     class PipelineStateDX11 {
     public:
-        InputAssemblerStateDX11* iaState;
-        ShaderStageStateDX11* vsState;
-        RasterizerStageStateDX11* rsState;
-        ShaderStageStateDX11* psState;
-        OutputMergerStageStateDX11* omState;
+        PipelineStateDX11(InputAssemblerStateDX11 *iaState = nullptr,
+                          ShaderStageStateDX11 *vsState = nullptr,
+                          RasterizerStageStateDX11 *rsState = nullptr,
+                          ShaderStageStateDX11 *psState = nullptr,
+                          OutputMergerStageStateDX11 *omState = nullptr) : iaState(iaState),
+                                                                            vsState(vsState),
+                                                                            rsState(rsState),
+                                                                            psState(psState),
+                                                                            omState(omState) {}
+
+        InputAssemblerStateDX11 *iaState;
+        ShaderStageStateDX11 *vsState;
+        RasterizerStageStateDX11 *rsState;
+        ShaderStageStateDX11 *psState;
+        OutputMergerStageStateDX11 *omState;
     };
 }
 

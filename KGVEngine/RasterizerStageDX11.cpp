@@ -3,6 +3,7 @@
 //
 
 #include "RasterizerStageDX11.h"
+#include "RenderDeviceDX11.h"
 
 const KGV::Render::RasterizerStageStateDX11 &KGV::Render::RasterizerStageDX11::getCurrentState() const {
     return currentState;

@@ -3,6 +3,7 @@
 //
 
 #include "VertexShaderStageDX11.h"
+#include "RenderDeviceDX11.h"
 #include "VertexShaderDX11.h"
 #include "ConstantBufferDX11.h"
 

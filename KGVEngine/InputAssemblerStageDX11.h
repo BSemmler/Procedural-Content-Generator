@@ -6,11 +6,12 @@
 #define ENGINE_INPUTASSEMBLERSTAGEDX11_H
 
 #include "pch.h"
-#include "RenderDeviceDX11.h"
-#include "InputAssemblerStateDX11.h"
 #include "IPipelineStageDX11.h"
+#include "InputAssemblerStateDX11.h"
+
 
 namespace KGV::Render {
+    class IPipelineStageDX11;
     class InputAssemblerStageDX11 : public IPipelineStageDX11 {
     public:
         const InputAssemblerStateDX11 &getCurrentState() const;

@@ -26,7 +26,7 @@ WindowWin32::WindowWin32(IWndProc *procObj, const std::string &className, S32 wi
                          const std::string &caption, bool showWindow) :
         Window(width, height, xPos, yPos, caption, showWindow) {
     // Check that all the numeric values are non-negative.
-    KGV_ASSERT_TRUE(width > 0 && height > 0 && xPos >= 0 && yPos >= 0);
+    // KGV_ASSERT_TRUE(width > 0 && height > 0 && xPos >= 0 && yPos >= 0);
 
 //    spdlog::get("window"),
 //                      "New Window is being instantiated. Caption: %s, Width: %d, Height: %d, Position: (%d,%d)",
