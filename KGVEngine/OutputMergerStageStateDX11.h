@@ -2,13 +2,13 @@
 // Created by Brett on 2024-03-06.
 //
 
-#ifndef ENGINE_OUTPUTMERGERSTAGESTATE_H
-#define ENGINE_OUTPUTMERGERSTAGESTATE_H
+#ifndef ENGINE_OUTPUTMERGERSTAGESTATEDX11_H
+#define ENGINE_OUTPUTMERGERSTAGESTATEDX11_H
 
 #include "pch.h"
 
 namespace KGV::Render {
-    class OutputMergerStageState {
+    class OutputMergerStageStateDX11 {
     public:
         const std::vector<S32> &getRtvIds() const;
 
@@ -22,4 +22,4 @@ namespace KGV::Render {
 
 
 
-#endif //ENGINE_OUTPUTMERGERSTAGESTATE_H
+#endif //ENGINE_OUTPUTMERGERSTAGESTATEDX11_H

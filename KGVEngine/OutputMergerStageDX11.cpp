@@ -4,19 +4,19 @@
 
 #include "OutputMergerStageDX11.h"
 
-const KGV::Render::OutputMergerStageState &KGV::Render::OutputMergerStageDX11::getCurrentState() const {
+const KGV::Render::OutputMergerStageStateDX11 &KGV::Render::OutputMergerStageDX11::getCurrentState() const {
     return currentState;
 }
 
-void KGV::Render::OutputMergerStageDX11::setCurrentState(const KGV::Render::OutputMergerStageState &currentState) {
+void KGV::Render::OutputMergerStageDX11::setCurrentState(const KGV::Render::OutputMergerStageStateDX11 &currentState) {
     OutputMergerStageDX11::currentState = currentState;
 }
 
-const KGV::Render::OutputMergerStageState &KGV::Render::OutputMergerStageDX11::getDesiredState() const {
+const KGV::Render::OutputMergerStageStateDX11 &KGV::Render::OutputMergerStageDX11::getDesiredState() const {
     return desiredState;
 }
 
-void KGV::Render::OutputMergerStageDX11::setDesiredState(const KGV::Render::OutputMergerStageState &desiredState) {
+void KGV::Render::OutputMergerStageDX11::setDesiredState(const KGV::Render::OutputMergerStageStateDX11 &desiredState) {
     OutputMergerStageDX11::desiredState = desiredState;
 }
 

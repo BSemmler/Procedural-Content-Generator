@@ -7,25 +7,25 @@
 
 #include "pch.h"
 #include "IPipelineStageDX11.h"
-#include "OutputMergerStageState.h"
+#include "OutputMergerStageStateDX11.h"
 
 namespace KGV::Render {
     class OutputMergerStageDX11 : public IPipelineStageDX11 {
     public:
-        const OutputMergerStageState &getCurrentState() const;
+        const OutputMergerStageStateDX11 &getCurrentState() const;
 
-        void setCurrentState(const OutputMergerStageState &currentState);
+        void setCurrentState(const OutputMergerStageStateDX11 &currentState);
 
-        const OutputMergerStageState &getDesiredState() const;
+        const OutputMergerStageStateDX11 &getDesiredState() const;
 
-        void setDesiredState(const OutputMergerStageState &desiredState);
+        void setDesiredState(const OutputMergerStageStateDX11 &desiredState);
 
     private:
         void applyDesiredState(ComPtr<ID3D11DeviceContext> context, RenderDeviceDX11 *device) override;
 
     protected:
-        OutputMergerStageState currentState;
-        OutputMergerStageState desiredState;
+        OutputMergerStageStateDX11 currentState;
+        OutputMergerStageStateDX11 desiredState;
     };
 }
 
