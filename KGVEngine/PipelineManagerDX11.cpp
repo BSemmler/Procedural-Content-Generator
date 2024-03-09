@@ -53,28 +53,58 @@ void KGV::Render::PipelineManagerDX11::clearColorBuffers(DirectX::XMFLOAT4 color
     }
 }
 
-void KGV::Render::PipelineManagerDX11::mapResource(S32 id, U32 subResource, D3D11_MAP actions, U32 flags) {
-
+D3D11_MAPPED_SUBRESOURCE KGV::Render::PipelineManagerDX11::mapResource(S32 id, U32 subResource, D3D11_MAP actions, U32 flags) {
+    auto r = device->getResourceById(id);
+    return mapResource(r, subResource, actions, flags);
 }
 
-void KGV::Render::PipelineManagerDX11::mapResource(KGV::Render::ResourceViewDX11 *resource, U32 subResource, D3D11_MAP actions, U32 flags) {
-
+D3D11_MAPPED_SUBRESOURCE KGV::Render::PipelineManagerDX11::mapResource(KGV::Render::ResourceViewDX11 *resource, U32 subResource, D3D11_MAP actions, U32 flags) {
+    auto r = device->getResourceById(resource->getResourceId());
+    return mapResource(r, subResource, actions, flags);
 }
 
-void KGV::Render::PipelineManagerDX11::mapResource(KGV::Render::ResourceDX11 *resource, U32 subResource, D3D11_MAP actions, U32 flags) {
+D3D11_MAPPED_SUBRESOURCE KGV::Render::PipelineManagerDX11::mapResource(KGV::Render::ResourceDX11 *resource, U32 subResource, D3D11_MAP actions, U32 flags) {
+    D3D11_MAPPED_SUBRESOURCE data;
+    data.pData = nullptr;
+    data.RowPitch = 0;
+    data.DepthPitch = 0;
 
+    // TODO: Add logging
+    if (resource == nullptr) {
+        return data;
+    }
+
+    ComPtr<ID3D11Resource> r = resource->getResource();
+    if (!r) {
+        return data;
+    }
+
+    context->Map(r.Get(), subResource, actions, flags, &data);
+    return data;
 }
 
 void KGV::Render::PipelineManagerDX11::unmapResource(S32 id, U32 subResource) {
-
+    auto r = device->getResourceById(id);
+    return unmapResource(r, subResource);
 }
 
 void KGV::Render::PipelineManagerDX11::unmapResource(KGV::Render::ResourceViewDX11 *resource, U32 subResource) {
-
+    auto r = device->getResourceById(resource->getResourceId());
+    return unmapResource(r, subResource);
 }
 
 void KGV::Render::PipelineManagerDX11::unmapResource(KGV::Render::ResourceDX11 *resource, U32 subResource) {
 
+    if (resource == nullptr) {
+        return;
+    }
+
+    ComPtr<ID3D11Resource> r = resource->getResource();
+    if (!r) {
+        return;
+    }
+
+    context->Unmap(r.Get(), subResource);
 }
 
 KGV::Render::PipelineManagerDX11::PipelineManagerDX11(KGV::Render::RenderDeviceDX11* device, ComPtr<ID3D11DeviceContext> context, ComPtr<ID3D11DeviceContext1> context1) {

@@ -27,9 +27,9 @@ namespace KGV::Render {
 
         void clearColorBuffers(DirectX::XMFLOAT4 color);
 
-        void mapResource(S32 id, U32 subResource, D3D11_MAP actions, U32 flags);
-        void mapResource(ResourceViewDX11* resource, U32 subResource, D3D11_MAP actions, U32 flags);
-        void mapResource(ResourceDX11* resource, U32 subResource, D3D11_MAP actions, U32 flags);
+        D3D11_MAPPED_SUBRESOURCE mapResource(S32 id, U32 subResource, D3D11_MAP actions, U32 flags);
+        D3D11_MAPPED_SUBRESOURCE mapResource(ResourceViewDX11* resource, U32 subResource, D3D11_MAP actions, U32 flags);
+        D3D11_MAPPED_SUBRESOURCE mapResource(ResourceDX11* resource, U32 subResource, D3D11_MAP actions, U32 flags);
 
         void unmapResource(S32 id, U32 subResource);
         void unmapResource(ResourceViewDX11* resource, U32 subResource);
