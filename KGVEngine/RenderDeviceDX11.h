@@ -41,9 +41,9 @@ namespace KGV::Render {
         std::shared_ptr<ResourceViewDX11> createTexture2D(Texture2dConfigDX11 &texConfig, ResourceData &data,
                                                            ShaderResourceViewConfigDX11 &srvConfig, RenderTargetViewConfigDX11 &rtvConfig);
 
-        std::shared_ptr<ResourceViewDX11> createVertexBuffer(BufferConfigDX11 &config, ResourceData &data);
-        std::shared_ptr<ResourceViewDX11> createIndexBuffer(BufferConfigDX11 &config, ResourceData &data);
-        std::shared_ptr<ResourceViewDX11> createConstantBuffer(BufferConfigDX11 &config, ResourceData &data);
+        std::shared_ptr<ResourceViewDX11> createVertexBuffer(BufferConfigDX11 &config, ResourceData *data);
+        std::shared_ptr<ResourceViewDX11> createIndexBuffer(BufferConfigDX11 &config, ResourceData *data);
+        std::shared_ptr<ResourceViewDX11> createConstantBuffer(BufferConfigDX11 &config, ResourceData *data);
 
 
 
