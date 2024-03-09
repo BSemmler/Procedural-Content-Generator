@@ -101,6 +101,14 @@ add_executable(Engine
         KGVEngine/RasterizerStageDX11.h
         KGVEngine/OutputMergerStageDX11.cpp
         KGVEngine/OutputMergerStageDX11.h
-        KGVEngine/PipelineStateDX11.h)
+        KGVEngine/PipelineStateDX11.h
+        KGVEngine/Entity.cpp
+        KGVEngine/Entity.h
+        KGVEngine/Mesh.cpp
+        KGVEngine/Mesh.h
+        KGVEngine/Transform.cpp
+        KGVEngine/Transform.h
+        KGVEngine/Camera.cpp
+        KGVEngine/Camera.h)
 
 target_link_libraries(Engine PRIVATE spdlog::spdlog d3d11.lib dxgi.lib d3dcompiler.lib)
