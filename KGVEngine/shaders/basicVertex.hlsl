@@ -10,10 +10,18 @@ struct psInput
     float4 color : COLOR;
 };
 
-psInput main(vsInput psi)
+cbuffer MatrixBuffer {
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+}
+
+psInput main(vsInput input)
 {
-    psInput pso;
-    pso.color = psi.color;
-    pso.position = psi.position;
-	return pso;
+    psInput output;
+    output.color = input.color;
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+	return output;
 }
