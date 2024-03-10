@@ -47,9 +47,11 @@ void KGV::Render::PipelineManagerDX11::applyState(InputAssemblerStateDX11 *iaSta
 
 void KGV::Render::PipelineManagerDX11::clearColorBuffers(DirectX::XMFLOAT4 color) {
     auto renderTargetIds = outputMergerStage.getCurrentState().getRtvIds();
+    float colorArr[] = { color.x, color.y, color.z, color.w};
+
     for (auto id : renderTargetIds) {
         // TODO: This cast feels hacky...
-        context->ClearRenderTargetView(device->getRtvById(id)->getView().Get(), static_cast<const FLOAT *>(&color.x));
+        context->ClearRenderTargetView(device->getRtvById(id)->getView().Get(), colorArr);
     }
 }
 
