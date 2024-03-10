@@ -114,3 +114,29 @@ KGV::Render::PipelineManagerDX11::PipelineManagerDX11(KGV::Render::RenderDeviceD
     this->context = context;
     this->context1 = context1;
 }
+
+void KGV::Render::PipelineManagerDX11::updateSubresource(S32 id, U32 subResource, const D3D11_BOX* pDst, const void *pSrcData, U32 rowPitch,
+                                                         U32 depthPitch) {
+    auto r = device->getResourceById(id);
+    updateSubresource(r, subResource, pDst, pSrcData, rowPitch, depthPitch);
+}
+
+void KGV::Render::PipelineManagerDX11::updateSubresource(KGV::Render::ResourceViewDX11 *resource, U32 subResource, const D3D11_BOX* pDst, const void *pSrcData, U32 rowPitch,
+                                                         U32 depthPitch) {
+    auto r = device->getResourceById(resource->getResourceId());
+    updateSubresource(r, subResource, pDst, pSrcData, rowPitch, depthPitch);
+}
+
+void KGV::Render::PipelineManagerDX11::updateSubresource(ResourceDX11* resource, U32 subResource, const D3D11_BOX* pDst, const void *pSrcData, U32 rowPitch,
+                                                         U32 depthPitch) {
+    if (!resource) {
+        return;
+    }
+
+    auto r = resource->getResource();
+    if (!r) {
+        return;
+    }
+
+    context->UpdateSubresource(r, subResource, pDst, pSrcData, rowPitch, depthPitch);
+}

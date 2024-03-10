@@ -35,6 +35,10 @@ namespace KGV::Render {
         void unmapResource(ResourceViewDX11* resource, U32 subResource);
         void unmapResource(ResourceDX11* resource, U32 subResource);
 
+        void updateSubresource(S32 id, U32 subResource, const D3D11_BOX* pDst, const void *pSrcData, U32 rowPitch, U32 depthPitch);
+        void updateSubresource(ResourceViewDX11* resource, U32 subResource, const D3D11_BOX* pDst, const void *pSrcData, U32 rowPitch, U32 depthPitch);
+        void updateSubresource(ResourceDX11* resource, U32 subResource,const D3D11_BOX* pDst, const void *pSrcData, U32 rowPitch, U32 depthPitch);
+
     protected:
         RenderDeviceDX11* device;
         ComPtr<ID3D11DeviceContext> context;
