@@ -11,8 +11,8 @@
 namespace KGV::Engine {
     class Mesh {
     public:
-        Render::ResourceViewDX11 vertexBuffer;
-        Render::ResourceViewDX11 indexBuffer;
+        std::shared_ptr<Render::ResourceViewDX11> vertexBuffer;
+        std::shared_ptr<Render::ResourceViewDX11> indexBuffer;
         S32 vertexCount;
         S32 indexCount;
         S32 offset;
