@@ -13,7 +13,7 @@ namespace KGV::Engine {
     class Entity {
     public:
         Transform transform;
-        Mesh* mesh;
+        std::shared_ptr<Mesh> mesh;
     };
 }
 
