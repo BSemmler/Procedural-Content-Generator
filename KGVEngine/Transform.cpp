@@ -4,6 +4,12 @@
 
 #include "Transform.h"
 
+KGV::Engine::Transform::Transform() {
+    position = { 0.0f, 0.0f, 0.0f, 1.0f };
+    rotation = { 0.0f, 0.0f, 0.0f, 0.0f };
+    scale = { 1.0f, 1.0f, 1.0f, 0.0f };
+}
+
 DirectX::XMMATRIX KGV::Engine::Transform::matrix() {
     const F32 c3 = cos(rotation.z);
     const F32 s3 = sin(rotation.z);

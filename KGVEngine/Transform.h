@@ -10,9 +10,11 @@
 namespace KGV::Engine {
     class Transform {
     public:
-        DirectX::XMFLOAT4A position;
-        DirectX::XMFLOAT4A rotation;
-        DirectX::XMFLOAT4A scale;
+        Transform();
+
+        DirectX::XMFLOAT4A position{};
+        DirectX::XMFLOAT4A rotation{};
+        DirectX::XMFLOAT4A scale{};
         DirectX::XMMATRIX matrix();
     };
 }
