@@ -3,6 +3,8 @@
 #include "Application.h"
 #include "WindowWin32.h"
 #include "RenderDeviceDX11.h"
+#include "Camera.h"
+#include "Entity.h"
 
 namespace KGV::System
 {
@@ -13,6 +15,7 @@ namespace KGV::System
 		bool	init()		override;
 		void	shutdown()	override;
 		int		run()		override;
+        void draw(F32 dt);
 
 		// Inherited via IWndProc
 		virtual LRESULT CALLBACK wndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam ) override;
@@ -24,11 +27,15 @@ namespace KGV::System
         S32 swapChainId;
         S32 rtvId;
         S32 inputLayoutId;
-        std::shared_ptr<Render::ResourceViewDX11> vertexBufferId;
-        std::shared_ptr<Render::ResourceViewDX11> indexBufferId;
+        std::shared_ptr<Render::ResourceViewDX11> vertexBuffer;
+        std::shared_ptr<Render::ResourceViewDX11> indexBuffer;
+        std::shared_ptr<Render::ResourceViewDX11> constantBuffer;
         S32 vertexShaderId;
         S32 pixelShaderId;
         S32 viewPortId;
+        Engine::Camera camera;
+        Engine::Entity triangle;
+        std::chrono::high_resolution_clock::time_point lastTime;
 
         Render::PipelineStateDX11 pipelineState;
 	};
