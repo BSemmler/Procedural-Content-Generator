@@ -3,6 +3,7 @@
 //
 
 #include "PipelineManagerDX11.h"
+#include "RenderDeviceDX11.h"
 
 void KGV::Render::PipelineManagerDX11::drawIndexed(S32 indexCount, S32 startIndex, S32 vertexOffset) {
     context->DrawIndexed(indexCount, startIndex, vertexOffset);

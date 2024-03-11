@@ -2,9 +2,10 @@
 #include "pch.h"
 #include "Application.h"
 #include "WindowWin32.h"
-#include "RenderDeviceDX11.h"
-#include "Camera.h"
-#include "Entity.h"
+//#include "RenderDeviceDX11.h"
+//#include "Camera.h"
+//#include "Entity.h"
+#include "SimpleRenderer.h"
 
 namespace KGV::System
 {
@@ -22,8 +23,9 @@ namespace KGV::System
 
 		std::unique_ptr<WindowWin32> window1;
 		std::unique_ptr<WindowWin32> window2;
-        std::unique_ptr<Render::RenderDeviceDX11> device;
-        std::shared_ptr<Render::PipelineManagerDX11> immediateContext;
+        std::shared_ptr<Render::RenderDeviceDX11> device;
+        std::shared_ptr<Render::PipelineManagerDX11> deviceContext;
+        std::unique_ptr<Render::SimpleRenderer> renderer;
         S32 swapChainId;
         S32 rtvId;
         S32 inputLayoutId;
@@ -33,10 +35,10 @@ namespace KGV::System
         S32 vertexShaderId;
         S32 pixelShaderId;
         S32 viewPortId;
-        Engine::Camera camera;
-        Engine::Entity triangle;
+        std::vector<std::shared_ptr<Engine::Entity>> cameras;
+        std::vector<std::shared_ptr<Engine::Entity>> entities;
+        S32 cubeMeshId;
+        S32 basicMatId;
         std::chrono::high_resolution_clock::time_point lastTime;
-
-        Render::PipelineStateDX11 pipelineState;
 	};
 }

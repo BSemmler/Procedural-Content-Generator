@@ -12,6 +12,8 @@
 
 namespace KGV::Render {
     class IPipelineStageDX11;
+//    class InputAssemblerStateDX11;
+
     class InputAssemblerStageDX11 : public IPipelineStageDX11 {
     public:
         const InputAssemblerStateDX11 &getCurrentState() const;

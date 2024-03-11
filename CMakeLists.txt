@@ -104,11 +104,19 @@ add_executable(Engine
         KGVEngine/PipelineStateDX11.h
         KGVEngine/Entity.cpp
         KGVEngine/Entity.h
-        KGVEngine/Mesh.cpp
-        KGVEngine/Mesh.h
-        KGVEngine/Transform.cpp
-        KGVEngine/Transform.h
+        KGVEngine/MeshComponent.cpp
+        KGVEngine/MeshComponent.h
+        KGVEngine/TransformComponent.cpp
+        KGVEngine/TransformComponent.h
         KGVEngine/Camera.cpp
-        KGVEngine/Camera.h)
+        KGVEngine/Camera.h
+        KGVEngine/SimpleRenderer.cpp
+        KGVEngine/SimpleRenderer.h
+        KGVEngine/RenderMesh.cpp
+        KGVEngine/RenderMesh.h
+        KGVEngine/RenderMaterial.cpp
+        KGVEngine/RenderMaterial.h
+        KGVEngine/MaterialComponent.cpp
+        KGVEngine/MaterialComponent.h)
 
 target_link_libraries(Engine PRIVATE spdlog::spdlog d3d11.lib dxgi.lib d3dcompiler.lib)

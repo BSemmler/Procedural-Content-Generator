@@ -6,7 +6,7 @@
 #define ENGINE_PIPELINEMANAGERDX11_H
 
 #include "pch.h"
-#include "RenderDeviceDX11.h"
+//#include "RenderDeviceDX11.h"
 #include "InputAssemblerStageDX11.h"
 #include "VertexShaderStageDX11.h"
 #include "PixelShaderStageDX11.h"
@@ -15,7 +15,10 @@
 #include "PipelineStateDX11.h"
 
 namespace KGV::Render {
-    class ResourceViewDX11;
+    class ResourceDX11;
+//    class ResourceViewDX11;
+
+
     class PipelineManagerDX11 {
     public:
         explicit PipelineManagerDX11(RenderDeviceDX11* device, ComPtr<ID3D11DeviceContext> context, ComPtr<ID3D11DeviceContext1> context1);

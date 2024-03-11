@@ -1,9 +1,5 @@
 #include "ApplicationWin32.h"
 using namespace DirectX;
-struct BasicVertex {
-    DirectX::XMFLOAT3 position;
-    DirectX::XMFLOAT4 color;
-};
 
 struct MatrixBufferType
 {
@@ -35,19 +31,30 @@ constexpr S32 gNumVertices = 8;
 //    { DirectX::XMFLOAT4( 0.0f, 1.0f, 0.0f, 1.0f ),   DirectX::XMFLOAT4( 0.0f, 0.0f, 1.0f, 1.0f ) }, // Top.
 //};
 
+//std::vector<KGV::Render::Vertex> gVertices = {
+//        { XMFLOAT4A(-1.0f, -1.0f, -1.0f, 1.0f) },
+//        { XMFLOAT4A(-1.0f, +1.0f, -1.0f, 1.0f) },
+//        { XMFLOAT4A(+1.0f, +1.0f, -1.0f, 1.0f) },
+//        { XMFLOAT4A(+1.0f, -1.0f, -1.0f, 1.0f) },
+//        { XMFLOAT4A(-1.0f, -1.0f, +1.0f, 1.0f) },
+//        { XMFLOAT4A(-1.0f, +1.0f, +1.0f, 1.0f) },
+//        { XMFLOAT4A(+1.0f, +1.0f, +1.0f, 1.0f) },
+//        { XMFLOAT4A(+1.0f, -1.0f, +1.0f, 1.0f) }
+//};
 
-BasicVertex gVertices[] = {
-    { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4( 1.0f, 0.0f, 0.0f, 1.0f ) },
-    { XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT4( 0.0f, 1.0f, 0.0f, 1.0f ) },
-    { XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT4( 0.0f, 0.0f, 1.0f, 1.0f ) },
-    { XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT4( 1.0f, 0.0f, 0.0f, 1.0f ) },
-    { XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT4( 0.0f, 1.0f, 0.0f, 1.0f ) },
-    { XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT4( 0.0f, 0.0f, 1.0f, 1.0f ) },
-    { XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT4( 1.0f, 0.0f, 0.0f, 1.0f ) },
-    { XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT4( 0.0f, 1.0f, 0.0f, 1.0f ) }
+
+std::vector<KGV::Render::Vertex> gVertices = {
+    { XMFLOAT4A(-1.0f, -1.0f, -1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() },
+    { XMFLOAT4A(-1.0f, +1.0f, -1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() },
+    { XMFLOAT4A(+1.0f, +1.0f, -1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() },
+    { XMFLOAT4A(+1.0f, -1.0f, -1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() },
+    { XMFLOAT4A(-1.0f, -1.0f, +1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() },
+    { XMFLOAT4A(-1.0f, +1.0f, +1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() },
+    { XMFLOAT4A(+1.0f, +1.0f, +1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() },
+    { XMFLOAT4A(+1.0f, -1.0f, +1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() }
 };
 
-U32 gIndices[] = {
+std::vector<U32> gIndices = {
 // front face
         0, 1, 2,
         0, 2, 3,
@@ -103,7 +110,9 @@ bool KGV::System::ApplicationWin32::init() {
     auto log = spdlog::get("render");
     device = std::move(std::make_unique<Render::RenderDeviceDX11>(log));
     device->init();
-    immediateContext = device->getPipelineManager();
+    deviceContext = device->getPipelineManager();
+
+    renderer = std::make_unique<Render::SimpleRenderer>(device.get(), deviceContext.get());
     spdlog::get("engine")->info("Initialization complete!");
 
     Render::SwapChainConfigDX11 swapChainConf;
@@ -118,21 +127,13 @@ bool KGV::System::ApplicationWin32::init() {
     pixelShaderId = device->loadShader("../KGVEngine/shaders/basicPixel.hlsl", Render::eShaderType::kPixel, false, "main", "ps_5_0");
 
     std::vector<D3D11_INPUT_ELEMENT_DESC> inputElements = {
-            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0}
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
 
     inputLayoutId = device->createInputLayout(vertexShaderId, inputElements);
 
-    Render::BufferConfigDX11 vertexBufferConf{};
-    vertexBufferConf.setDefaultVertexBuffer(sizeof(BasicVertex) * gNumVertices, false);
-    ResourceData vertices = {.Data = gVertices, .memPitch = 0, .memSlicePitch = 0};
-    vertexBuffer = device->createVertexBuffer(vertexBufferConf, &vertices);
-
-    Render::BufferConfigDX11 indexBufferConf{};
-    indexBufferConf.setDefaultIndexBuffer(sizeof(S32) * gNumIndices, false);
-    ResourceData indices = { .Data = gIndices, .memPitch = 0, .memSlicePitch = 0};
-    indexBuffer = device->createIndexBuffer(indexBufferConf, &indices);
     D3D11_VIEWPORT viewport;
     viewport.Width = static_cast<FLOAT>(window1->getWidth());
     viewport.Height = static_cast<FLOAT>(window1->getHeight()),
@@ -141,47 +142,43 @@ bool KGV::System::ApplicationWin32::init() {
     viewport.TopLeftX = 0.0f;
     viewport.TopLeftY = 0.0f;
 
-    triangle.mesh = std::make_shared<Engine::Mesh>();
-    triangle.mesh->vertexBuffer = vertexBuffer;
-    triangle.mesh->vertexCount = gNumVertices;
-    triangle.mesh->indexBuffer = indexBuffer;
-    triangle.mesh->indexCount = gNumIndices;
-    triangle.mesh->offset = 0;
-
-    triangle.transform.position = { 1.0f, 1.0f, 1.0f, 1.0f };
-    camera.setPerspectiveProject(90, static_cast<float>(window1->getWidth() ) / static_cast<float>(window1->getHeight()), 0.5f, 10.0f);
-
-    Render::BufferConfigDX11 constantBufferConf{};
-    constantBufferConf.setDefaultConstantBuffer(sizeof(MatrixBufferType), true);
-    constantBuffer = device->createConstantBuffer(constantBufferConf, nullptr);
-
-    Render::InputAssemblerStateDX11 ia;
-    ia.setInputLayout(inputLayoutId);
-    ia.setIndexBuffer(indexBuffer->getResourceId());
-    ia.setIndexFormat(DXGI_FORMAT_R32_UINT);
-    ia.setVertexBuffers({vertexBuffer->getResourceId()}, {sizeof(BasicVertex)}, {0});
-    ia.setTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    pipelineState.iaState = &ia;
-
-    Render::ShaderStageStateDX11 vs;
-    vs.setShaderId(vertexShaderId);
-    vs.setConstantBuffersIds({constantBuffer->getResourceId()});
-    pipelineState.vsState = &vs;
-
-    Render::RasterizerStageStateDX11 rs;
     viewPortId = device->createViewPort(viewport);
-    rs.setViewportIds({viewPortId});
-    pipelineState.rsState = &rs;
 
-    Render::ShaderStageStateDX11 ps;
-    ps.setShaderId(pixelShaderId);
-    pipelineState.psState = &ps;
+    auto camera = std::make_shared<Engine::Entity>();
+    camera->camera = std::make_unique<Engine::Camera>();
+    camera->camera->setRtvId(rtvId);
+    camera->camera->setViewPortId(viewPortId);
+    camera->camera->setPerspectiveProject(90, (float)window1->getWidth()/window1->getHeight(), 0.1, 20.0f);
+    camera->transform.position.z = -5.0f;
+    camera->camera->setIsWireframe(true);
+//    camera->transform.position.y = 5.0f;
+//    camera->transform.rotation.x = 45.0f;
 
-    Render::OutputMergerStageStateDX11 om;
-    om.setRtvIds({rtvId});
-    pipelineState.omState = &om;
+    cameras.emplace_back(camera);
 
-    immediateContext->applyState(pipelineState);
+    cubeMeshId = renderer->createMesh({gVertices}, gIndices, Render::eBufferUpdateType::kImmutable);
+    basicMatId = renderer->createMaterial(inputLayoutId, vertexShaderId, pixelShaderId);
+
+    auto cube = std::make_shared<Engine::Entity>();
+    cube->material = std::make_unique<Engine::MaterialComponent>();
+    cube->material->color = { 0.0f, 1.0f, 0.0f, 0.0f };
+
+    cube->mesh = std::make_unique<Engine::MeshComponent>();
+    cube->mesh->meshId = cubeMeshId;
+    cube->mesh->render = true;
+
+    entities.emplace_back(cube);
+
+//    triangle.mesh = std::make_shared<Engine::MeshComponent>();
+//    triangle.mesh->vertexBuffer = vertexBuffer;
+//    triangle.mesh->vertexCount = gNumVertices;
+//    triangle.mesh->indexBuffer = indexBuffer;
+//    triangle.mesh->indexCount = gNumIndices;
+//    triangle.mesh->offset = 0;
+//
+//    triangle.transform.position = { 1.0f, 1.0f, 1.0f, 1.0f };
+//    camera.setPerspectiveProject(90, static_cast<float>(window1->getWidth() ) / static_cast<float>(window1->getHeight()), 0.5f, 10.0f);
+
 
     return true;
 }
@@ -195,17 +192,6 @@ int KGV::System::ApplicationWin32::run() {
     MSG msg;
     memset(&msg, 0, sizeof(MSG));
 
-    BOOL bRet = 1;
-//    while ( ( bRet = GetMessage(&msg, 0, 0, 0 )) != 0) {
-//        if ( bRet == -1 ) {
-//            MessageBox(nullptr, "GetMessage FAILED", "Error", MB_OK );
-//            break;
-//        } else {
-//            TranslateMessage( &msg );
-//            DispatchMessage( &msg );
-//        }
-//    }
-
     lastTime = high_resolution_clock::now();
     while(msg.message != WM_QUIT) {
         if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -215,6 +201,7 @@ int KGV::System::ApplicationWin32::run() {
             if (msg.message == WM_QUIT)
                 break;
         }
+
         auto currentTime = high_resolution_clock::now();
         float dt = duration_cast<duration<double>>(currentTime - lastTime).count();
         lastTime = currentTime;
@@ -228,8 +215,8 @@ LRESULT KGV::System::ApplicationWin32::wndProc( HWND hWnd, UINT msg, WPARAM wPar
     switch ( msg ) 	
     {
     case WM_LBUTTONDOWN:
-        if (hWnd == window1->getWin32Handle() )
-            MessageBox( nullptr, "Hello, World 1", "Hello", MB_OK );
+//        if (hWnd == window1->getWin32Handle() )
+//            MessageBox( nullptr, "Hello, World 1", "Hello", MB_OK );
 //        if ( hWnd == window2->getWin32Handle() )
 //            MessageBox( nullptr, "Hello, World 2", "Hello", MB_OK );
 
@@ -258,37 +245,39 @@ LRESULT KGV::System::ApplicationWin32::wndProc( HWND hWnd, UINT msg, WPARAM wPar
 }
 
 void KGV::System::ApplicationWin32::draw(F32 dt) {
-    static float degPerSec = 5.0f;
-    spdlog::get("engine")->info("Delta time: {}", dt);
+    deviceContext->clearColorBuffers({0.0f, 0.0f, 1.0f, 1.0f});
+    renderer->renderScene(entities, cameras, dt);
 
-    immediateContext->clearColorBuffers({0.0f, 0.0f, 0.0f, 1.0f});
+//    static float degPerSec = 5.0f;
+//    spdlog::get("engine")->info("Delta time: {}", dt);
+//
 
-    triangle.transform.rotation.y = triangle.transform.rotation.y + degPerSec * dt;
-    if (triangle.transform.rotation.y > 360.0f)
-        triangle.transform.rotation.y -= 360.0f;
+//
+//    triangle.transform.rotation.y = triangle.transform.rotation.y + degPerSec * dt;
+//    if (triangle.transform.rotation.y > 360.0f)
+//        triangle.transform.rotation.y -= 360.0f;
+//
+//    spdlog::get("engine")->info("Rotation y: {}", triangle.transform.rotation.y);
+//
+//    auto world = XMMatrixIdentity();
+//    world = world * XMMatrixScalingFromVector(XMLoadFloat4(&triangle.transform.scale));
+//    world = world * XMMatrixRotationRollPitchYawFromVector(XMLoadFloat4(&triangle.transform.rotation));
+//    world = world * XMMatrixTranslationFromVector(XMLoadFloat4(&triangle.transform.position));
+//
+//    auto view = XMMatrixLookAtLH({0.0f, 0.0f, -5.0f},
+//                                 {0.0f, 0.0f, 1.0f},
+//                                 {0.0f, 1.0f, 0.0f});
+//    auto proj = XMMatrixPerspectiveFovLH(90.0f, static_cast<float>(window1->getWidth() ) / static_cast<float>(window1->getHeight()), 0.1f, 10.f);
+//    auto t = deviceContext->mapResource(constantBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0);
+//
+//    MatrixBufferType* mat;
+//    mat = (MatrixBufferType*)t.pData;
+//    mat->world = world;
+//    mat->view = view;
+//    mat->projection = proj;
+//    deviceContext->unmapResource(constantBuffer.get(), 0);
+//    deviceContext->drawIndexed(gNumIndices, 0, 0);
 
-    spdlog::get("engine")->info("Rotation y: {}", triangle.transform.rotation.y);
-
-    auto world = XMMatrixIdentity();
-    world = world * XMMatrixScalingFromVector(XMLoadFloat4(&triangle.transform.scale));
-    world = world * XMMatrixRotationRollPitchYawFromVector(XMLoadFloat4(&triangle.transform.rotation));
-    world = world * XMMatrixTranslationFromVector(XMLoadFloat4(&triangle.transform.position));
-//    world = world * XMMatrixRotationRollPitchYaw(0.0, degPerSec * dt, 0.0f);
-//        world = XMMatrixTranslation();
-
-    auto view = XMMatrixLookAtLH({0.0f, 0.0f, -5.0f},
-                                 {0.0f, 0.0f, 1.0f},
-                                 {0.0f, 1.0f, 0.0f});
-    auto proj = XMMatrixPerspectiveFovLH(90.0f, static_cast<float>(window1->getWidth() ) / static_cast<float>(window1->getHeight()), 0.1f, 10.f);
-    auto t = immediateContext->mapResource(constantBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0);
-    MatrixBufferType* mat;
-    mat = (MatrixBufferType*)t.pData;
-    mat->world = world;
-    mat->view = view;
-    mat->projection = proj;
-    immediateContext->unmapResource(constantBuffer.get(), 0);
-    immediateContext->drawIndexed(gNumIndices, 0, 0);
-
-//        immediateContext->applyState(pipelineState);
+//        deviceContext->applyState(pipelineState);
     device->presentSwapChain(swapChainId, 0, 0);
 }

@@ -16,8 +16,9 @@ const std::vector<S32> &KGV::Render::ShaderStageStateDX11::getConstantBuffersIds
     return constantBuffersIds;
 }
 
-void KGV::Render::ShaderStageStateDX11::setConstantBuffersIds(const std::vector<S32> &constantBuffersIds) {
+void KGV::Render::ShaderStageStateDX11::setConstantBuffersIds(const std::vector<S32> &constantBuffersIds,  S32 startSlot) {
     ShaderStageStateDX11::constantBuffersIds = constantBuffersIds;
+    this->cbufferStartSlot = startSlot;
 }
 
 const std::vector<S32> &KGV::Render::ShaderStageStateDX11::getSrvIds() const {
@@ -26,4 +27,12 @@ const std::vector<S32> &KGV::Render::ShaderStageStateDX11::getSrvIds() const {
 
 void KGV::Render::ShaderStageStateDX11::setSrvIds(const std::vector<S32> &srvIds) {
     ShaderStageStateDX11::srvIds = srvIds;
+}
+
+S32 KGV::Render::ShaderStageStateDX11::getCbufferStartSlot() const {
+    return cbufferStartSlot;
+}
+
+void KGV::Render::ShaderStageStateDX11::setCbufferStartSlot(S32 cbufferStartSlot) {
+    ShaderStageStateDX11::cbufferStartSlot = cbufferStartSlot;
 }

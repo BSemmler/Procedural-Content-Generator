@@ -6,10 +6,9 @@
 #define ENGINE_INPUTASSEMBLERSTATEDX11_H
 
 #include "pch.h"
-#include "VertexBufferDX11.h"
-#include "IndexBufferDX11.h"
 
 namespace KGV::Render {
+    class ResourceViewDX11;
     class InputAssemblerStateDX11 {
     public:
         static constexpr S32 maxSlots = 16;
@@ -21,6 +20,10 @@ namespace KGV::Render {
         void setVertexBuffers(const std::vector<S32> &vertexBuffers);
 
         void setVertexBuffers(const std::vector<S32> &vertexBuffers, const std::vector<S32> &strides, const std::vector<S32> &offsets);
+
+        void setVertexBuffers(const std::vector<std::shared_ptr<ResourceViewDX11>> &vertexBufferViews);
+
+        void setVertexBuffers(const std::vector<std::shared_ptr<ResourceViewDX11>> &vertexBufferViews, const std::vector<S32> &strides, const std::vector<S32> &offsets);
 
         const std::vector<S32> &getStrides() const;
 

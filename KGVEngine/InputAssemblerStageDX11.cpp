@@ -4,6 +4,9 @@
 
 #include "InputAssemblerStageDX11.h"
 #include "RenderDeviceDX11.h"
+#include "VertexBufferDX11.h"
+#include "IndexBufferDX11.h"
+
 
 const KGV::Render::InputAssemblerStateDX11 &KGV::Render::InputAssemblerStageDX11::getCurrentState() const {
     return currentState;
@@ -26,7 +29,7 @@ void KGV::Render::InputAssemblerStageDX11::applyDesiredState(ComPtr<ID3D11Device
 
     std::vector<ID3D11Buffer*> vertexBuffers;
     for (S32 id : desiredState.getVertexBuffers()) {
-        auto* buff = dynamic_cast<VertexBufferDX11 *>(device->getResourceById(id));
+        auto* buff = dynamic_cast<VertexBufferDX11*>(device->getResourceById(id));
         vertexBuffers.emplace_back(buff->getBuffer().Get());
     }
     context->IASetVertexBuffers(0, vertexBuffers.size(), vertexBuffers.data(),

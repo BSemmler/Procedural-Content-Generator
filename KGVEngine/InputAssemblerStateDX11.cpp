@@ -3,13 +3,14 @@
 //
 
 #include "InputAssemblerStateDX11.h"
+#include "ResourceViewDX11.h"
 
 const std::vector<S32> &KGV::Render::InputAssemblerStateDX11::getVertexBuffers() const {
     return vertexBuffers;
 }
 
 void KGV::Render::InputAssemblerStateDX11::setVertexBuffers(const std::vector<S32> &vertexBuffers) {
-    InputAssemblerStateDX11::vertexBuffers = vertexBuffers;
+    this->vertexBuffers = vertexBuffers;
 }
 
 const std::vector<S32> &KGV::Render::InputAssemblerStateDX11::getStrides() const {
@@ -17,7 +18,7 @@ const std::vector<S32> &KGV::Render::InputAssemblerStateDX11::getStrides() const
 }
 
 void KGV::Render::InputAssemblerStateDX11::setStrides(const std::vector<S32> &strides) {
-    InputAssemblerStateDX11::strides = strides;
+    this->strides = strides;
 }
 
 const std::vector<S32> &KGV::Render::InputAssemblerStateDX11::getOffsets() const {
@@ -25,7 +26,7 @@ const std::vector<S32> &KGV::Render::InputAssemblerStateDX11::getOffsets() const
 }
 
 void KGV::Render::InputAssemblerStateDX11::setOffsets(const std::vector<S32> &offsets) {
-    InputAssemblerStateDX11::offsets = offsets;
+    this->offsets = offsets;
 }
 
 S32 KGV::Render::InputAssemblerStateDX11::getInputLayout() const {
@@ -33,7 +34,7 @@ S32 KGV::Render::InputAssemblerStateDX11::getInputLayout() const {
 }
 
 void KGV::Render::InputAssemblerStateDX11::setInputLayout(S32 inputLayout) {
-    InputAssemblerStateDX11::inputLayout = inputLayout;
+    this->inputLayout = inputLayout;
 }
 
 S32 KGV::Render::InputAssemblerStateDX11::getIndexBuffer() const {
@@ -41,7 +42,7 @@ S32 KGV::Render::InputAssemblerStateDX11::getIndexBuffer() const {
 }
 
 void KGV::Render::InputAssemblerStateDX11::setIndexBuffer(S32 indexBuffer) {
-    InputAssemblerStateDX11::indexBuffer = indexBuffer;
+    this->indexBuffer = indexBuffer;
 }
 
 DXGI_FORMAT KGV::Render::InputAssemblerStateDX11::getIndexFormat() const {
@@ -49,7 +50,7 @@ DXGI_FORMAT KGV::Render::InputAssemblerStateDX11::getIndexFormat() const {
 }
 
 void KGV::Render::InputAssemblerStateDX11::setIndexFormat(DXGI_FORMAT indexFormat) {
-    InputAssemblerStateDX11::indexFormat = indexFormat;
+    this->indexFormat = indexFormat;
 }
 
 D3D11_PRIMITIVE_TOPOLOGY KGV::Render::InputAssemblerStateDX11::getTopology() const {
@@ -57,7 +58,7 @@ D3D11_PRIMITIVE_TOPOLOGY KGV::Render::InputAssemblerStateDX11::getTopology() con
 }
 
 void KGV::Render::InputAssemblerStateDX11::setTopology(D3D11_PRIMITIVE_TOPOLOGY topology) {
-    InputAssemblerStateDX11::topology = topology;
+    this->topology = topology;
 }
 
 S32 KGV::Render::InputAssemblerStateDX11::getAvailableSlots() const {
@@ -66,7 +67,28 @@ S32 KGV::Render::InputAssemblerStateDX11::getAvailableSlots() const {
 
 void KGV::Render::InputAssemblerStateDX11::setVertexBuffers(const std::vector<S32> &vertexBuffers, const std::vector<S32> &strides,
                                                             const std::vector<S32> &offsets) {
-    InputAssemblerStateDX11::vertexBuffers = vertexBuffers;
-    InputAssemblerStateDX11::strides = strides;
-    InputAssemblerStateDX11::offsets = offsets;
+    this->vertexBuffers = vertexBuffers;
+    this->strides = strides;
+    this->offsets = offsets;
+}
+
+void KGV::Render::InputAssemblerStateDX11::setVertexBuffers(const std::vector<std::shared_ptr<ResourceViewDX11>> &vertexBufferViews) {
+    vertexBuffers.clear();
+    strides.clear();
+    offsets.clear();
+    for (auto r : vertexBufferViews) {
+        vertexBuffers.emplace_back(r->getResourceId());
+        strides.emplace_back(0);
+        offsets.emplace_back(0);
+    }
+}
+
+void KGV::Render::InputAssemblerStateDX11::setVertexBuffers(const std::vector<std::shared_ptr<ResourceViewDX11>> &vertexBufferViews,
+                                                            const std::vector<S32> &strides, const std::vector<S32> &offsets) {
+    vertexBuffers.clear();
+    for (const auto& r : vertexBufferViews) {
+        vertexBuffers.emplace_back(r->getResourceId());
+        this->strides = strides;
+        this->offsets = offsets;
+    }
 }

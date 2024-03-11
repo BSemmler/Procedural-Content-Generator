@@ -41,5 +41,5 @@ void KGV::Render::PixelShaderStageDX11::applyDesiredState(ComPtr<ID3D11DeviceCon
         constantBuffers.emplace_back(buff->getBuffer().Get());
     }
 
-    context->PSSetConstantBuffers(0, constantBuffers.size(), constantBuffers.data());
+    context->PSSetConstantBuffers(desiredState.getCbufferStartSlot(), constantBuffers.size(), constantBuffers.data());
 }

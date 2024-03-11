@@ -19,6 +19,7 @@ namespace KGV::Render {
                 case kDefault: {
                     desc.Usage = D3D11_USAGE_DEFAULT;
                     desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+                    break;
                 }
                 default: {
                     desc.Usage = D3D11_USAGE_DEFAULT;

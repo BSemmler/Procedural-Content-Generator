@@ -6,12 +6,13 @@
 #define ENGINE_PIPELINESTATEDX11_H
 
 #include "pch.h"
-#include "InputAssemblerStateDX11.h"
-#include "ShaderStageStateDX11.h"
-#include "RasterizerStageStateDX11.h"
-#include "OutputMergerStageStateDX11.h"
 
 namespace KGV::Render {
+    class InputAssemblerStateDX11;
+    class ShaderStageStateDX11;
+    class RasterizerStageStateDX11;
+    class OutputMergerStageStateDX11;
+
     class PipelineStateDX11 {
     public:
         PipelineStateDX11(InputAssemblerStateDX11 *iaState = nullptr,

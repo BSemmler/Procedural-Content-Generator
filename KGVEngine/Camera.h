@@ -6,6 +6,7 @@
 #define ENGINE_CAMERA_H
 
 #include "pch.h"
+#include "TransformComponent.h"
 
 namespace KGV::Engine {
     class Camera {
@@ -16,12 +17,54 @@ namespace KGV::Engine {
 
         const DirectX::XMMATRIX& getProjectionMatrix();
 
+        const DirectX::XMMATRIX &getViewMatrix() const;
+
+        void setViewMatrix(const DirectX::XMMATRIX &viewMatrix);
+
+        const DirectX::XMVECTOR &getLookAt() const;
+
+        void setLookAt(const DirectX::XMVECTOR &lookAt);
+
+        const DirectX::XMVECTOR &getUp() const;
+
+        void setUp(const DirectX::XMVECTOR &up);
+
+        const DirectX::XMVECTOR &getEye() const;
+
+        void setEye(const DirectX::XMVECTOR &eye);
+
+        bool isActive() const;
+
+        void setIsActive(bool isActive);
+
+        bool isWireframe() const;
+
+        void setIsWireframe(bool isWireframe);
+
+        S32 getRtvId() const;
+
+        void setRtvId(const S32 id);
+
+        bool isOrthographic() const;
+
+        S32 getViewPortId() const;
+
+        void setViewPortId(S32 viewPortId);
+
     protected:
         DirectX::XMMATRIX projectionMatrix{DirectX::XMMatrixIdentity()};
+        DirectX::XMMATRIX viewMatrix{DirectX::XMMatrixIdentity()};
+        DirectX::XMVECTOR lookAt = { 0.0f, 0.0f, 1.0f };
+        DirectX::XMVECTOR up { 0.0f, 1.0f, 0.0f };
+        DirectX::XMVECTOR eye { 0.0f, 0.0f, 0.0f };
 //        float farPlane;
 //        float nearPlane;
 //        float fovY;
-        bool isOrthographic;
+        S32 rtvId;
+        S32 viewPortId;
+        bool m_isActive = true;
+        bool m_isOrthographic;
+        bool m_isWireframe;
     };
 }
 
