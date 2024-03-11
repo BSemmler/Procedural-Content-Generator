@@ -24,7 +24,7 @@ namespace KGV::Render {
     class SimpleRenderer {
     public:
         SimpleRenderer(Render::RenderDeviceDX11* device, Render::PipelineManagerDX11* deviceContext);
-        void renderScene(std::vector<std::shared_ptr<Engine::Entity>>& entities, std::vector<std::shared_ptr<Engine::Entity>>& cameras, F32 deltaTime);
+        void renderScene(std::vector<std::shared_ptr<Engine::Entity>>& entities, std::vector<std::shared_ptr<Engine::Entity>>& cameras, std::vector<std::shared_ptr<Engine::Entity>>* lights, F32 deltaTime);
 
         void updateMesh(S32 id, const std::vector<std::vector<Vertex>>& vertices, const std::vector<U32>& indices);
         S32 createMesh(const std::vector<std::vector<Vertex>>& vertices, std::vector<U32>& indices, eBufferUpdateType update);
@@ -39,6 +39,7 @@ namespace KGV::Render {
         std::shared_ptr<ResourceViewDX11> vsCameraConstantsBuffer;
         std::shared_ptr<ResourceViewDX11> psMaterialConstantsBuffer;
         std::shared_ptr<ResourceViewDX11> vsFrameConstantsBuffer;
+        std::shared_ptr<ResourceViewDX11> psLightConstantsBuffer;
         std::vector<RenderMaterial> materials;
         std::shared_ptr<S32> inputLayouts;
         std::shared_ptr<S32> shaders;

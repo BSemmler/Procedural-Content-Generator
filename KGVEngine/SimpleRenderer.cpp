@@ -17,6 +17,13 @@ struct MaterialConstantsDef {
     DirectX::XMFLOAT4 color;
 };
 
+struct LightConstantsDef {
+    DirectX::XMFLOAT4 color;
+    DirectX::XMFLOAT4 direction;
+    DirectX::XMFLOAT4 position;
+};
+
+
 struct FrameConstantsDef {
     F32 deltaTime;
     F32 pad1;
@@ -44,6 +51,9 @@ KGV::Render::SimpleRenderer::SimpleRenderer(Render::RenderDeviceDX11* device, Re
     cbufferConf.setDefaultConstantBuffer(sizeof(MaterialConstantsDef), eBufferUpdateType::kDynamic);
     psMaterialConstantsBuffer = device->createConstantBuffer(cbufferConf, nullptr);
 
+    cbufferConf.setDefaultConstantBuffer(sizeof(LightConstantsDef), eBufferUpdateType::kDynamic);
+    psLightConstantsBuffer = device->createConstantBuffer(cbufferConf, nullptr);
+
     D3D11_RASTERIZER_DESC rsDesc{};
     rsDesc.FillMode = D3D11_FILL_SOLID;
     rsDesc.AntialiasedLineEnable = false;
@@ -53,10 +63,22 @@ KGV::Render::SimpleRenderer::SimpleRenderer(Render::RenderDeviceDX11* device, Re
     wireFrameFillRasterState = device->createRasterizerState(rsDesc);
 }
 
-void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine::Entity>>& entities, std::vector<std::shared_ptr<Engine::Entity>>& cameras, F32 deltaTime) {
+void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine::Entity>>& entities, std::vector<std::shared_ptr<Engine::Entity>>& cameras, std::vector<std::shared_ptr<Engine::Entity>>* lights, F32 deltaTime) {
     auto frameConstants = deviceContext->mapResource(vsFrameConstantsBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0);
     memcpy(frameConstants.pData, &deltaTime, sizeof(F32));
     deviceContext->unmapResource(vsFrameConstantsBuffer.get(), 0);
+
+    LightConstantsDef lc{};
+    lc.color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    if (lights && lights->at(0)->light) {
+        auto lightEntity = lights->at(0);
+//        lc.position = XMFLOAT4(lightEntity->transform.position);
+        lc.color = lightEntity->light->color;
+    }
+
+    auto lightConstants = deviceContext->mapResource(psLightConstantsBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0);
+    memcpy(lightConstants.pData, &lc, sizeof(LightConstantsDef));
+    deviceContext->unmapResource(psLightConstantsBuffer.get(), 0);
 
     for (const auto& cameraEntity : cameras) {
         // If the entity doesn't have a cameraEntity setup then ignore, likewise if a cameraEntity is disabled.
@@ -143,7 +165,7 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
                                                vsFrameConstantsBuffer->getResourceId()});
 
                 psState.setShaderId(renderMat->pixelShaderId);
-                psState.setConstantBuffersIds({psMaterialConstantsBuffer->getResourceId()}, 3); // TODO: Define start slot enum for various cbuffer positions.
+                psState.setConstantBuffersIds({psMaterialConstantsBuffer->getResourceId(), psLightConstantsBuffer->getResourceId()}, 3); // TODO: Define start slot enum for various cbuffer positions.
 
                 changeIaState = true;
                 changeVsState = true;

@@ -75,6 +75,50 @@ std::vector<U32> gIndices = {
         4, 3, 7
 };
 
+void CalculatePerVertexNormals(std::vector<KGV::Render::Vertex>& vertices, const std::vector<unsigned int>& indices)
+{
+    // Clear normals
+    for (auto& vertex : vertices)
+    {
+        vertex.normal = { 0.0f, 0.0f, 0.0f };
+    }
+
+    // Calculate face normals and accumulate them to vertices
+    for (size_t i = 0; i < indices.size(); i += 3)
+    {
+        DirectX::XMVECTOR v0 = DirectX::XMLoadFloat4(&vertices[indices[i]].position);
+        DirectX::XMVECTOR v1 = DirectX::XMLoadFloat4(&vertices[indices[i + 1]].position);
+        DirectX::XMVECTOR v2 = DirectX::XMLoadFloat4(&vertices[indices[i + 2]].position);
+
+        DirectX::XMVECTOR faceNormal = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(DirectX::XMVectorSubtract(v1, v0), DirectX::XMVectorSubtract(v2, v0)));
+
+        for (int j = 0; j < 3; ++j)
+        {
+            DirectX::XMFLOAT3 normal;
+            DirectX::XMStoreFloat3(&normal, faceNormal);
+
+            vertices[indices[i + j]].normal.x += normal.x;
+            vertices[indices[i + j]].normal.y += normal.y;
+            vertices[indices[i + j]].normal.z += normal.z;
+        }
+    }
+
+    // Normalize accumulated normals
+    for (auto& vertex : vertices)
+    {
+        DirectX::XMVECTOR normal = DirectX::XMLoadFloat3(&vertex.normal);
+        normal = DirectX::XMVector3Normalize(normal);
+        DirectX::XMStoreFloat3(&vertex.normal, normal);
+    }
+}
+
+
+XMVECTOR CalculateFaceNormal(XMVECTOR v0, XMVECTOR v1, XMVECTOR v2) {
+    XMVECTOR edge1 = XMVectorSubtract(v1, v0);
+    XMVECTOR edge2 = XMVectorSubtract(v2, v0);
+    return XMVector3Normalize(XMVector3Cross(edge1, edge2));
+}
+
 constexpr S32 gNumIndices = 36;
 //const S32 gTriangleIndices[gNumVertices] = {1, 2, 0 }; // Clockwise order.
 
@@ -156,6 +200,7 @@ bool KGV::System::ApplicationWin32::init() {
 
     cameras.emplace_back(camera);
 
+    CalculatePerVertexNormals(gVertices, gIndices);
     cubeMeshId = renderer->createMesh({gVertices}, gIndices, Render::eBufferUpdateType::kImmutable);
     basicMatId = renderer->createMaterial(inputLayoutId, vertexShaderId, pixelShaderId);
 
@@ -246,7 +291,7 @@ LRESULT KGV::System::ApplicationWin32::wndProc( HWND hWnd, UINT msg, WPARAM wPar
 
 void KGV::System::ApplicationWin32::draw(F32 dt) {
     deviceContext->clearColorBuffers({0.0f, 0.0f, 1.0f, 1.0f});
-    renderer->renderScene(entities, cameras, dt);
+    renderer->renderScene(entities, cameras, nullptr, dt);
 
 //    static float degPerSec = 5.0f;
 //    spdlog::get("engine")->info("Delta time: {}", dt);

@@ -117,6 +117,8 @@ add_executable(Engine
         KGVEngine/RenderMaterial.cpp
         KGVEngine/RenderMaterial.h
         KGVEngine/MaterialComponent.cpp
-        KGVEngine/MaterialComponent.h)
+        KGVEngine/MaterialComponent.h
+        KGVEngine/LightComponent.cpp
+        KGVEngine/LightComponent.h)
 
 target_link_libraries(Engine PRIVATE spdlog::spdlog d3d11.lib dxgi.lib d3dcompiler.lib)

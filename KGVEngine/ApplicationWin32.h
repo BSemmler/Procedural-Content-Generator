@@ -36,6 +36,7 @@ namespace KGV::System
         S32 pixelShaderId;
         S32 viewPortId;
         std::vector<std::shared_ptr<Engine::Entity>> cameras;
+        std::vector<std::shared_ptr<Engine::Entity>> lights;
         std::vector<std::shared_ptr<Engine::Entity>> entities;
         S32 cubeMeshId;
         S32 basicMatId;

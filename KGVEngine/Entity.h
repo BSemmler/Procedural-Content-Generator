@@ -10,6 +10,7 @@
 #include "MeshComponent.h"
 #include "Camera.h"
 #include "MaterialComponent.h"
+#include "LightComponent.h"
 
 namespace KGV::Engine {
     class Entity {
@@ -18,6 +19,7 @@ namespace KGV::Engine {
         std::unique_ptr<MeshComponent> mesh;
         std::unique_ptr<MaterialComponent> material;
         std::unique_ptr<Camera> camera;
+        std::unique_ptr<LightComponent> light;
     };
 }
 

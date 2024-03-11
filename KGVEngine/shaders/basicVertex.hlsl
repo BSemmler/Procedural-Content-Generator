@@ -8,6 +8,7 @@ struct vsInput
 struct psInput
 {
     float4 position : SV_POSITION;
+    float3 normal : NORMAL;
 };
 
 cbuffer CameraConstants : register(b1) {
@@ -31,5 +32,8 @@ psInput main(vsInput input)
 //     output.position = input.position;
     output.position = mul(input.position, worldMatrix);
     output.position = mul(output.position, viewProjectionMatrix);
+
+    output.normal = input.normal;
+
 	return output;
 }

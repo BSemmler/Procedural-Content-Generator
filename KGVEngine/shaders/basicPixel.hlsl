@@ -1,6 +1,7 @@
 struct psInput
 {
     float4 position : SV_POSITION;
+    float3 normal : NORMAL;
 };
 
 // cbuffer MaterialConstants : register(b3)
@@ -9,10 +10,21 @@ struct psInput
 // };
 
 cbuffer MaterialConstants : register(b3) {
-     float4 color;
+     float4 objectColor;
 };
 
-float4 main(psInput ps) : SV_TARGET
+cbuffer LightConstants : register(b4) {
+    float4 lightColor;
+    float4 direction;
+    float4 position;
+}
+
+float4 main(psInput input) : SV_TARGET
 {
-    return color;
+    float ambientStrength = 0.2f;
+    float3 ambient = ambientStrength * lightColor;
+    float3 result = ambient * objectColor;
+//     return color;
+
+    return float4(result, 1.0f);
 }
