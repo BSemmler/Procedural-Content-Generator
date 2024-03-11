@@ -148,11 +148,11 @@ bool KGV::System::ApplicationWin32::init() {
     camera->camera = std::make_unique<Engine::Camera>();
     camera->camera->setRtvId(rtvId);
     camera->camera->setViewPortId(viewPortId);
-    camera->camera->setPerspectiveProject(90, (float)window1->getWidth()/window1->getHeight(), 0.1, 20.0f);
+    camera->camera->setPerspectiveProject(1.5708, (float)window1->getWidth()/window1->getHeight(), 0.1, 20.0f);
     camera->transform.position.z = -5.0f;
-    camera->camera->setIsWireframe(true);
-//    camera->transform.position.y = 5.0f;
-//    camera->transform.rotation.x = 45.0f;
+//    camera->camera->setIsWireframe(true);
+    camera->transform.position.y = 5.0f;
+    camera->transform.rotation.x = 45.0f;
 
     cameras.emplace_back(camera);
 

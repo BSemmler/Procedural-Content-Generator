@@ -68,15 +68,11 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
 
         // Calculate camera position and subsequently the view matrix, the projection matrix, and the view-projection matrix.
         // Finally, copy the viewProjection matrix to its constant buffer.
-        auto cameraPosTransformMat  = XMMatrixTranslationFromVector(XMLoadFloat3A(&cameraEntity->transform.position));
-        cameraPosTransformMat = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3A(&cameraEntity->transform.rotation));
-        auto eye = XMVector4Transform(cameraEntity->camera->getEye(), cameraPosTransformMat);
-        cameraEntity->camera->setEye(eye);
-//        auto view = XMMatrixLookAtLH(eye, cameraEntity->camera->getLookAt(), cameraEntity->camera->getUp());
-
-        auto view = XMMatrixLookAtLH({0.0f, 0.0f, -10.0f},
-                             {0.0f, 0.0f, 0.0f},
-                             {0.0f, 1.0f, 0.0f});
+        auto position = XMLoadFloat3A(&cameraEntity->transform.position);
+        auto rotation = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3A(&cameraEntity->transform.rotation));
+        auto forward = XMVector3Rotate(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), rotation);
+        auto up = XMVector3Rotate(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), rotation);
+        auto view = XMMatrixLookAtLH(position, XMVectorAdd(position, forward), up);
 
         auto viewProj = view * cameraEntity->camera->getProjectionMatrix();
         auto buffer = deviceContext->mapResource(vsCameraConstantsBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0);
