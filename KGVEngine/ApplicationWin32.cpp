@@ -63,8 +63,8 @@ void CalculatePerVertexNormals(std::vector<KGV::Render::Vertex>& vertices, const
         XMVECTOR n3 = XMVectorAdd(XMLoadFloat3A(&vertices[i2].normal), faceNormal);
 
         XMStoreFloat3A(&vertices[i0].normal, n1);
-        XMStoreFloat3A(&vertices[i0].normal, n2);
-        XMStoreFloat3A(&vertices[i0].normal, n3);
+        XMStoreFloat3A(&vertices[i1].normal, n2);
+        XMStoreFloat3A(&vertices[i2].normal, n3);
     }
 
     // Normalize accumulated normals
