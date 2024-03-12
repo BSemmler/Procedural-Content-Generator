@@ -1,48 +1,6 @@
 #include "ApplicationWin32.h"
 using namespace DirectX;
 
-struct MatrixBufferType
-{
-    XMMATRIX world;
-    XMMATRIX view;
-    XMMATRIX projection;
-};
-
-/*
-*              Triangle vertex coordinates (2D)
-*                       
-*                           x (0.0, 1.0)  
-*                         /  \
-*                        /    \
-*                       /      \
-*                      /        \
-*                     /          \
-*                    /            \
-*                   /______________\
-*     (-1.0, -1.0) x                x (1.0, -1.0)
-* 
-*/
-
-constexpr S32 gNumVertices = 8;
-//const BasicVertex gTriangle[gNumVertices] = {
-//        // pos(x, y z, 1)   color(r,g,b,a)
-//    { DirectX::XMFLOAT4( 1.0f, -1.0f, 0.0f, 1.0f ),  DirectX::XMFLOAT4( 1.0f, 0.0f, 0.0f, 1.0f ) }, // Bottom right.
-//    { DirectX::XMFLOAT4( -1.0f, -1.0f, 0.0f, 1.0f ), DirectX::XMFLOAT4( 0.0f, 1.0f, 0.0f, 1.0f ) }, // Bottom left.
-//    { DirectX::XMFLOAT4( 0.0f, 1.0f, 0.0f, 1.0f ),   DirectX::XMFLOAT4( 0.0f, 0.0f, 1.0f, 1.0f ) }, // Top.
-//};
-
-//std::vector<KGV::Render::Vertex> gVertices = {
-//        { XMFLOAT4A(-1.0f, -1.0f, -1.0f, 1.0f) },
-//        { XMFLOAT4A(-1.0f, +1.0f, -1.0f, 1.0f) },
-//        { XMFLOAT4A(+1.0f, +1.0f, -1.0f, 1.0f) },
-//        { XMFLOAT4A(+1.0f, -1.0f, -1.0f, 1.0f) },
-//        { XMFLOAT4A(-1.0f, -1.0f, +1.0f, 1.0f) },
-//        { XMFLOAT4A(-1.0f, +1.0f, +1.0f, 1.0f) },
-//        { XMFLOAT4A(+1.0f, +1.0f, +1.0f, 1.0f) },
-//        { XMFLOAT4A(+1.0f, -1.0f, +1.0f, 1.0f) }
-//};
-
-
 std::vector<KGV::Render::Vertex> gVertices = {
     { XMFLOAT4A(-1.0f, -1.0f, -1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() },
     { XMFLOAT4A(-1.0f, +1.0f, -1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() },
@@ -118,9 +76,6 @@ XMVECTOR CalculateFaceNormal(XMVECTOR v0, XMVECTOR v1, XMVECTOR v2) {
     XMVECTOR edge2 = XMVectorSubtract(v2, v0);
     return XMVector3Normalize(XMVector3Cross(edge1, edge2));
 }
-
-constexpr S32 gNumIndices = 36;
-//const S32 gTriangleIndices[gNumVertices] = {1, 2, 0 }; // Clockwise order.
 
 bool KGV::System::ApplicationWin32::init() {
     WNDCLASSEX wc;
@@ -232,17 +187,6 @@ bool KGV::System::ApplicationWin32::init() {
     entities.emplace_back(cube);
     lights.emplace_back(cube);
 
-//    triangle.mesh = std::make_shared<Engine::MeshComponent>();
-//    triangle.mesh->vertexBuffer = vertexBuffer;
-//    triangle.mesh->vertexCount = gNumVertices;
-//    triangle.mesh->indexBuffer = indexBuffer;
-//    triangle.mesh->indexCount = gNumIndices;
-//    triangle.mesh->offset = 0;
-//
-//    triangle.transform.position = { 1.0f, 1.0f, 1.0f, 1.0f };
-//    camera.setPerspectiveProject(90, static_cast<float>(window1->getWidth() ) / static_cast<float>(window1->getHeight()), 0.5f, 10.0f);
-
-
     return true;
 }
 
@@ -278,12 +222,7 @@ LRESULT KGV::System::ApplicationWin32::wndProc( HWND hWnd, UINT msg, WPARAM wPar
     switch ( msg ) 	
     {
     case WM_LBUTTONDOWN:
-//        if (hWnd == window1->getWin32Handle() )
-//            MessageBox( nullptr, "Hello, World 1", "Hello", MB_OK );
-//        if ( hWnd == window2->getWin32Handle() )
-//            MessageBox( nullptr, "Hello, World 2", "Hello", MB_OK );
-
-
+        break;
     case WM_KEYDOWN:
         if ( wParam == VK_ESCAPE ) {
             DestroyWindow( hWnd );
@@ -314,40 +253,14 @@ float cumalitiveTime = 0;
 void KGV::System::ApplicationWin32::draw(F32 dt) {
     deviceContext->clearColorBuffers({0.1f, 0.1f, 0.1f, 1.0f});
     renderer->renderScene(entities, cameras, &lights, dt);
+    constexpr float degPerSec = 1.0f;
 
-    static constexpr float degPerSec = 1.0f;
-//    spdlog::get("engine")->info("Delta time: {}", dt);
-//
-
-//
 //    entities[0]->transform.rotation.y = entities[0]->transform.rotation.y + degPerSec * dt;
     if (entities[0]->transform.rotation.y > 360.0f)
         entities[0]->transform.rotation.y -= 360.0f;
     else if (entities[0]->transform.rotation.y < 0)
         entities[0]->transform.rotation.y += 360.0f;
-//
-//    spdlog::get("engine")->info("Rotation y: {}", triangle.transform.rotation.y);
-//
-//    auto world = XMMatrixIdentity();
-//    world = world * XMMatrixScalingFromVector(XMLoadFloat4(&triangle.transform.scale));
-//    world = world * XMMatrixRotationRollPitchYawFromVector(XMLoadFloat4(&triangle.transform.rotation));
-//    world = world * XMMatrixTranslationFromVector(XMLoadFloat4(&triangle.transform.position));
-//
-//    auto view = XMMatrixLookAtLH({0.0f, 0.0f, -5.0f},
-//                                 {0.0f, 0.0f, 1.0f},
-//                                 {0.0f, 1.0f, 0.0f});
-//    auto proj = XMMatrixPerspectiveFovLH(90.0f, static_cast<float>(window1->getWidth() ) / static_cast<float>(window1->getHeight()), 0.1f, 10.f);
-//    auto t = deviceContext->mapResource(constantBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0);
-//
-//    MatrixBufferType* mat;
-//    mat = (MatrixBufferType*)t.pData;
-//    mat->world = world;
-//    mat->view = view;
-//    mat->projection = proj;
-//    deviceContext->unmapResource(constantBuffer.get(), 0);
-//    deviceContext->drawIndexed(gNumIndices, 0, 0);
 
-//        deviceContext->applyState(pipelineState);
     device->presentSwapChain(swapChainId, 0, 0);
     gAvgFps = (1/dt + gAvgFps) / 2;
     gAvgFrameTime = (dt + gAvgFrameTime) / 2;
