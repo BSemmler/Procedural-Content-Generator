@@ -228,6 +228,11 @@ LRESULT KGV::System::ApplicationWin32::wndProc( HWND hWnd, UINT msg, WPARAM wPar
             DestroyWindow( hWnd );
             spdlog::get("engine")->info("Escape Key Pressed, exiting.", wParam);
         }
+
+        if (wParam == 0x5a)  { // Z key
+            cameras[0]->camera->setIsWireframe(!cameras[0]->camera->isWireframe());
+        }
+
         spdlog::get("engine")->info("Keydown, Keycode: {}", wParam);
         break;
     case WM_DESTROY:
