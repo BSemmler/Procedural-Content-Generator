@@ -12,6 +12,9 @@ struct psInput
 
 cbuffer MaterialConstants : register(b3) {
      float4 objectColor;
+     float4 ambient;
+     float4 diffuse;
+     float4 specular;
 };
 
 cbuffer LightConstants : register(b4) {

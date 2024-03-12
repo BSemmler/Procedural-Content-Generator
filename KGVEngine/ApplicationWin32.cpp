@@ -41,24 +41,30 @@ void CalculatePerVertexNormals(std::vector<KGV::Render::Vertex>& vertices, const
         vertex.normal = { 0.0f, 0.0f, 0.0f };
     }
 
+    constexpr int vertsPerTriangle = 3;
+
     // Calculate face normals and accumulate them to vertices
-    for (size_t i = 0; i < indices.size(); i += 3)
+    for (size_t i = 0; i < indices.size() / vertsPerTriangle; i += 3)
     {
-        DirectX::XMVECTOR v0 = DirectX::XMLoadFloat4(&vertices[indices[i]].position);
-        DirectX::XMVECTOR v1 = DirectX::XMLoadFloat4(&vertices[indices[i + 1]].position);
-        DirectX::XMVECTOR v2 = DirectX::XMLoadFloat4(&vertices[indices[i + 2]].position);
+        U32 i0 = indices[i * vertsPerTriangle + 0];
+        U32 i1 = indices[i * vertsPerTriangle + 1];
+        U32 i2 = indices[i * vertsPerTriangle + 2];
 
-        DirectX::XMVECTOR faceNormal = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(DirectX::XMVectorSubtract(v1, v0), DirectX::XMVectorSubtract(v2, v0)));
+        DirectX::XMVECTOR v0 = DirectX::XMLoadFloat4(&vertices[i0].position);
+        DirectX::XMVECTOR v1 = DirectX::XMLoadFloat4(&vertices[i1].position);
+        DirectX::XMVECTOR v2 = DirectX::XMLoadFloat4(&vertices[i2].position);
 
-        for (int j = 0; j < 3; ++j)
-        {
-            DirectX::XMFLOAT3 normal;
-            DirectX::XMStoreFloat3(&normal, faceNormal);
+        XMVECTOR e0 = DirectX::XMVectorSubtract(v1, v0);
+        XMVECTOR e1 = DirectX::XMVectorSubtract(v2, v0);
+        XMVECTOR faceNormal = DirectX::XMVector3Cross(e0, e1);
 
-            vertices[indices[i + j]].normal.x += normal.x;
-            vertices[indices[i + j]].normal.y += normal.y;
-            vertices[indices[i + j]].normal.z += normal.z;
-        }
+        XMVECTOR n1 = XMVectorAdd(XMLoadFloat3A(&vertices[i0].normal), faceNormal);
+        XMVECTOR n2 = XMVectorAdd(XMLoadFloat3A(&vertices[i1].normal), faceNormal);
+        XMVECTOR n3 = XMVectorAdd(XMLoadFloat3A(&vertices[i2].normal), faceNormal);
+
+        XMStoreFloat3A(&vertices[i0].normal, n1);
+        XMStoreFloat3A(&vertices[i0].normal, n2);
+        XMStoreFloat3A(&vertices[i0].normal, n3);
     }
 
     // Normalize accumulated normals
@@ -67,14 +73,8 @@ void CalculatePerVertexNormals(std::vector<KGV::Render::Vertex>& vertices, const
         DirectX::XMVECTOR normal = DirectX::XMLoadFloat3(&vertex.normal);
         normal = DirectX::XMVector3Normalize(normal);
         DirectX::XMStoreFloat3(&vertex.normal, normal);
+        spdlog::info("Vertex normals: {} {} {}", vertex.normal.x, vertex.normal.y, vertex.normal.z);
     }
-}
-
-
-XMVECTOR CalculateFaceNormal(XMVECTOR v0, XMVECTOR v1, XMVECTOR v2) {
-    XMVECTOR edge1 = XMVectorSubtract(v1, v0);
-    XMVECTOR edge2 = XMVectorSubtract(v2, v0);
-    return XMVector3Normalize(XMVector3Cross(edge1, edge2));
 }
 
 bool KGV::System::ApplicationWin32::init() {
@@ -258,13 +258,22 @@ float cumalitiveTime = 0;
 void KGV::System::ApplicationWin32::draw(F32 dt) {
     deviceContext->clearColorBuffers({0.1f, 0.1f, 0.1f, 1.0f});
     renderer->renderScene(entities, cameras, &lights, dt);
-    constexpr float degPerSec = 1.0f;
+//    constexpr float degPerSec = 20.0f;
+//
+//    auto cameraRotate = XMMatrixRotationY(XMConvertToRadians(degPerSec * dt));
+//    auto camForward = XMVector4Transform(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), cameraRotate);
+////    auto orbit = cameraRotate * XMMatrixTranslation(0, 0, -5);
+//
+//    auto camPos = XMLoadFloat3A(&cameras[0]->transform.position);
+//    auto newPos = XMVector3Transform(camPos, cameraRotate);
+////    auto toOrigin = XMVector4Dot(XMVector4Normalize(cameraForward), { 0, 0, 0, 0});
 
-//    entities[0]->transform.rotation.y = entities[0]->transform.rotation.y + degPerSec * dt;
-    if (entities[0]->transform.rotation.y > 360.0f)
-        entities[0]->transform.rotation.y -= 360.0f;
-    else if (entities[0]->transform.rotation.y < 0)
-        entities[0]->transform.rotation.y += 360.0f;
+//     XMStoreFloat3(&cameras[0]->transform.position, newPos);
+//    cameras[0]->transform.rotation.y += degPerSec * dt;
+    if (cameras[0]->transform.rotation.y > 360.0f)
+        cameras[0]->transform.rotation.y -= 360.0f;
+    else if (cameras[0]->transform.rotation.y < 0)
+        cameras[0]->transform.rotation.y += 360.0f;
 
     device->presentSwapChain(swapChainId, 0, 0);
     gAvgFps = (1/dt + gAvgFps) / 2;
