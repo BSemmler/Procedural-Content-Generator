@@ -19,8 +19,8 @@ struct MaterialConstantsDef {
 
 struct LightConstantsDef {
     DirectX::XMFLOAT4 color;
-    DirectX::XMFLOAT4 direction;
-    DirectX::XMFLOAT4 position;
+    DirectX::XMVECTOR position;
+    DirectX::XMVECTOR lightDir;
 };
 
 
@@ -57,7 +57,7 @@ KGV::Render::SimpleRenderer::SimpleRenderer(Render::RenderDeviceDX11* device, Re
     D3D11_RASTERIZER_DESC rsDesc{};
     rsDesc.FillMode = D3D11_FILL_SOLID;
     rsDesc.AntialiasedLineEnable = false;
-    rsDesc.CullMode = D3D11_CULL_NONE;
+    rsDesc.CullMode = D3D11_CULL_BACK;
     solidFillRasterState = device->createRasterizerState(rsDesc);
     rsDesc.FillMode = D3D11_FILL_WIREFRAME;
     wireFrameFillRasterState = device->createRasterizerState(rsDesc);
@@ -69,11 +69,15 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
     deviceContext->unmapResource(vsFrameConstantsBuffer.get(), 0);
 
     LightConstantsDef lc{};
-    lc.color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    lc.color = { 0.5f, 0.5f, 0.5f, 1.0f };
+    lc.position = { 0.0f, 0.0f, 0.0f, 1.0f };
     if (lights && lights->at(0)->light) {
         auto lightEntity = lights->at(0);
-//        lc.position = XMFLOAT4(lightEntity->transform.position);
+        lc.position = XMLoadFloat3A(&lightEntity->transform.position);
+        lc.position.m128_f32[3] = 1.0f;
         lc.color = lightEntity->light->color;
+//        lc.lightDir = { 1.0, -1.0, 0.0f, 0.0f};
+//        lc.lightDir = XMVector4Normalize(lc.lightDir);
     }
 
     auto lightConstants = deviceContext->mapResource(psLightConstantsBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0);

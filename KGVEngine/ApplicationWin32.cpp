@@ -192,11 +192,13 @@ bool KGV::System::ApplicationWin32::init() {
     camera->camera = std::make_unique<Engine::Camera>();
     camera->camera->setRtvId(rtvId);
     camera->camera->setViewPortId(viewPortId);
-    camera->camera->setPerspectiveProject(1.5708, (float)window1->getWidth()/window1->getHeight(), 0.1, 20.0f);
-    camera->transform.position.z = -5.0f;
+    camera->camera->setPerspectiveProject(XMConvertToRadians(70), (float)window1->getWidth()/(float)window1->getHeight(), 0.1, 100.0f);
+    camera->transform.position.z = -3.0f;
+    camera->transform.position.x = 0;
 //    camera->camera->setIsWireframe(true);
-    camera->transform.position.y = 5.0f;
-    camera->transform.rotation.x = 45.0f;
+    camera->transform.position.y = 2;
+    camera->transform.rotation.x = XMConvertToRadians(30);
+//    camera->transform.rotation.y = XMConvertToRadians(30.0f);
 
     cameras.emplace_back(camera);
 
@@ -206,13 +208,29 @@ bool KGV::System::ApplicationWin32::init() {
 
     auto cube = std::make_shared<Engine::Entity>();
     cube->material = std::make_unique<Engine::MaterialComponent>();
-    cube->material->color = { 0.0f, 1.0f, 0.0f, 0.0f };
+    cube->material->color = { 1.0f, 0.5f, 0.31f, 1.0f };
 
     cube->mesh = std::make_unique<Engine::MeshComponent>();
     cube->mesh->meshId = cubeMeshId;
     cube->mesh->render = true;
+    cube->transform.scale = { 0.5f, 0.5f, 0.5 };
 
     entities.emplace_back(cube);
+
+    cube = std::make_shared<Engine::Entity>();
+    cube->material = std::make_unique<Engine::MaterialComponent>();
+    cube->material->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+    cube->mesh = std::make_unique<Engine::MeshComponent>();
+    cube->mesh->meshId = cubeMeshId;
+    cube->mesh->render = true;
+    cube->transform.position = { 1.2f, 1.0f, -1.0f };
+    cube->transform.scale = { 0.25f, 0.25f, 0.25 };
+    cube->light = std::make_unique<Engine::LightComponent>();
+    cube->light->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+    entities.emplace_back(cube);
+    lights.emplace_back(cube);
 
 //    triangle.mesh = std::make_shared<Engine::MeshComponent>();
 //    triangle.mesh->vertexBuffer = vertexBuffer;
@@ -289,18 +307,24 @@ LRESULT KGV::System::ApplicationWin32::wndProc( HWND hWnd, UINT msg, WPARAM wPar
     return DefWindowProc( hWnd, msg, wParam, lParam );
 }
 
-void KGV::System::ApplicationWin32::draw(F32 dt) {
-    deviceContext->clearColorBuffers({0.0f, 0.0f, 1.0f, 1.0f});
-    renderer->renderScene(entities, cameras, nullptr, dt);
+int gAvgFps = 0;
+float gAvgFrameTime = 0;
+float cumalitiveTime = 0;
 
-//    static float degPerSec = 5.0f;
+void KGV::System::ApplicationWin32::draw(F32 dt) {
+    deviceContext->clearColorBuffers({0.1f, 0.1f, 0.1f, 1.0f});
+    renderer->renderScene(entities, cameras, &lights, dt);
+
+    static constexpr float degPerSec = 1.0f;
 //    spdlog::get("engine")->info("Delta time: {}", dt);
 //
 
 //
-//    triangle.transform.rotation.y = triangle.transform.rotation.y + degPerSec * dt;
-//    if (triangle.transform.rotation.y > 360.0f)
-//        triangle.transform.rotation.y -= 360.0f;
+//    entities[0]->transform.rotation.y = entities[0]->transform.rotation.y + degPerSec * dt;
+    if (entities[0]->transform.rotation.y > 360.0f)
+        entities[0]->transform.rotation.y -= 360.0f;
+    else if (entities[0]->transform.rotation.y < 0)
+        entities[0]->transform.rotation.y += 360.0f;
 //
 //    spdlog::get("engine")->info("Rotation y: {}", triangle.transform.rotation.y);
 //
@@ -325,4 +349,12 @@ void KGV::System::ApplicationWin32::draw(F32 dt) {
 
 //        deviceContext->applyState(pipelineState);
     device->presentSwapChain(swapChainId, 0, 0);
+    gAvgFps = (1/dt + gAvgFps) / 2;
+    gAvgFrameTime = (dt + gAvgFrameTime) / 2;
+    cumalitiveTime += dt;
+
+    if (cumalitiveTime > 0.25f) {
+        window1->setWindowCaption(fmt::format("Frame rate: {:d}, Frame time: {:.3f}", gAvgFps, gAvgFrameTime));
+        cumalitiveTime = 0.0f;
+    }
 }

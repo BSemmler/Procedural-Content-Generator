@@ -8,6 +8,7 @@ struct vsInput
 struct psInput
 {
     float4 position : SV_POSITION;
+    float4 worldPosition : WORLD_POSITION;
     float3 normal : NORMAL;
 };
 
@@ -30,10 +31,10 @@ psInput main(vsInput input)
 {
     psInput output;
 //     output.position = input.position;
-    output.position = mul(input.position, worldMatrix);
-    output.position = mul(output.position, viewProjectionMatrix);
+    output.worldPosition = mul(input.position, worldMatrix);
+    output.position = mul(output.worldPosition, viewProjectionMatrix);
 
-    output.normal = input.normal;
+    output.normal = mul(input.normal, worldMatrix);
 
 	return output;
 }
