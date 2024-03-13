@@ -44,7 +44,7 @@ void CalculatePerVertexNormals(std::vector<KGV::Render::Vertex>& vertices, const
     constexpr int vertsPerTriangle = 3;
 
     // Calculate face normals and accumulate them to vertices
-    for (size_t i = 0; i < indices.size() / vertsPerTriangle; i += 3)
+    for (size_t i = 0; i < indices.size() / vertsPerTriangle; i++)
     {
         U32 i0 = indices[i * vertsPerTriangle + 0];
         U32 i1 = indices[i * vertsPerTriangle + 1];
