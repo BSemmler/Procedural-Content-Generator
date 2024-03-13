@@ -5,32 +5,73 @@
 #include "SimpleRenderer.h"
 using namespace DirectX;
 
+struct DirectionalLight {
+    DirectX::XMFLOAT4A ambient;
+    DirectX::XMFLOAT4A diffuse;
+    DirectX::XMFLOAT4A specular;
+    DirectX::XMFLOAT3A direction;
+};
+
+struct PointLight {
+    DirectX::XMFLOAT4A ambient;
+    DirectX::XMFLOAT4A diffuse;
+    DirectX::XMFLOAT4A specular;
+    DirectX::XMFLOAT3 position;
+    float range;
+    DirectX::XMFLOAT3A attenuation;
+};
+
+struct SpotLight {
+    DirectX::XMFLOAT4A ambient;
+    DirectX::XMFLOAT4A diffuse;
+    DirectX::XMFLOAT4A specular;
+
+    DirectX::XMFLOAT3 position;
+    float range;
+
+    DirectX::XMFLOAT3 direction;
+    float spot;
+
+    DirectX::XMFLOAT3A attenuation;
+};
+
 struct ObjectConstantsDef {
     DirectX::XMMATRIX worldMatrix;
+    DirectX::XMMATRIX worldInvTranspose;
 };
 
 struct CameraConstantsDef {
     DirectX::XMMATRIX viewProjectionMatrix;
+    DirectX::XMVECTOR cameraPos;
 };
 
 struct MaterialConstantsDef {
-    DirectX::XMFLOAT4 color;
+    DirectX::XMFLOAT4A ambient;
+    DirectX::XMFLOAT4A diffuse;
+    DirectX::XMFLOAT4A specular;
 };
 
-struct LightConstantsDef {
-    DirectX::XMFLOAT4 color;
-    DirectX::XMVECTOR position;
-    DirectX::XMVECTOR lightDir;
-};
-
+//struct LightConstantsDef {
+//    DirectX::XMFLOAT4A color;
+//    DirectX::XMFLOAT4A position;
+//    DirectX::XMFLOAT4A lightDir;
+//};
 
 struct FrameConstantsDef {
+    DirectionalLight directionalLight;
     F32 deltaTime;
     F32 pad1;
     F32 pad2;
     F32 pad3;
 };
 
+XMMATRIX InverseTranspose(CXMMATRIX M) {
+    auto A = M;
+    A.r[3] = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+
+    XMVECTOR det = XMMatrixDeterminant(A);
+    return XMMatrixTranspose(XMMatrixInverse(&det, A));
+}
 
 KGV::Render::SimpleRenderer::SimpleRenderer(Render::RenderDeviceDX11* device, Render::PipelineManagerDX11* deviceContext) {
     this->device = device;
@@ -51,8 +92,8 @@ KGV::Render::SimpleRenderer::SimpleRenderer(Render::RenderDeviceDX11* device, Re
     cbufferConf.setDefaultConstantBuffer(sizeof(MaterialConstantsDef), eBufferUpdateType::kDynamic);
     psMaterialConstantsBuffer = device->createConstantBuffer(cbufferConf, nullptr);
 
-    cbufferConf.setDefaultConstantBuffer(sizeof(LightConstantsDef), eBufferUpdateType::kDynamic);
-    psLightConstantsBuffer = device->createConstantBuffer(cbufferConf, nullptr);
+//    cbufferConf.setDefaultConstantBuffer(sizeof(LightConstantsDef), eBufferUpdateType::kDynamic);
+//    psLightConstantsBuffer = device->createConstantBuffer(cbufferConf, nullptr);
 
     D3D11_RASTERIZER_DESC rsDesc{};
     rsDesc.FillMode = D3D11_FILL_SOLID;
@@ -64,25 +105,36 @@ KGV::Render::SimpleRenderer::SimpleRenderer(Render::RenderDeviceDX11* device, Re
 }
 
 void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine::Entity>>& entities, std::vector<std::shared_ptr<Engine::Entity>>& cameras, std::vector<std::shared_ptr<Engine::Entity>>* lights, F32 deltaTime) {
+    FrameConstantsDef fcd{};
+    fcd.deltaTime = deltaTime;
+    auto lightEntity = (*lights)[0];
+    auto light = lightEntity->light.get();
+    fcd.directionalLight.ambient = light->ambient;
+    fcd.directionalLight.diffuse = light->diffuse;
+    fcd.directionalLight.specular = light->specular;
+
+    // Calculate direction of the light.
+    auto lightRotation = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3A(&lightEntity->transform.rotation));
+    XMStoreFloat3(&fcd.directionalLight.direction, XMVector3Rotate(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), lightRotation));
+
+
     auto frameConstants = deviceContext->mapResource(vsFrameConstantsBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0);
-    memcpy(frameConstants.pData, &deltaTime, sizeof(F32));
+    memcpy(frameConstants.pData, &fcd, sizeof(FrameConstantsDef));
     deviceContext->unmapResource(vsFrameConstantsBuffer.get(), 0);
 
-    LightConstantsDef lc{};
-    lc.color = { 0.5f, 0.5f, 0.5f, 1.0f };
-    lc.position = { 0.0f, 0.0f, 0.0f, 1.0f };
-    if (lights && lights->at(0)->light) {
-        auto lightEntity = lights->at(0);
-        lc.position = XMLoadFloat3A(&lightEntity->transform.position);
-        lc.position.m128_f32[3] = 1.0f;
-        lc.color = lightEntity->light->color;
-//        lc.lightDir = { 1.0, -1.0, 0.0f, 0.0f};
-//        lc.lightDir = XMVector4Normalize(lc.lightDir);
-    }
+//    LightConstantsDef lc{};
+//    lc.ambient = { 0.5f, 0.5f, 0.5f, 1.0f };
+//    lc.position = { 0.0f, 0.0f, 0.0f, 1.0f };
+//    if (lights && lights->at(0)->light) {
+//        auto lightEntity = lights->at(0);
+//        lc.position = XMLoadFloat3A(&lightEntity->transform.position);
+//        lc.position.m128_f32[3] = 1.0f;
+//        lc.color = lightEntity->light->ambient;
+//    }
 
-    auto lightConstants = deviceContext->mapResource(psLightConstantsBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0);
-    memcpy(lightConstants.pData, &lc, sizeof(LightConstantsDef));
-    deviceContext->unmapResource(psLightConstantsBuffer.get(), 0);
+//    auto lightConstants = deviceContext->mapResource(psLightConstantsBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0);
+//    memcpy(lightConstants.pData, &lc, sizeof(LightConstantsDef));
+//    deviceContext->unmapResource(psLightConstantsBuffer.get(), 0);
 
     for (const auto& cameraEntity : cameras) {
         // If the entity doesn't have a cameraEntity setup then ignore, likewise if a cameraEntity is disabled.
@@ -92,19 +144,22 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
             continue;
         }
 
-        // Calculate camera position and subsequently the view matrix, the projection matrix, and the view-projection matrix.
-        // Finally, copy the viewProjection matrix to its constant buffer.
-        auto position = XMLoadFloat3A(&cameraEntity->transform.position);
-        auto rotation = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3A(&cameraEntity->transform.rotation));
-        auto forward = XMVector3Rotate(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), rotation);
-        auto up = XMVector3Rotate(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), rotation);
-        auto view = XMMatrixLookAtLH(position, XMVectorAdd(position, forward), up);
+        // Calculate camera camPos and subsequently the view matrix, the projection matrix, and the view-projection matrix.
+        // Finally, copy the viewProjection matrix to its constant cameraConstantsBuff.
+        auto camPos = XMLoadFloat3A(&cameraEntity->transform.position);
+        auto camRotation = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3A(&cameraEntity->transform.rotation));
+        auto camForward = XMVector3Rotate(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), camRotation);
+        auto camUp = XMVector3Rotate(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), camRotation);
+        auto view = XMMatrixLookAtLH(camPos, XMVectorAdd(camPos, camForward), camUp);
 
         auto viewProj = view * cameraEntity->camera->getProjectionMatrix();
-        auto buffer = deviceContext->mapResource(vsCameraConstantsBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0);
-        memcpy(buffer.pData, &viewProj, sizeof(XMMATRIX));
-        deviceContext->unmapResource(vsCameraConstantsBuffer.get(), 0);
+        auto cameraConstantsBuff = deviceContext->mapResource(vsCameraConstantsBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0);
 
+        CameraConstantsDef ccd;
+        ccd.cameraPos = camPos;
+        ccd.viewProjectionMatrix = viewProj;
+        memcpy(cameraConstantsBuff.pData, &ccd, sizeof(CameraConstantsDef));
+        deviceContext->unmapResource(vsCameraConstantsBuffer.get(), 0);
 
         RasterizerStageStateDX11 rsState;
         rsState.setViewportIds({cameraEntity->camera->getViewPortId()});
@@ -119,15 +174,16 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
         for (auto entity : entities) {
             auto mesh = entity->mesh.get();
             auto material = entity->material.get();
-            if (!mesh || !material) {
-                continue;
-            } else if (!mesh->render) {
+            if (!mesh || !material || !mesh->render) {
                 continue;
             }
 
-            auto world = entity->transform.matrix();
+            ObjectConstantsDef ocd{};
+            ocd.worldMatrix = entity->transform.matrix();
+            ocd.worldInvTranspose = InverseTranspose(ocd.worldMatrix);
+
             auto objectConstants =deviceContext->mapResource(vsObjectConstantsBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0);
-            memcpy(objectConstants.pData, &world, sizeof(XMMATRIX));
+            memcpy(objectConstants.pData, &ocd, sizeof(ObjectConstantsDef));
             deviceContext->unmapResource(vsObjectConstantsBuffer.get(), 0);
 
             // TODO: Move this logic of keep unchanged state elements to the individual stages.
@@ -151,7 +207,11 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
             }
 
             auto materialConstants = deviceContext->mapResource(psMaterialConstantsBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0);
-            memcpy(materialConstants.pData, &material->color, sizeof(XMVECTOR));
+            MaterialConstantsDef mcd{};
+            mcd.ambient = entity->material->ambient;
+            mcd.diffuse = entity->material->diffuse;
+            mcd.specular = entity->material->specular;
+            memcpy(materialConstants.pData, &mcd, sizeof(MaterialConstantsDef));
             deviceContext->unmapResource(psMaterialConstantsBuffer.get(), 0);
 
             bool changeVsState = false;
@@ -169,7 +229,10 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
                                                vsFrameConstantsBuffer->getResourceId()});
 
                 psState.setShaderId(renderMat->pixelShaderId);
-                psState.setConstantBuffersIds({psMaterialConstantsBuffer->getResourceId(), psLightConstantsBuffer->getResourceId()}, 3); // TODO: Define start slot enum for various cbuffer positions.
+                psState.setConstantBuffersIds({
+                    vsCameraConstantsBuffer->getResourceId(),
+                    vsFrameConstantsBuffer->getResourceId(),
+                    psMaterialConstantsBuffer->getResourceId()}, 1); // TODO: Define start slot enum for various cbuffer positions.
 
                 changeIaState = true;
                 changeVsState = true;

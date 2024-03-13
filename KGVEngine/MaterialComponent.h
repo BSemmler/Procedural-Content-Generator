@@ -11,7 +11,9 @@ namespace KGV::Engine {
     class MaterialComponent {
     public:
         S32 materialId;
-        DirectX::XMFLOAT4A color;
+        DirectX::XMFLOAT4A ambient;
+        DirectX::XMFLOAT4A diffuse;
+        DirectX::XMFLOAT4A specular {0.1f, 0.1f, 0.1f, 16};
     };
 }
 

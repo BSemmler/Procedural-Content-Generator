@@ -8,9 +8,21 @@
 #include "pch.h"
 
 namespace KGV::Engine {
+    enum eLightType : U32 {
+        kDirectional = 0,
+        kPoint = 1,
+        kSpot = 2,
+    };
+
     class LightComponent {
     public:
-        DirectX::XMFLOAT4 color;
+        DirectX::XMFLOAT4A ambient;
+        DirectX::XMFLOAT4A diffuse;
+        DirectX::XMFLOAT4A specular;
+        DirectX::XMFLOAT3 attenuation;
+        float range;
+        float spot;
+        eLightType lightType;
     };
 }
 

@@ -39,7 +39,7 @@ namespace KGV::Render {
         std::shared_ptr<ResourceViewDX11> vsCameraConstantsBuffer;
         std::shared_ptr<ResourceViewDX11> psMaterialConstantsBuffer;
         std::shared_ptr<ResourceViewDX11> vsFrameConstantsBuffer;
-        std::shared_ptr<ResourceViewDX11> psLightConstantsBuffer;
+//        std::shared_ptr<ResourceViewDX11> psLightConstantsBuffer;
         std::vector<RenderMaterial> materials;
         std::shared_ptr<S32> inputLayouts;
         std::shared_ptr<S32> shaders;

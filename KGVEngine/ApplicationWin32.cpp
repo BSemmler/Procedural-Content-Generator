@@ -13,26 +13,51 @@ std::vector<KGV::Render::Vertex> gVertices = {
 };
 
 std::vector<U32> gIndices = {
-// front face
+//// front face
+//        0, 1, 2,
+//        0, 2, 3,
+//// back face
+//        4, 6, 5,
+//        4, 7, 6,
+//// left face
+//        4, 5, 1,
+//        4, 1, 0,
+//// right face
+//        3, 2, 6,
+//        3, 6, 7,
+//// top face
+//        1, 5, 6,
+//        1, 6, 2,
+//// bottom face
+//        4, 0, 3,
+//        4, 3, 7
+
+// Front face
         0, 1, 2,
         0, 2, 3,
-// back face
+
+// Back face
         4, 6, 5,
         4, 7, 6,
-// left face
+
+// Left face
         4, 5, 1,
         4, 1, 0,
-// right face
+
+// Right face
         3, 2, 6,
         3, 6, 7,
-// top face
+
+// Top face
         1, 5, 6,
         1, 6, 2,
-// bottom face
+
+// Bottom face
         4, 0, 3,
         4, 3, 7
 };
 
+// This method is flawed. If a vertice is connect to 5 faces the normal will be skewed to one direction. Only way to do it properly would be through quads.
 void CalculatePerVertexNormals(std::vector<KGV::Render::Vertex>& vertices, const std::vector<unsigned int>& indices)
 {
     // Clear normals
@@ -50,9 +75,9 @@ void CalculatePerVertexNormals(std::vector<KGV::Render::Vertex>& vertices, const
         U32 i1 = indices[i * vertsPerTriangle + 1];
         U32 i2 = indices[i * vertsPerTriangle + 2];
 
-        DirectX::XMVECTOR v0 = DirectX::XMLoadFloat4(&vertices[i0].position);
-        DirectX::XMVECTOR v1 = DirectX::XMLoadFloat4(&vertices[i1].position);
-        DirectX::XMVECTOR v2 = DirectX::XMLoadFloat4(&vertices[i2].position);
+        XMVECTOR v0 = DirectX::XMLoadFloat4(&vertices[i0].position);
+        XMVECTOR v1 = DirectX::XMLoadFloat4(&vertices[i1].position);
+        XMVECTOR v2 = DirectX::XMLoadFloat4(&vertices[i2].position);
 
         XMVECTOR e0 = DirectX::XMVectorSubtract(v1, v0);
         XMVECTOR e1 = DirectX::XMVectorSubtract(v2, v0);
@@ -73,7 +98,6 @@ void CalculatePerVertexNormals(std::vector<KGV::Render::Vertex>& vertices, const
         DirectX::XMVECTOR normal = DirectX::XMLoadFloat3(&vertex.normal);
         normal = DirectX::XMVector3Normalize(normal);
         DirectX::XMStoreFloat3(&vertex.normal, normal);
-        spdlog::info("Vertex normals: {} {} {}", vertex.normal.x, vertex.normal.y, vertex.normal.z);
     }
 }
 
@@ -122,8 +146,11 @@ bool KGV::System::ApplicationWin32::init() {
 
     rtvId = device->createRenderTargetView(swapChain->getResource()->getResourceId(), nullptr);
 
-    vertexShaderId = device->loadShader("../KGVEngine/shaders/basicVertex.hlsl", Render::eShaderType::kVertex, false, "main", "vs_5_0");
-    pixelShaderId = device->loadShader("../KGVEngine/shaders/basicPixel.hlsl", Render::eShaderType::kPixel, false, "main", "ps_5_0");
+//    vertexShaderId = device->loadShader("../KGVEngine/shaders/basicVertex.hlsl", Render::eShaderType::kVertex, false, "main", "vs_5_0");
+//    pixelShaderId = device->loadShader("../KGVEngine/shaders/basicPixel.hlsl", Render::eShaderType::kPixel, false, "main", "ps_5_0");
+
+    vertexShaderId = device->loadShader("../KGVEngine/shaders/basicLighting.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
+    pixelShaderId = device->loadShader("../KGVEngine/shaders/basicLighting.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
 
     std::vector<D3D11_INPUT_ELEMENT_DESC> inputElements = {
             {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -163,7 +190,9 @@ bool KGV::System::ApplicationWin32::init() {
 
     auto cube = std::make_shared<Engine::Entity>();
     cube->material = std::make_unique<Engine::MaterialComponent>();
-    cube->material->color = { 1.0f, 0.5f, 0.31f, 1.0f };
+    cube->material->ambient = { 0.0215f, 0.1745f, 0.0215f, 1.0f };
+    cube->material->diffuse = { 0.07568f, 0.61424f, 0.07568f, 1.0f };
+    cube->material->specular = { 0.633f, 0.727811f, 0.633f, 0.6 * 128 };
 
     cube->mesh = std::make_unique<Engine::MeshComponent>();
     cube->mesh->meshId = cubeMeshId;
@@ -173,16 +202,24 @@ bool KGV::System::ApplicationWin32::init() {
     entities.emplace_back(cube);
 
     cube = std::make_shared<Engine::Entity>();
-    cube->material = std::make_unique<Engine::MaterialComponent>();
-    cube->material->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+//    cube->material = std::make_unique<Engine::MaterialComponent>();
+//    cube->material->ambient = { 1.0f, 1.0f, 1.0f, 1.0f };
+//    cube->material->diffuse = cube->material->ambient;
+//
 
-    cube->mesh = std::make_unique<Engine::MeshComponent>();
-    cube->mesh->meshId = cubeMeshId;
-    cube->mesh->render = true;
-    cube->transform.position = { 1.2f, 1.0f, -1.0f };
-    cube->transform.scale = { 0.25f, 0.25f, 0.25 };
+//    cube->mesh = std::make_unique<Engine::MeshComponent>();
+//    cube->mesh->meshId = cubeMeshId;
+//    cube->mesh->render = true;
+//    cube->transform.position = { 1.2f, 1.0f, -1.0f };
+//    cube->transform.scale = { 0.25f, 0.25f, 0.25 };
+//    cube->transform.rotation.x = XMConvertToRadians(35.79f);
+//    cube->transform.rotation.y = XMConvertToRadians(1.15f);
+    cube->transform.rotation.x = XMConvertToRadians(0);
+    cube->transform.rotation.y = XMConvertToRadians(0);
     cube->light = std::make_unique<Engine::LightComponent>();
-    cube->light->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    cube->light->ambient = {0.2f, 0.2f, 0.2f, 1.0f };
+    cube->light->diffuse = {0.7f, 0.7f, 0.7f, 1.0f };
+    cube->light->specular = { 1.0f, 1.0f, 1.0f, 1.0f };
 
     entities.emplace_back(cube);
     lights.emplace_back(cube);
