@@ -16,9 +16,9 @@
 
 namespace KGV::Render {
     struct Vertex {
-        DirectX::XMFLOAT4A position;
-        DirectX::XMFLOAT3A normal;
-        DirectX::XMFLOAT2A texCord;
+        DirectX::XMFLOAT3 position;
+        DirectX::XMFLOAT3 normal;
+        DirectX::XMFLOAT2 texCoord;
     };
 
     class SimpleRenderer {

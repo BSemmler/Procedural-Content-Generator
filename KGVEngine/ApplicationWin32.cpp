@@ -1,15 +1,16 @@
 #include "ApplicationWin32.h"
+#include "GeometryFactory.h"
 using namespace DirectX;
 
 std::vector<KGV::Render::Vertex> gVertices = {
-    { XMFLOAT4A(-1.0f, -1.0f, -1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() },
-    { XMFLOAT4A(-1.0f, +1.0f, -1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() },
-    { XMFLOAT4A(+1.0f, +1.0f, -1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() },
-    { XMFLOAT4A(+1.0f, -1.0f, -1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() },
-    { XMFLOAT4A(-1.0f, -1.0f, +1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() },
-    { XMFLOAT4A(-1.0f, +1.0f, +1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() },
-    { XMFLOAT4A(+1.0f, +1.0f, +1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() },
-    { XMFLOAT4A(+1.0f, -1.0f, +1.0f, 1.0f), XMFLOAT3A(), XMFLOAT2A() }
+    { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(), XMFLOAT2() },
+    { XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT3(), XMFLOAT2() },
+    { XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT3(), XMFLOAT2() },
+    { XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT3(), XMFLOAT2() },
+    { XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT3(), XMFLOAT2() },
+    { XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT3(), XMFLOAT2() },
+    { XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT3(), XMFLOAT2() },
+    { XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT3(), XMFLOAT2() }
 };
 
 std::vector<U32> gIndices = {
@@ -58,48 +59,48 @@ std::vector<U32> gIndices = {
 };
 
 // This method is flawed. If a vertice is connect to 5 faces the normal will be skewed to one direction. Only way to do it properly would be through quads.
-void CalculatePerVertexNormals(std::vector<KGV::Render::Vertex>& vertices, const std::vector<unsigned int>& indices)
-{
-    // Clear normals
-    for (auto& vertex : vertices)
-    {
-        vertex.normal = { 0.0f, 0.0f, 0.0f };
-    }
-
-    constexpr int vertsPerTriangle = 3;
-
-    // Calculate face normals and accumulate them to vertices
-    for (size_t i = 0; i < indices.size() / vertsPerTriangle; i++)
-    {
-        U32 i0 = indices[i * vertsPerTriangle + 0];
-        U32 i1 = indices[i * vertsPerTriangle + 1];
-        U32 i2 = indices[i * vertsPerTriangle + 2];
-
-        XMVECTOR v0 = DirectX::XMLoadFloat4(&vertices[i0].position);
-        XMVECTOR v1 = DirectX::XMLoadFloat4(&vertices[i1].position);
-        XMVECTOR v2 = DirectX::XMLoadFloat4(&vertices[i2].position);
-
-        XMVECTOR e0 = DirectX::XMVectorSubtract(v1, v0);
-        XMVECTOR e1 = DirectX::XMVectorSubtract(v2, v0);
-        XMVECTOR faceNormal = DirectX::XMVector3Cross(e0, e1);
-
-        XMVECTOR n1 = XMVectorAdd(XMLoadFloat3A(&vertices[i0].normal), faceNormal);
-        XMVECTOR n2 = XMVectorAdd(XMLoadFloat3A(&vertices[i1].normal), faceNormal);
-        XMVECTOR n3 = XMVectorAdd(XMLoadFloat3A(&vertices[i2].normal), faceNormal);
-
-        XMStoreFloat3A(&vertices[i0].normal, n1);
-        XMStoreFloat3A(&vertices[i1].normal, n2);
-        XMStoreFloat3A(&vertices[i2].normal, n3);
-    }
-
-    // Normalize accumulated normals
-    for (auto& vertex : vertices)
-    {
-        DirectX::XMVECTOR normal = DirectX::XMLoadFloat3(&vertex.normal);
-        normal = DirectX::XMVector3Normalize(normal);
-        DirectX::XMStoreFloat3(&vertex.normal, normal);
-    }
-}
+//void CalculatePerVertexNormals(std::vector<KGV::Render::Vertex>& vertices, const std::vector<unsigned int>& indices)
+//{
+//    // Clear normals
+//    for (auto& vertex : vertices)
+//    {
+//        vertex.normal = { 0.0f, 0.0f, 0.0f };
+//    }
+//
+//    constexpr int vertsPerTriangle = 3;
+//
+//    // Calculate face normals and accumulate them to vertices
+//    for (size_t i = 0; i < indices.size() / vertsPerTriangle; i++)
+//    {
+//        U32 i0 = indices[i * vertsPerTriangle + 0];
+//        U32 i1 = indices[i * vertsPerTriangle + 1];
+//        U32 i2 = indices[i * vertsPerTriangle + 2];
+//
+//        XMVECTOR v0 = DirectX::XMLoadFloat4(&vertices[i0].position);
+//        XMVECTOR v1 = DirectX::XMLoadFloat4(&vertices[i1].position);
+//        XMVECTOR v2 = DirectX::XMLoadFloat4(&vertices[i2].position);
+//
+//        XMVECTOR e0 = DirectX::XMVectorSubtract(v1, v0);
+//        XMVECTOR e1 = DirectX::XMVectorSubtract(v2, v0);
+//        XMVECTOR faceNormal = DirectX::XMVector3Cross(e0, e1);
+//
+//        XMVECTOR n1 = XMVectorAdd(XMLoadFloat3A(&vertices[i0].normal), faceNormal);
+//        XMVECTOR n2 = XMVectorAdd(XMLoadFloat3A(&vertices[i1].normal), faceNormal);
+//        XMVECTOR n3 = XMVectorAdd(XMLoadFloat3A(&vertices[i2].normal), faceNormal);
+//
+//        XMStoreFloat3A(&vertices[i0].normal, n1);
+//        XMStoreFloat3A(&vertices[i1].normal, n2);
+//        XMStoreFloat3A(&vertices[i2].normal, n3);
+//    }
+//
+//    // Normalize accumulated normals
+//    for (auto& vertex : vertices)
+//    {
+//        DirectX::XMVECTOR normal = DirectX::XMLoadFloat3(&vertex.normal);
+//        normal = DirectX::XMVector3Normalize(normal);
+//        DirectX::XMStoreFloat3(&vertex.normal, normal);
+//    }
+//}
 
 bool KGV::System::ApplicationWin32::init() {
     WNDCLASSEX wc;
@@ -153,9 +154,9 @@ bool KGV::System::ApplicationWin32::init() {
     pixelShaderId = device->loadShader("../KGVEngine/shaders/basicLighting.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
 
     std::vector<D3D11_INPUT_ELEMENT_DESC> inputElements = {
-            {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"TEXCOORD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0}
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
 
     inputLayoutId = device->createInputLayout(vertexShaderId, inputElements);
@@ -184,8 +185,21 @@ bool KGV::System::ApplicationWin32::init() {
 
     cameras.emplace_back(camera);
 
-    CalculatePerVertexNormals(gVertices, gIndices);
-    cubeMeshId = renderer->createMesh({gVertices}, gIndices, Render::eBufferUpdateType::kImmutable);
+//    CalculatePerVertexNormals(gVertices, gIndices);
+
+    std::vector<XMFLOAT3> verts;
+    std::vector<XMFLOAT3> normals;
+    std::vector<U32> indices;
+    Engine::GeometryFactory::getCube(true, verts, normals, indices);
+
+    std::vector<Render::Vertex> combinedCubeVerts;
+    combinedCubeVerts.reserve(verts.size());
+    for (int i = 0; i < verts.size(); ++i) {
+        combinedCubeVerts.emplace_back(Render::Vertex{.position = verts[i], .normal = normals[i], .texCoord { 0.0f, 0.0f}});
+    }
+
+    cubeMeshId = renderer->createMesh({combinedCubeVerts}, indices, Render::eBufferUpdateType::kImmutable);
+//    cubeMeshId = renderer->createMesh({gVertices}, gIndices, Render::eBufferUpdateType::kImmutable);
     basicMatId = renderer->createMaterial(inputLayoutId, vertexShaderId, pixelShaderId);
 
     auto cube = std::make_shared<Engine::Entity>();
@@ -197,7 +211,7 @@ bool KGV::System::ApplicationWin32::init() {
     cube->mesh = std::make_unique<Engine::MeshComponent>();
     cube->mesh->meshId = cubeMeshId;
     cube->mesh->render = true;
-    cube->transform.scale = { 0.5f, 0.5f, 0.5 };
+//    cube->transform.scale = { 0.5f, 0.5f, 0.5 };
 
     entities.emplace_back(cube);
 
@@ -214,7 +228,7 @@ bool KGV::System::ApplicationWin32::init() {
 //    cube->transform.scale = { 0.25f, 0.25f, 0.25 };
 //    cube->transform.rotation.x = XMConvertToRadians(35.79f);
 //    cube->transform.rotation.y = XMConvertToRadians(1.15f);
-    cube->transform.rotation.x = XMConvertToRadians(0);
+    cube->transform.rotation.x = XMConvertToRadians(30);
     cube->transform.rotation.y = XMConvertToRadians(0);
     cube->light = std::make_unique<Engine::LightComponent>();
     cube->light->ambient = {0.2f, 0.2f, 0.2f, 1.0f };
@@ -295,7 +309,7 @@ float cumalitiveTime = 0;
 void KGV::System::ApplicationWin32::draw(F32 dt) {
     deviceContext->clearColorBuffers({0.1f, 0.1f, 0.1f, 1.0f});
     renderer->renderScene(entities, cameras, &lights, dt);
-//    constexpr float degPerSec = 20.0f;
+    constexpr float degPerSec = 1.0f;
 //
 //    auto cameraRotate = XMMatrixRotationY(XMConvertToRadians(degPerSec * dt));
 //    auto camForward = XMVector4Transform(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), cameraRotate);
@@ -306,11 +320,11 @@ void KGV::System::ApplicationWin32::draw(F32 dt) {
 ////    auto toOrigin = XMVector4Dot(XMVector4Normalize(cameraForward), { 0, 0, 0, 0});
 
 //     XMStoreFloat3(&cameras[0]->transform.position, newPos);
-//    cameras[0]->transform.rotation.y += degPerSec * dt;
-    if (cameras[0]->transform.rotation.y > 360.0f)
-        cameras[0]->transform.rotation.y -= 360.0f;
-    else if (cameras[0]->transform.rotation.y < 0)
-        cameras[0]->transform.rotation.y += 360.0f;
+    entities[0]->transform.rotation.x += degPerSec * dt;
+    if (entities[0]->transform.rotation.x > 360.0f)
+        entities[0]->transform.rotation.x -= 360.0f;
+    else if (entities[0]->transform.rotation.x < 0)
+        entities[0]->transform.rotation.x += 360.0f;
 
     device->presentSwapChain(swapChainId, 0, 0);
     gAvgFps = (1/dt + gAvgFps) / 2;

@@ -1,7 +1,7 @@
 struct VertexIn
 {
-    float4 position : POSITION0;
-    float4 normal : NORMAL;
+    float3 position : POSITION0;
+    float3 normal : NORMAL;
     float2 texcoord : TEXCOORD0;
 };
 
@@ -53,7 +53,7 @@ VertexOut VS(VertexIn input)
 {
     VertexOut output;
 
-    output.worldPosition = mul(input.position, gWorldMatrix);
+    output.worldPosition = mul(float4(input.position, 1.0f), gWorldMatrix);
     output.position = mul(output.worldPosition, gViewProjectionMatrix);
 
     // Transform the normals to homogeneous clip space.
