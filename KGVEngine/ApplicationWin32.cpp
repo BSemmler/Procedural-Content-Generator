@@ -147,9 +147,6 @@ bool KGV::System::ApplicationWin32::init() {
 
     rtvId = device->createRenderTargetView(swapChain->getResource()->getResourceId(), nullptr);
 
-//    vertexShaderId = device->loadShader("../KGVEngine/shaders/basicVertex.hlsl", Render::eShaderType::kVertex, false, "main", "vs_5_0");
-//    pixelShaderId = device->loadShader("../KGVEngine/shaders/basicPixel.hlsl", Render::eShaderType::kPixel, false, "main", "ps_5_0");
-
     vertexShaderId = device->loadShader("../KGVEngine/shaders/basicLighting.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
     pixelShaderId = device->loadShader("../KGVEngine/shaders/basicLighting.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
 
@@ -178,14 +175,11 @@ bool KGV::System::ApplicationWin32::init() {
     camera->camera->setPerspectiveProject(XMConvertToRadians(70), (float)window1->getWidth()/(float)window1->getHeight(), 0.1, 100.0f);
     camera->transform.position.z = -3.0f;
     camera->transform.position.x = 0;
-//    camera->camera->setIsWireframe(true);
     camera->transform.position.y = 2;
     camera->transform.rotation.x = XMConvertToRadians(30);
-//    camera->transform.rotation.y = XMConvertToRadians(30.0f);
 
     cameras.emplace_back(camera);
 
-//    CalculatePerVertexNormals(gVertices, gIndices);
 
     std::vector<XMFLOAT3> verts;
     std::vector<XMFLOAT3> normals;
@@ -199,10 +193,10 @@ bool KGV::System::ApplicationWin32::init() {
     }
 
     cubeMeshId = renderer->createMesh({combinedCubeVerts}, indices, Render::eBufferUpdateType::kImmutable);
-//    cubeMeshId = renderer->createMesh({gVertices}, gIndices, Render::eBufferUpdateType::kImmutable);
     basicMatId = renderer->createMaterial(inputLayoutId, vertexShaderId, pixelShaderId);
 
     auto cube = std::make_shared<Engine::Entity>();
+    cube->transform.position.y = 1;
     cube->material = std::make_unique<Engine::MaterialComponent>();
     cube->material->ambient = { 0.0215f, 0.1745f, 0.0215f, 1.0f };
     cube->material->diffuse = { 0.07568f, 0.61424f, 0.07568f, 1.0f };
@@ -211,32 +205,44 @@ bool KGV::System::ApplicationWin32::init() {
     cube->mesh = std::make_unique<Engine::MeshComponent>();
     cube->mesh->meshId = cubeMeshId;
     cube->mesh->render = true;
-//    cube->transform.scale = { 0.5f, 0.5f, 0.5 };
 
     entities.emplace_back(cube);
 
-    cube = std::make_shared<Engine::Entity>();
-//    cube->material = std::make_unique<Engine::MaterialComponent>();
-//    cube->material->ambient = { 1.0f, 1.0f, 1.0f, 1.0f };
-//    cube->material->diffuse = cube->material->ambient;
-//
+    auto light = std::make_shared<Engine::Entity>();
+    light->transform.rotation.x = XMConvertToRadians(30);
+    light->transform.rotation.y = XMConvertToRadians(5.15);
+    light->light = std::make_unique<Engine::LightComponent>();
+    light->light->ambient = {0.2f, 0.2f, 0.2f, 1.0f };
+    light->light->diffuse = {0.7f, 0.7f, 0.7f, 1.0f };
+    light->light->specular = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-//    cube->mesh = std::make_unique<Engine::MeshComponent>();
-//    cube->mesh->meshId = cubeMeshId;
-//    cube->mesh->render = true;
-//    cube->transform.position = { 1.2f, 1.0f, -1.0f };
-//    cube->transform.scale = { 0.25f, 0.25f, 0.25 };
-//    cube->transform.rotation.x = XMConvertToRadians(35.79f);
-//    cube->transform.rotation.y = XMConvertToRadians(1.15f);
-    cube->transform.rotation.x = XMConvertToRadians(30);
-    cube->transform.rotation.y = XMConvertToRadians(0);
-    cube->light = std::make_unique<Engine::LightComponent>();
-    cube->light->ambient = {0.2f, 0.2f, 0.2f, 1.0f };
-    cube->light->diffuse = {0.7f, 0.7f, 0.7f, 1.0f };
-    cube->light->specular = { 1.0f, 1.0f, 1.0f, 1.0f };
+    entities.emplace_back(light);
+    lights.emplace_back(light);
 
-    entities.emplace_back(cube);
-    lights.emplace_back(cube);
+    std::vector<XMFLOAT3> gridVerts;
+    std::vector<XMFLOAT3> gridNormals;
+    std::vector<U32> gridIndices;
+    Engine::GeometryFactory::getVertexGridU32(5, gridVerts, gridNormals, gridIndices, 0.5);
+
+    std::vector<Render::Vertex> combinedGridVerts;
+    combinedCubeVerts.reserve(gridVerts.size());
+    for (int i = 0; i < gridVerts.size(); ++i) {
+        combinedGridVerts.emplace_back(Render::Vertex{.position = gridVerts[i], .normal = gridNormals[i], .texCoord { 0.0f, 0.0f}});
+    }
+
+    gridMeshId = renderer->createMesh({combinedGridVerts}, gridIndices, Render::eBufferUpdateType::kImmutable);
+
+    auto grid = std::make_shared<Engine::Entity>();
+    grid->transform.position.y = 0;
+    grid->material = std::make_unique<Engine::MaterialComponent>();
+    grid->material->ambient = { 0.0215f, 0.1745f, 0.0215f, 1.0f };
+    grid->material->diffuse = { 0.07568f, 0.61424f, 0.07568f, 1.0f };
+    grid->material->specular = { 0.633f, 0.727811f, 0.633f, 0.6 * 128 };
+
+    grid->mesh = std::make_unique<Engine::MeshComponent>();
+    grid->mesh->meshId = gridMeshId;
+    grid->mesh->render = true;
+    entities.emplace_back(grid);
 
     return true;
 }
@@ -325,6 +331,12 @@ void KGV::System::ApplicationWin32::draw(F32 dt) {
         entities[0]->transform.rotation.x -= 360.0f;
     else if (entities[0]->transform.rotation.x < 0)
         entities[0]->transform.rotation.x += 360.0f;
+
+    entities[0]->transform.rotation.y += degPerSec * dt;
+    if (entities[0]->transform.rotation.y > 360.0f)
+        entities[0]->transform.rotation.y -= 360.0f;
+    else if (entities[0]->transform.rotation.y < 0)
+        entities[0]->transform.rotation.y += 360.0f;
 
     device->presentSwapChain(swapChainId, 0, 0);
     gAvgFps = (1/dt + gAvgFps) / 2;

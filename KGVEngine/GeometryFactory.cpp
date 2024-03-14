@@ -110,31 +110,55 @@ void KGV::Engine::GeometryFactory::getCube(bool hasFlatNormalGeometry, std::vect
     memcpy(indices.data(), gCubeFlatIndices, sizeof(U32) * gCubeNumIndices);
 }
 
-void KGV::Engine::GeometryFactory::getVertexGridU16(U32 width, U32 height, std::vector<DirectX::XMFLOAT3> &vertices,
+void KGV::Engine::GeometryFactory::getVertexGridU16(U32 size, std::vector<DirectX::XMFLOAT3> &vertices,
                                                     std::vector<DirectX::XMFLOAT3> &normals, std::vector<U16> &indices, float step) {
 
 }
 
-void KGV::Engine::GeometryFactory::getVertexGridU32(U32 widthNodes, U32 heightNodes, std::vector<DirectX::XMFLOAT3> &vertices,
+void KGV::Engine::GeometryFactory::getVertexGridU32(U32 size, std::vector<DirectX::XMFLOAT3> &vertices,
                                                  std::vector<DirectX::XMFLOAT3> &normals, std::vector<U32> &indices, float step) {
-    const U32 numNodes = widthNodes * heightNodes;
+    const U32 numNodes = size * size;
     vertices.reserve(numNodes);
     normals.reserve(numNodes);
 
     // The number of squares/quads is always 1 less than the number of nodes in a direction
     // Since each quad will be divided into two triangles,
     // with each triangle having 3 vertices, this gives us the num of indices
-    const U32 numQuads = (widthNodes - 1) * (heightNodes - 1);
+    const U32 numQuads = (size - 1) * (size - 1);
     const U32 numIndices = numQuads * 2 * 3;
     indices.reserve(numIndices);
 
-    float currentZPos = -(static_cast<float>(heightNodes) / 2.0f);
-    float currentXPos = -(static_cast<float>(widthNodes) / 2.0f);
 
+    float currentZPos = (static_cast<float>(size) / 2.0f) * step;
+    for (int i = 0; i < size; ++i) {
+//        if (currentZPos < step)
+//            currentZPos = 0;
 
-    for (int i = 0; i < widthNodes; ++i) {
-        for (int j = 0; j < heightNodes; ++j) {
-//            vertices.emplace_back({})
+        float currentXPos = -(static_cast<float>(size) / 2.0f) * step;
+        for (int j = 0; j < size; ++j) {
+//            if (currentXPos < step)
+//                currentXPos = 0.0f;
+
+            vertices.emplace_back(currentXPos, 0.0f, currentZPos);
+            normals.emplace_back(0.0f, 1.0f, 0.0f);
+            currentXPos += step;
+        }
+        currentZPos -= step;
+    }
+
+    for (int i = 0; i < size - 1; ++i) {
+        for (int j = 0; j < size - 1; ++j) {
+            // top left tri
+            indices.emplace_back(i * size + j);
+            indices.emplace_back(i * size + j + 1);
+            indices.emplace_back((i + 1) * size + j);
+//            spdlog::info("{} {} {}", indices[indices.size() - 3], indices[indices.size() - 2], indices[indices.size() - 1]);
+
+            // bottom right tri
+            indices.emplace_back(i * size + j + 1);
+            indices.emplace_back((i + 1) * size + j + 1);
+            indices.emplace_back((i + 1) * size + j);
+//            spdlog::info("{} {} {}", indices[indices.size() - 3], indices[indices.size() - 2], indices[indices.size() - 1]);
         }
     }
 }

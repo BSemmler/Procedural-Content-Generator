@@ -39,6 +39,7 @@ namespace KGV::System
         std::vector<std::shared_ptr<Engine::Entity>> lights;
         std::vector<std::shared_ptr<Engine::Entity>> entities;
         S32 cubeMeshId;
+        S32 gridMeshId;
         S32 basicMatId;
         std::chrono::high_resolution_clock::time_point lastTime;
 	};

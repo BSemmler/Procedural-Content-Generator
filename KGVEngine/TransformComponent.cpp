@@ -15,8 +15,8 @@ KGV::Engine::TransformComponent::TransformComponent() {
 DirectX::XMMATRIX KGV::Engine::TransformComponent::matrix() {
     auto world = XMMatrixIdentity();
     world = world * XMMatrixScalingFromVector(XMLoadFloat3A(&scale));
-    world = world * XMMatrixTranslationFromVector(XMLoadFloat3A(&position));
     world = world * XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3A(&rotation));
+    world = world * XMMatrixTranslationFromVector(XMLoadFloat3A(&position));
     return world;
 //    const F32 c3 = cos(rotation.z);
 //    const F32 s3 = sin(rotation.z);
