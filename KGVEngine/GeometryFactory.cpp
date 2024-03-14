@@ -115,11 +115,9 @@ void KGV::Engine::GeometryFactory::getVertexGridU16(U32 size, std::vector<Direct
 
 }
 
-void KGV::Engine::GeometryFactory::getVertexGridU32(U32 size, std::vector<DirectX::XMFLOAT3> &vertices,
-                                                 std::vector<DirectX::XMFLOAT3> &normals, std::vector<U32> &indices, float step) {
+void KGV::Engine::GeometryFactory::getVertexGridU32(U32 size, std::vector<Render::Vertex> &vertices, std::vector<U32> &indices, float step) {
     const U32 numNodes = size * size;
     vertices.reserve(numNodes);
-    normals.reserve(numNodes);
 
     // The number of squares/quads is always 1 less than the number of nodes in a direction
     // Since each quad will be divided into two triangles,
@@ -127,34 +125,48 @@ void KGV::Engine::GeometryFactory::getVertexGridU32(U32 size, std::vector<Direct
     const U32 numQuads = (size - 1) * (size - 1);
     const U32 numIndices = numQuads * 2 * 3;
     indices.reserve(numIndices);
+    const float uvStep = 1.0f / static_cast<float>(size - 1);
 
-
+    // We produce the grid in a scanline pattern
+    // Traverse horizontal then step vertical,
     float currentZPos = (static_cast<float>(size) / 2.0f) * step;
     for (int i = 0; i < size; ++i) {
-//        if (currentZPos < step)
-//            currentZPos = 0;
 
         float currentXPos = -(static_cast<float>(size) / 2.0f) * step;
         for (int j = 0; j < size; ++j) {
-//            if (currentXPos < step)
-//                currentXPos = 0.0f;
 
-            vertices.emplace_back(currentXPos, 0.0f, currentZPos);
-            normals.emplace_back(0.0f, 1.0f, 0.0f);
+            Render::Vertex v{};
+            v.position = {currentXPos, 0.0f, currentZPos};
+            v.normal = {0.0f, 1.0f, 0.0f};
+            v.texCoord = {uvStep * static_cast<float>(j), uvStep * static_cast<float>(i)};
+            vertices.emplace_back(v);
+
             currentXPos += step;
         }
         currentZPos -= step;
     }
 
+    /* We produce indices from quads in the same left to right top to bottom fashion.
+     * however we keep repeating the pattern below.
+     *
+     * 0-------1
+     * |  t1 / |
+     * |   /   |
+     * | /  t2 |
+     * 4-------3
+     *
+     * Indices for t1 = 0 1 4
+     * Indices for t2 = 1 3 4
+    */
     for (int i = 0; i < size - 1; ++i) {
         for (int j = 0; j < size - 1; ++j) {
-            // top left tri
+            // top left tri (T1)
             indices.emplace_back(i * size + j);
             indices.emplace_back(i * size + j + 1);
             indices.emplace_back((i + 1) * size + j);
 //            spdlog::info("{} {} {}", indices[indices.size() - 3], indices[indices.size() - 2], indices[indices.size() - 1]);
 
-            // bottom right tri
+            // bottom right tri (T2)
             indices.emplace_back(i * size + j + 1);
             indices.emplace_back((i + 1) * size + j + 1);
             indices.emplace_back((i + 1) * size + j);

@@ -219,18 +219,10 @@ bool KGV::System::ApplicationWin32::init() {
     entities.emplace_back(light);
     lights.emplace_back(light);
 
-    std::vector<XMFLOAT3> gridVerts;
-    std::vector<XMFLOAT3> gridNormals;
     std::vector<U32> gridIndices;
-    Engine::GeometryFactory::getVertexGridU32(5, gridVerts, gridNormals, gridIndices, 0.5);
-
-    std::vector<Render::Vertex> combinedGridVerts;
-    combinedCubeVerts.reserve(gridVerts.size());
-    for (int i = 0; i < gridVerts.size(); ++i) {
-        combinedGridVerts.emplace_back(Render::Vertex{.position = gridVerts[i], .normal = gridNormals[i], .texCoord { 0.0f, 0.0f}});
-    }
-
-    gridMeshId = renderer->createMesh({combinedGridVerts}, gridIndices, Render::eBufferUpdateType::kImmutable);
+    std::vector<Render::Vertex> gridVertices;
+    Engine::GeometryFactory::getVertexGridU32(5, gridVertices, gridIndices, 0.5);
+    gridMeshId = renderer->createMesh({gridVertices}, gridIndices, Render::eBufferUpdateType::kImmutable);
 
     auto grid = std::make_shared<Engine::Entity>();
     grid->transform.position.y = 0;
