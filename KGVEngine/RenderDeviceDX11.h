@@ -13,6 +13,7 @@
 #include "ResourceViewDX11.h"
 #include "ShaderResourceViewConfigDX11.h"
 #include "RenderTargetViewConfigDX11.h"
+#include "DepthStencilViewConfigDX11.h"
 #include "RenderTargetViewDX11.h"
 #include "ShaderResourceViewDX11.h"
 #include "ShaderDX11.h"
@@ -39,8 +40,10 @@ namespace KGV::Render {
         ComPtr<IDXGIAdapter1> getOptimalAdapter(const ComPtr<IDXGIFactory2>& _pFactory = nullptr);
         std::vector<ComPtr<IDXGIAdapter1>> getAdapters(const ComPtr<IDXGIFactory2>& pFactory = nullptr);
 
-        std::shared_ptr<ResourceViewDX11> createTexture2D(Texture2dConfigDX11 &texConfig, ResourceData &data,
-                                                           ShaderResourceViewConfigDX11 &srvConfig, RenderTargetViewConfigDX11 &rtvConfig);
+        std::shared_ptr<ResourceViewDX11> createTexture2D(Texture2dConfigDX11 &texConfig, ResourceData *data,
+                                                           ShaderResourceViewConfigDX11 *srvConfig,
+                                                           RenderTargetViewConfigDX11 *rtvConfig,
+                                                           DepthStencilViewConfigDX11 *dsvConfig);
 
         std::shared_ptr<ResourceViewDX11> createVertexBuffer(BufferConfigDX11 &config, ResourceData *data);
         std::shared_ptr<ResourceViewDX11> createIndexBuffer(BufferConfigDX11 &config, ResourceData *data);

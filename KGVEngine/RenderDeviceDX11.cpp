@@ -101,11 +101,12 @@ namespace KGV::Render {
         }
     }
 
-    std::shared_ptr<ResourceViewDX11> RenderDeviceDX11::createTexture2D(
-            Texture2dConfigDX11 &texConfig, ResourceData &data,
-            ShaderResourceViewConfigDX11 &srvConfig, RenderTargetViewConfigDX11 &rtvConfig) {
+    std::shared_ptr<ResourceViewDX11> RenderDeviceDX11::createTexture2D(Texture2dConfigDX11 &texConfig, ResourceData *data,
+                                                                        ShaderResourceViewConfigDX11 *srvConfig,
+                                                                        RenderTargetViewConfigDX11 *rtvConfig,
+                                                                        DepthStencilViewConfigDX11 *dsvConfig) {
         ComPtr<ID3D11Texture2D> tex;
-        HRESULT hr = device->CreateTexture2D(&texConfig.desc, reinterpret_cast<D3D11_SUBRESOURCE_DATA *>(&data), tex.GetAddressOf());
+        HRESULT hr = device->CreateTexture2D(&texConfig.desc, reinterpret_cast<D3D11_SUBRESOURCE_DATA *>(data), tex.GetAddressOf());
 
         if (FAILED(hr)) {
             logger->error("Failed to create D3D11 Texture2D");
@@ -117,28 +118,8 @@ namespace KGV::Render {
         auto texture = std::make_unique<Texture2dDX11>(tex);
         texture->desiredDesc = texConfig.desc;
         S32 resourceId = storeResource(std::move(texture));
-        return std::make_shared<ResourceViewDX11>(resourceId, &texConfig, this, &srvConfig, &rtvConfig);
+        return std::make_shared<ResourceViewDX11>(resourceId, &texConfig, this, srvConfig, rtvConfig, dsvConfig);
     }
-
-//    BufferDX11 * RenderDeviceDX11::createBuffer(BufferConfigDX11 &config, ResourceData &data, eResourceType type) {
-//        auto *buff = new BufferDX11();
-//        HRESULT hr = device->CreateBuffer(&config.desc, reinterpret_cast<D3D11_SUBRESOURCE_DATA *>(&data), &buff->buffer);
-//
-//        if (FAILED(hr)) {
-//            logger->error("Failed to create D3D11 Buffer!");
-//            // Trigger a breakpoint if we're in a debug build.
-//            KGV_debugBreak();
-//            delete buff;
-//            buff = nullptr;
-//        }
-//
-//        if (buff) {
-//            buff->actualDesc = config.desc;
-//            buff->desiredDesc = buff->actualDesc;
-//        }
-//
-//        return buff;
-//    }
 
     S32 RenderDeviceDX11::createSwapChain(void *hwnd, SwapChainConfigDX11 &config) {
         ComPtr<IDXGIDevice> dxgiDevice;
