@@ -84,7 +84,11 @@ namespace KGV::Render {
 
         S32 createRasterizerState(D3D11_RASTERIZER_DESC &desc);
 
+        S32 createDepthStencilState(D3D11_DEPTH_STENCIL_DESC &desc);
+
         ComPtr<ID3D11RasterizerState> getRasterizerStateById(S32 id);
+
+        ComPtr<ID3D11DepthStencilState> getDsvStateById(S32 id);
 
         D3D11_VIEWPORT* getViewPortById(S32 id);
 

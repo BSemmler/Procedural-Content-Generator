@@ -122,20 +122,6 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
     memcpy(frameConstants.pData, &fcd, sizeof(FrameConstantsDef));
     deviceContext->unmapResource(vsFrameConstantsBuffer.get(), 0);
 
-//    LightConstantsDef lc{};
-//    lc.ambient = { 0.5f, 0.5f, 0.5f, 1.0f };
-//    lc.position = { 0.0f, 0.0f, 0.0f, 1.0f };
-//    if (lights && lights->at(0)->light) {
-//        auto lightEntity = lights->at(0);
-//        lc.position = XMLoadFloat3A(&lightEntity->transform.position);
-//        lc.position.m128_f32[3] = 1.0f;
-//        lc.color = lightEntity->light->ambient;
-//    }
-
-//    auto lightConstants = deviceContext->mapResource(psLightConstantsBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0);
-//    memcpy(lightConstants.pData, &lc, sizeof(LightConstantsDef));
-//    deviceContext->unmapResource(psLightConstantsBuffer.get(), 0);
-
     for (const auto& cameraEntity : cameras) {
         // If the entity doesn't have a cameraEntity setup then ignore, likewise if a cameraEntity is disabled.
         if (!cameraEntity->camera) {
@@ -168,6 +154,8 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
 
         OutputMergerStageStateDX11 omState;
         omState.setRtvIds({cameraEntity->camera->getRtvId()});
+        omState.setDsvId(cameraEntity->camera->getDsvId());
+        omState.setDsvStateId(cameraEntity->camera->getDsvStateId());
         bool changeOmState = true;
 
         // Render each entity;

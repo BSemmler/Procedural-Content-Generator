@@ -104,3 +104,19 @@ void KGV::Engine::Camera::setRtvId(const S32 id) {
     rtvId = id;
 }
 
+S32 KGV::Engine::Camera::getDsvId() const {
+    return dsvId;
+}
+
+void KGV::Engine::Camera::setDsvId(S32 dsvId) {
+    Camera::dsvId = dsvId;
+}
+
+S32 KGV::Engine::Camera::getDsvStateId() const {
+    return dsvStateId;
+}
+
+void KGV::Engine::Camera::setDsvStateId(S32 dsvStateId) {
+    Camera::dsvStateId = dsvStateId;
+}
+

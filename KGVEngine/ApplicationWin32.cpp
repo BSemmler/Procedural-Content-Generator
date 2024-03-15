@@ -145,7 +145,24 @@ bool KGV::System::ApplicationWin32::init() {
     swapChainId = device->createSwapChain(window1->getWin32Handle(), swapChainConf);
     auto swapChain = device->getSwapChainById(swapChainId);
 
-    rtvId = device->createRenderTargetView(swapChain->getResource()->getResourceId(), nullptr);
+//    spdlog::get("engine")->info("RTV ID: {}", swapChain->getResource()->getRtvId());
+//    rtvId = device->createRenderTargetView(swapChain->getResource()->getResourceId(), nullptr);
+    rtvId = swapChain->getResource()->getRtvId();
+    Render::Texture2dConfigDX11 texConfig;
+    texConfig.setDepthTexture(window1->getWidth(), window1->getHeight());
+    texConfig.setFormat(DXGI_FORMAT_D32_FLOAT);
+
+    Render::DepthStencilViewConfigDX11 dsvConfig;
+    dsvConfig.setFormat(DXGI_FORMAT_D32_FLOAT);
+    D3D11_TEX2D_DSV dsvState;
+    dsvState.MipSlice = 0;
+    dsvConfig.SetTexture2D(dsvState);
+    depthBuffer = device->createTexture2D(texConfig, nullptr, nullptr, nullptr, &dsvConfig);
+
+    D3D11_DEPTH_STENCIL_DESC dsDesc;
+
+
+
 
     vertexShaderId = device->loadShader("../KGVEngine/shaders/basicLighting.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
     pixelShaderId = device->loadShader("../KGVEngine/shaders/basicLighting.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
@@ -168,8 +185,32 @@ bool KGV::System::ApplicationWin32::init() {
 
     viewPortId = device->createViewPort(viewport);
 
+    // Depth test parameters
+    dsDesc.DepthEnable = true;
+    dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+    dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+// Stencil test parameters
+    dsDesc.StencilEnable = true;
+    dsDesc.StencilReadMask = 0xFF;
+    dsDesc.StencilWriteMask = 0xFF;
+
+// Stencil operations if pixel is front-facing
+    dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+    dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+// Stencil operations if pixel is back-facing
+    dsDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    dsDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+    dsDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    dsDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
     auto camera = std::make_shared<Engine::Entity>();
     camera->camera = std::make_unique<Engine::Camera>();
+    camera->camera->setDsvStateId(device->createDepthStencilState(dsDesc));
+    camera->camera->setDsvId(depthBuffer->getDsvId());
     camera->camera->setRtvId(rtvId);
     camera->camera->setViewPortId(viewPortId);
     camera->camera->setPerspectiveProject(XMConvertToRadians(70), (float)window1->getWidth()/(float)window1->getHeight(), 0.1, 100.0f);
@@ -221,7 +262,10 @@ bool KGV::System::ApplicationWin32::init() {
 
     std::vector<U32> gridIndices;
     std::vector<Render::Vertex> gridVertices;
-    Engine::GeometryFactory::getVertexGridU32(5, gridVertices, gridIndices, 0.5);
+    auto lt = std::chrono::high_resolution_clock::now();
+    Engine::GeometryFactory::getVertexGridU32(512, gridVertices, gridIndices, 0.2);
+    auto ct = std::chrono::high_resolution_clock::now();
+    spdlog::info("Time to generate grid of {} vertices, {} triangles: {}s", gridVertices.size(), gridIndices.size() / 3, std::chrono::duration_cast<std::chrono::duration<double>>(ct - lt).count());
     gridMeshId = renderer->createMesh({gridVertices}, gridIndices, Render::eBufferUpdateType::kImmutable);
 
     auto grid = std::make_shared<Engine::Entity>();
@@ -302,10 +346,11 @@ LRESULT KGV::System::ApplicationWin32::wndProc( HWND hWnd, UINT msg, WPARAM wPar
 
 int gAvgFps = 0;
 float gAvgFrameTime = 0;
-float cumalitiveTime = 0;
+float cumulativeTime = 0;
 
 void KGV::System::ApplicationWin32::draw(F32 dt) {
     deviceContext->clearColorBuffers({0.1f, 0.1f, 0.1f, 1.0f});
+    deviceContext->clearDepthStencilBuffers();
     renderer->renderScene(entities, cameras, &lights, dt);
     constexpr float degPerSec = 1.0f;
 //
@@ -331,12 +376,12 @@ void KGV::System::ApplicationWin32::draw(F32 dt) {
         entities[0]->transform.rotation.y += 360.0f;
 
     device->presentSwapChain(swapChainId, 0, 0);
-    gAvgFps = (1/dt + gAvgFps) / 2;
+    gAvgFps = static_cast<S32>(1.0f/dt + static_cast<F32>(gAvgFps)) / 2;
     gAvgFrameTime = (dt + gAvgFrameTime) / 2;
-    cumalitiveTime += dt;
+    cumulativeTime += dt;
 
-    if (cumalitiveTime > 0.25f) {
+    if (cumulativeTime > 0.25f) {
         window1->setWindowCaption(fmt::format("Frame rate: {:d}, Frame time: {:.3f}", gAvgFps, gAvgFrameTime));
-        cumalitiveTime = 0.0f;
+        cumulativeTime = 0.0f;
     }
 }

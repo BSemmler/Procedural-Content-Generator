@@ -32,6 +32,7 @@ namespace KGV::System
         std::shared_ptr<Render::ResourceViewDX11> vertexBuffer;
         std::shared_ptr<Render::ResourceViewDX11> indexBuffer;
         std::shared_ptr<Render::ResourceViewDX11> constantBuffer;
+        std::shared_ptr<Render::ResourceViewDX11> depthBuffer;
         S32 vertexShaderId;
         S32 pixelShaderId;
         S32 viewPortId;

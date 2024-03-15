@@ -141,3 +141,13 @@ void KGV::Render::PipelineManagerDX11::updateSubresource(ResourceDX11* resource,
 
     context->UpdateSubresource(r, subResource, pDst, pSrcData, rowPitch, depthPitch);
 }
+
+void KGV::Render::PipelineManagerDX11::clearDepthStencilBuffers(float depth, U32 stencil) {
+    auto depthStencilBuff = device->getDsvById(outputMergerStage.getCurrentState().getDsvId());
+
+    if (!depthStencilBuff) {
+        return;
+    }
+
+    context->ClearDepthStencilView(depthStencilBuff->getView().Get(), D3D11_CLEAR_DEPTH, depth, stencil);
+}

@@ -29,6 +29,7 @@ namespace KGV::Render {
                         ShaderStageStateDX11 *psState = nullptr, OutputMergerStageStateDX11 *omState = nullptr);
 
         void clearColorBuffers(DirectX::XMFLOAT4 color);
+        void clearDepthStencilBuffers(float depth = 1.0f, U32 stencil = 0);
 
         D3D11_MAPPED_SUBRESOURCE mapResource(S32 id, U32 subResource, D3D11_MAP actions, U32 flags);
         D3D11_MAPPED_SUBRESOURCE mapResource(ResourceViewDX11* resource, U32 subResource, D3D11_MAP actions, U32 flags);

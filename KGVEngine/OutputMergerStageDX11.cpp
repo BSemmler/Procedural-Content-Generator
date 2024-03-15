@@ -33,7 +33,8 @@ void KGV::Render::OutputMergerStageDX11::applyDesiredState(ComPtr<ID3D11DeviceCo
     // TODO: Configure this to also retrieve depth stencil and blend states.
     context->OMSetRenderTargets(renderTargets.size(), renderTargets.data(), dsv ? dsv->getView().Get() : nullptr);
 
-//    contex->OMSet
+    auto dsvState = device->getDsvStateById(desiredState.getDsvStateId());
+    context->OMSetDepthStencilState(dsvState.Get(), 1);
 
     currentState = desiredState;
 }

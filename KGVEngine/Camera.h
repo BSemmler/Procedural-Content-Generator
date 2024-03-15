@@ -51,6 +51,14 @@ namespace KGV::Engine {
 
         void setViewPortId(S32 viewPortId);
 
+        S32 getDsvId() const;
+
+        void setDsvId(S32 dsvId);
+
+        S32 getDsvStateId() const;
+
+        void setDsvStateId(S32 dsvStateId);
+
     protected:
         DirectX::XMMATRIX projectionMatrix{DirectX::XMMatrixIdentity()};
         DirectX::XMMATRIX viewMatrix{DirectX::XMMatrixIdentity()};
@@ -62,6 +70,8 @@ namespace KGV::Engine {
 //        float fovY;
         S32 rtvId;
         S32 viewPortId;
+        S32 dsvId;
+        S32 dsvStateId;
         bool m_isActive = true;
         bool m_isOrthographic;
         bool m_isWireframe;

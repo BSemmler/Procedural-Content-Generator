@@ -584,4 +584,24 @@ namespace KGV::Render {
 
         return nullptr;
     }
+
+    S32 RenderDeviceDX11::createDepthStencilState(D3D11_DEPTH_STENCIL_DESC &desc) {
+        ComPtr<ID3D11DepthStencilState> depthState;
+
+        HRESULT hr;
+        if (FAILED(hr = device->CreateDepthStencilState(&desc, depthState.GetAddressOf()))) {
+            logger->error("Failed to create depth stencil state.");
+            return -1;
+        }
+
+        depthStencilStates.emplace_back(depthState);
+        return static_cast<S32>(depthStencilStates.size()) - 1;
+    }
+
+    ComPtr<ID3D11DepthStencilState> RenderDeviceDX11::getDsvStateById(S32 id) {
+        if (id < depthStencilStates.size() && id >= 0)
+            return depthStencilStates[id];
+
+        return nullptr;
+    }
 }

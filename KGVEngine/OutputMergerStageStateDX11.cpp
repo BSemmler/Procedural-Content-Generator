@@ -16,6 +16,14 @@ void KGV::Render::OutputMergerStageStateDX11::setDsvId(S32 id) {
     depthStencilViewId = id;
 }
 
-S32 KGV::Render::OutputMergerStageStateDX11::getDsvId() {
+S32 KGV::Render::OutputMergerStageStateDX11::getDsvId() const {
     return depthStencilViewId;
+}
+
+S32 KGV::Render::OutputMergerStageStateDX11::getDsvStateId() const {
+    return dsvStateId;
+}
+
+void KGV::Render::OutputMergerStageStateDX11::setDsvStateId(S32 dsvStateId) {
+    OutputMergerStageStateDX11::dsvStateId = dsvStateId;
 }
