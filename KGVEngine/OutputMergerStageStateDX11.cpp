@@ -9,5 +9,13 @@ const std::vector<S32> &KGV::Render::OutputMergerStageStateDX11::getRtvIds() con
 }
 
 void KGV::Render::OutputMergerStageStateDX11::setRtvIds(const std::vector<S32> &rtvIds) {
-    OutputMergerStageStateDX11::rtvIds = rtvIds;
+    this->rtvIds = rtvIds;
+}
+
+void KGV::Render::OutputMergerStageStateDX11::setDsvId(S32 id) {
+    depthStencilViewId = id;
+}
+
+S32 KGV::Render::OutputMergerStageStateDX11::getDsvId() {
+    return depthStencilViewId;
 }

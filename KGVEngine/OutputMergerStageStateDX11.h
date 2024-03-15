@@ -14,9 +14,12 @@ namespace KGV::Render {
 
         void setRtvIds(const std::vector<S32> &rtvIds);
 
+        S32 getDsvId();
+        void setDsvId(S32 id);
+
     protected:
         std::vector<S32> rtvIds;
-//        S32 depthStencilViewId;
+        S32 depthStencilViewId;
     };
 }
 

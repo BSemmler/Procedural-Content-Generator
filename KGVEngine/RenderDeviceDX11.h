@@ -109,6 +109,7 @@ namespace KGV::Render {
         std::vector<ShaderResourceViewDX11> shaderResourceViews;
         std::vector<RenderTargetViewDX11> renderTargetViews;
         std::vector<DepthStencilViewDX11> depthStencilViews;
+        std::vector<ComPtr<ID3D11DepthStencilState>> depthStencilStates;
         std::vector<ComPtr<ID3D11InputLayout>> inputLayouts;
         std::vector<ComPtr<ID3D11RasterizerState>> rasterStates;
         std::vector<D3D11_VIEWPORT> viewPorts;
