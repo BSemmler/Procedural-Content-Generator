@@ -121,6 +121,10 @@ add_executable(Engine
         KGVEngine/LightComponent.cpp
         KGVEngine/LightComponent.h
         KGVEngine/GeometryFactory.cpp
-        KGVEngine/GeometryFactory.h)
+        KGVEngine/GeometryFactory.h
+        KGVEngine/DepthStencilViewConfigDX11.cpp
+        KGVEngine/DepthStencilViewConfigDX11.h
+        KGVEngine/DepthStencilViewDX11.cpp
+        KGVEngine/DepthStencilViewDX11.h)
 
 target_link_libraries(Engine PRIVATE spdlog::spdlog d3d11.lib dxgi.lib d3dcompiler.lib)

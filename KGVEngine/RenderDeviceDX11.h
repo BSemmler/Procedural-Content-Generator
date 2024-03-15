@@ -17,6 +17,7 @@
 #include "ShaderResourceViewDX11.h"
 #include "ShaderDX11.h"
 #include "PipelineManagerDX11.h"
+#include "DepthStencilViewDX11.h"
 
 namespace KGV::Render {
     class ResourceViewDX11;
@@ -53,6 +54,8 @@ namespace KGV::Render {
 
         S32 createRenderTargetView(S32 resourceId, D3D11_RENDER_TARGET_VIEW_DESC* desc);
 
+        S32 createDepthStencilView(S32 resourceId, D3D11_DEPTH_STENCIL_VIEW_DESC* desc);
+
         S32 storeResource(std::unique_ptr<ResourceDX11> resource);
         ResourceDX11* getResourceById(S32 id);
 
@@ -63,6 +66,8 @@ namespace KGV::Render {
         RenderTargetViewDX11* getRtvById(S32 id);
 
         ShaderResourceViewDX11* getSrvById(S32 id);
+
+        DepthStencilViewDX11* getDsvById(S32 id);
 
         ComPtr<ID3D11InputLayout> getInputLayoutById(S32 id);
 
@@ -100,6 +105,7 @@ namespace KGV::Render {
         std::vector<std::unique_ptr<SwapChainDX11>> swapChains;
         std::vector<ShaderResourceViewDX11> shaderResourceViews;
         std::vector<RenderTargetViewDX11> renderTargetViews;
+        std::vector<DepthStencilViewDX11> depthStencilViews;
         std::vector<ComPtr<ID3D11InputLayout>> inputLayouts;
         std::vector<ComPtr<ID3D11RasterizerState>> rasterStates;
         std::vector<D3D11_VIEWPORT> viewPorts;

@@ -14,7 +14,7 @@ namespace KGV::Render {
     }
 
     ResourceViewDX11::ResourceViewDX11(S32 _resourceId, Texture2dConfigDX11 *_config, RenderDeviceDX11 *_device, ShaderResourceViewConfigDX11 *_srvConfig,
-                                       RenderTargetViewConfigDX11 *_rtvConfig) {
+                                       RenderTargetViewConfigDX11 *_rtvConfig, DepthStencilViewConfigDX11 *_dsvConfig) {
         D3D11_TEXTURE2D_DESC desc = _config->getDesc();
         initResource(desc.BindFlags, _resourceId, _device, _srvConfig, _rtvConfig);
 
@@ -23,7 +23,7 @@ namespace KGV::Render {
     }
 
     void ResourceViewDX11::initResource(U32 _bindFlags, S32 _resourceId, RenderDeviceDX11 *_device, ShaderResourceViewConfigDX11 *_srvConfig,
-                                        RenderTargetViewConfigDX11 *_rtvConfig) {
+                                        RenderTargetViewConfigDX11 *_rtvConfig, DepthStencilViewConfigDX11 *_dsvConfig) {
         texture2dConfig = nullptr;
         bufferConfig    = nullptr;
         rtvConfig       = nullptr;
@@ -43,6 +43,11 @@ namespace KGV::Render {
             *srvConfig = *_srvConfig;
         }
 
+        if (_dsvConfig) {
+            dsvConfig = std::make_unique<DepthStencilViewConfigDX11>();
+            *dsvConfig = *_dsvConfig;
+        }
+
         if ((_bindFlags & D3D11_BIND_RENDER_TARGET) == D3D11_BIND_RENDER_TARGET ) {
             D3D11_RENDER_TARGET_VIEW_DESC* desc = rtvConfig ? &rtvConfig->getDesc() : nullptr;
             rtvId = _device->createRenderTargetView(resourceId, desc);
@@ -51,6 +56,11 @@ namespace KGV::Render {
         if ((_bindFlags & D3D11_BIND_SHADER_RESOURCE) == D3D11_BIND_SHADER_RESOURCE ) {
             D3D11_SHADER_RESOURCE_VIEW_DESC* desc = srvConfig ? &srvConfig->getDesc() : nullptr;
             rtvId = _device->createShaderResourceView(resourceId, desc);
+        }
+
+        if ((_bindFlags & D3D11_BIND_DEPTH_STENCIL) == D3D11_BIND_DEPTH_STENCIL) {
+            D3D11_DEPTH_STENCIL_VIEW_DESC* desc = dsvConfig ? &dsvConfig->getDesc() : nullptr;
+            dsvId = _device->createDepthStencilView(resourceId, desc);
         }
     }
 

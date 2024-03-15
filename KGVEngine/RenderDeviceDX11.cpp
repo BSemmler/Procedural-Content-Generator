@@ -571,5 +571,36 @@ namespace KGV::Render {
         return std::make_shared<PipelineManagerDX11>(dev, context, context1);
     }
 
+    S32 RenderDeviceDX11::createDepthStencilView(S32 resourceId, D3D11_DEPTH_STENCIL_VIEW_DESC *desc) {
+        ComPtr<ID3D11Resource> rawResource;
+        ResourceDX11* resourceView = getResourceById(resourceId);
 
+        if (!resourceView) {
+            return -1;
+        }
+
+        rawResource = resourceView->getResource();
+
+        if (!rawResource) {
+            return -1;
+        }
+
+        ComPtr<ID3D11DepthStencilView> dsv;
+        HRESULT hr = S_OK;
+        if (FAILED(device->CreateDepthStencilView(rawResource.Get(), desc, dsv.GetAddressOf()))) {
+            logger->error("Failed to create depth stencil view for resource {}, ({})", resourceId, hr);
+            return -1;
+        }
+
+        depthStencilViews.emplace_back(dsv);
+
+        return static_cast<S32>(depthStencilViews.size()) - 1;
+    }
+
+    DepthStencilViewDX11 *RenderDeviceDX11::getDsvById(S32 id) {
+        if (id < depthStencilViews.size() && id >= 0)
+            return &depthStencilViews[id];
+
+        return nullptr;
+    }
 }
