@@ -126,6 +126,8 @@ add_executable(Engine
         KGVEngine/DepthStencilViewConfigDX11.h
         KGVEngine/DepthStencilViewDX11.cpp
         KGVEngine/DepthStencilViewDX11.h
+        KGVEngine/PerlinNoise.h
+        KGVEngine/PerlinNoise.cpp
 )
 
 target_link_libraries(Engine PRIVATE spdlog::spdlog d3d11.lib dxgi.lib d3dcompiler.lib)
