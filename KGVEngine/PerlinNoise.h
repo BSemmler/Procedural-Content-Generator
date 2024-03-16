@@ -12,6 +12,7 @@ namespace KGV::Procedural{
     public:
         PerlinNoise();
         double noiseDP(double x, double y, double z);
+        double noiseDP(double x, double y);
         float noiseSP(double x, double y, double z);
     protected:
         static inline double fade(double t);
