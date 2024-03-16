@@ -1,5 +1,7 @@
 #include "ApplicationWin32.h"
 #include "GeometryFactory.h"
+#include "PerlinNoise.h"
+
 using namespace DirectX;
 
 std::vector<KGV::Render::Vertex> gVertices = {
@@ -59,48 +61,48 @@ std::vector<U32> gIndices = {
 };
 
 // This method is flawed. If a vertice is connect to 5 faces the normal will be skewed to one direction. Only way to do it properly would be through quads.
-//void CalculatePerVertexNormals(std::vector<KGV::Render::Vertex>& vertices, const std::vector<unsigned int>& indices)
-//{
-//    // Clear normals
-//    for (auto& vertex : vertices)
-//    {
-//        vertex.normal = { 0.0f, 0.0f, 0.0f };
-//    }
-//
-//    constexpr int vertsPerTriangle = 3;
-//
-//    // Calculate face normals and accumulate them to vertices
-//    for (size_t i = 0; i < indices.size() / vertsPerTriangle; i++)
-//    {
-//        U32 i0 = indices[i * vertsPerTriangle + 0];
-//        U32 i1 = indices[i * vertsPerTriangle + 1];
-//        U32 i2 = indices[i * vertsPerTriangle + 2];
-//
-//        XMVECTOR v0 = DirectX::XMLoadFloat4(&vertices[i0].position);
-//        XMVECTOR v1 = DirectX::XMLoadFloat4(&vertices[i1].position);
-//        XMVECTOR v2 = DirectX::XMLoadFloat4(&vertices[i2].position);
-//
-//        XMVECTOR e0 = DirectX::XMVectorSubtract(v1, v0);
-//        XMVECTOR e1 = DirectX::XMVectorSubtract(v2, v0);
-//        XMVECTOR faceNormal = DirectX::XMVector3Cross(e0, e1);
-//
-//        XMVECTOR n1 = XMVectorAdd(XMLoadFloat3A(&vertices[i0].normal), faceNormal);
-//        XMVECTOR n2 = XMVectorAdd(XMLoadFloat3A(&vertices[i1].normal), faceNormal);
-//        XMVECTOR n3 = XMVectorAdd(XMLoadFloat3A(&vertices[i2].normal), faceNormal);
-//
-//        XMStoreFloat3A(&vertices[i0].normal, n1);
-//        XMStoreFloat3A(&vertices[i1].normal, n2);
-//        XMStoreFloat3A(&vertices[i2].normal, n3);
-//    }
-//
-//    // Normalize accumulated normals
-//    for (auto& vertex : vertices)
-//    {
-//        DirectX::XMVECTOR normal = DirectX::XMLoadFloat3(&vertex.normal);
-//        normal = DirectX::XMVector3Normalize(normal);
-//        DirectX::XMStoreFloat3(&vertex.normal, normal);
-//    }
-//}
+void CalculatePerVertexNormals(std::vector<KGV::Render::Vertex>& vertices, const std::vector<unsigned int>& indices)
+{
+    // Clear normals
+    for (auto& vertex : vertices)
+    {
+        vertex.normal = { 0.0f, 0.0f, 0.0f };
+    }
+
+    constexpr int vertsPerTriangle = 3;
+
+    // Calculate face normals and accumulate them to vertices
+    for (size_t i = 0; i < indices.size() / vertsPerTriangle; i++)
+    {
+        U32 i0 = indices[i * vertsPerTriangle + 0];
+        U32 i1 = indices[i * vertsPerTriangle + 1];
+        U32 i2 = indices[i * vertsPerTriangle + 2];
+
+        XMVECTOR v0 = DirectX::XMLoadFloat3(&vertices[i0].position);
+        XMVECTOR v1 = DirectX::XMLoadFloat3(&vertices[i1].position);
+        XMVECTOR v2 = DirectX::XMLoadFloat3(&vertices[i2].position);
+
+        XMVECTOR e0 = DirectX::XMVectorSubtract(v1, v0);
+        XMVECTOR e1 = DirectX::XMVectorSubtract(v2, v0);
+        XMVECTOR faceNormal = DirectX::XMVector3Cross(e0, e1);
+
+        XMVECTOR n1 = XMVectorAdd(XMLoadFloat3(&vertices[i0].normal), faceNormal);
+        XMVECTOR n2 = XMVectorAdd(XMLoadFloat3(&vertices[i1].normal), faceNormal);
+        XMVECTOR n3 = XMVectorAdd(XMLoadFloat3(&vertices[i2].normal), faceNormal);
+
+        XMStoreFloat3(&vertices[i0].normal, n1);
+        XMStoreFloat3(&vertices[i1].normal, n2);
+        XMStoreFloat3(&vertices[i2].normal, n3);
+    }
+
+    // Normalize accumulated normals
+    for (auto& vertex : vertices)
+    {
+        DirectX::XMVECTOR normal = DirectX::XMLoadFloat3(&vertex.normal);
+        normal = DirectX::XMVector3Normalize(normal);
+        DirectX::XMStoreFloat3(&vertex.normal, normal);
+    }
+}
 
 bool KGV::System::ApplicationWin32::init() {
     WNDCLASSEX wc;
@@ -118,7 +120,7 @@ bool KGV::System::ApplicationWin32::init() {
     wc.hIconSm = LoadIcon( nullptr, IDI_APPLICATION );
     
     WindowWin32::registerClass( wc );
-    window1 = std::make_unique<WindowWin32>( this, "KGV_Win32", 800, 600, 0, 0, "Hello World 1!", true );
+    window1 = std::make_unique<WindowWin32>( this, "KGV_Win32", 1920, 1080, 0, 0, "Hello World 1!", true );
 //    window2 = std::make_unique<WindowWin32>( this, "KGV_Win32", 800, 600, 800, 0, "Hello World 2!", true );
 
     if ( !window1->getWin32Handle() ) {
@@ -213,11 +215,11 @@ bool KGV::System::ApplicationWin32::init() {
     camera->camera->setDsvId(depthBuffer->getDsvId());
     camera->camera->setRtvId(rtvId);
     camera->camera->setViewPortId(viewPortId);
-    camera->camera->setPerspectiveProject(XMConvertToRadians(70), (float)window1->getWidth()/(float)window1->getHeight(), 0.1, 100.0f);
-    camera->transform.position.z = -3.0f;
+    camera->camera->setPerspectiveProject(XMConvertToRadians(70), (float)window1->getWidth()/(float)window1->getHeight(), 0.1, 1024.0f);
+    camera->transform.position.z = -500.0f;
     camera->transform.position.x = 0;
-    camera->transform.position.y = 2;
-    camera->transform.rotation.x = XMConvertToRadians(30);
+    camera->transform.position.y = 500;
+    camera->transform.rotation.x = XMConvertToRadians(45);
 
     cameras.emplace_back(camera);
 
@@ -255,7 +257,7 @@ bool KGV::System::ApplicationWin32::init() {
     light->light = std::make_unique<Engine::LightComponent>();
     light->light->ambient = {0.2f, 0.2f, 0.2f, 1.0f };
     light->light->diffuse = {0.7f, 0.7f, 0.7f, 1.0f };
-    light->light->specular = { 1.0f, 1.0f, 1.0f, 1.0f };
+    light->light->specular = { 0.1f, 0.1f, 0.1f, 1.0f };
 
     entities.emplace_back(light);
     lights.emplace_back(light);
@@ -263,22 +265,93 @@ bool KGV::System::ApplicationWin32::init() {
     std::vector<U32> gridIndices;
     std::vector<Render::Vertex> gridVertices;
     auto lt = std::chrono::high_resolution_clock::now();
-    Engine::GeometryFactory::getVertexGridU32(512, gridVertices, gridIndices, 0.2);
+    int gridSize = 1024;
+    double stepSize = 1;
+    Engine::GeometryFactory::getVertexGridU32(gridSize, gridVertices, gridIndices, stepSize);
     auto ct = std::chrono::high_resolution_clock::now();
     spdlog::info("Time to generate grid of {} vertices, {} triangles: {}s", gridVertices.size(), gridIndices.size() / 3, std::chrono::duration_cast<std::chrono::duration<double>>(ct - lt).count());
+
+    Procedural::PerlinNoise p;
+    lt = std::chrono::high_resolution_clock::now();
+    spdlog::info("Noise at position [0, 0]: {}", p.noiseDP(0, 0));
+    int octaves = 8;
+    double persistence = 0.4;
+    double lowestVertex = 1000;
+    double highestVertex = -1000;
+    double gridOffset = 1000;
+    for (auto &vert : gridVertices) {
+        double total = 0.0f;
+        double frequency = 1;
+        double amplitude = 1;
+        double maxValue = 0;
+        for (int i = 0; i < octaves; ++i) {
+            total += p.noiseDP(((vert.position.x + gridSize) / (gridSize) + gridOffset) * frequency, ((vert.position.z + gridSize) / (gridSize) + gridOffset) * frequency) * amplitude;
+            maxValue += amplitude;
+            amplitude *= persistence;
+            frequency *= 2;
+        }
+        total /= maxValue;
+        vert.position.y = total * 256.0f;
+        if (vert.position.y < lowestVertex)
+            lowestVertex = vert.position.y;
+
+        if (vert.position.y > highestVertex)
+            highestVertex = vert.position.y;
+    }
+    ct = std::chrono::high_resolution_clock::now();
+
+    spdlog::info("Noise at position [0, 0]: {}", p.noiseDP(0, 0));
+    spdlog::info("Time to generate generate perlin noise for {} vertices: {}s", gridVertices.size(), std::chrono::duration_cast<std::chrono::duration<double>>(ct - lt).count());
+    spdlog::info("Lowest valley: {}, highest peak: {}", lowestVertex, highestVertex);
+
+    CalculatePerVertexNormals(gridVertices, gridIndices);
+//    for (int i = 0; i < 10; i++) {
+//        for (int j = 0; j < 10; j++) {
+//            p.noiseDP((float)i / 512.0,(float)j / 512.0, (float)0);
+//            spdlog::info("noise at {} {} : {}", i, j, p.noiseDP((float)i / 512.0,(float)j / 512.0, (float)0));
+//        }
+//    }
+
     gridMeshId = renderer->createMesh({gridVertices}, gridIndices, Render::eBufferUpdateType::kImmutable);
 
     auto grid = std::make_shared<Engine::Entity>();
     grid->transform.position.y = 0;
+//    grid->transform.scale.x = 0.1;
+//    grid->transform.scale.y = 0.1;
+//    grid->transform.scale.z = 0.1;
     grid->material = std::make_unique<Engine::MaterialComponent>();
     grid->material->ambient = { 0.0215f, 0.1745f, 0.0215f, 1.0f };
     grid->material->diffuse = { 0.07568f, 0.61424f, 0.07568f, 1.0f };
-    grid->material->specular = { 0.633f, 0.727811f, 0.633f, 0.6 * 128 };
+    grid->material->specular = { 0.633f, 0.727811f, 0.633f, 0.001 * 128 };
+    grid->material->materialId = basicMatId;
 
     grid->mesh = std::make_unique<Engine::MeshComponent>();
     grid->mesh->meshId = gridMeshId;
     grid->mesh->render = true;
     entities.emplace_back(grid);
+
+    std::vector<Render::Vertex> waterVerts;
+    std::vector<U32> waterIndices;
+    Engine::GeometryFactory::getVertexGridU32(gridSize, waterVerts, waterIndices, 1);
+
+    auto waterMeshId = renderer->createMesh({waterVerts}, waterIndices, Render::eBufferUpdateType::kImmutable);
+
+    auto water = std::make_shared<Engine::Entity>();
+    water->transform.position.y = 0;
+//    water->transform.scale.x = 1024;
+//    water->transform.scale.y = 1024;
+//    water->transform.scale.z = 1024;
+    water->material = std::make_unique<Engine::MaterialComponent>();
+    water->material->ambient = { 0, 0, 1, 1.0f };
+    water->material->diffuse = { 0, 0, 1.0f, 1.0f };
+    water->material->specular = { 0, 0, 1.0f, 0.6 * 128 };
+    water->material->materialId = basicMatId;
+
+    water->mesh = std::make_unique<Engine::MeshComponent>();
+    water->mesh->meshId = waterMeshId;
+    water->mesh->render = true;
+    entities.emplace_back(water);
+
 
     return true;
 }
