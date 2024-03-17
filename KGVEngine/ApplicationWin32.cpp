@@ -1,6 +1,6 @@
 #include "ApplicationWin32.h"
 #include "GeometryFactory.h"
-#include "PerlinNoise.h"
+#include "NoiseBufferGenerator.h"
 
 using namespace DirectX;
 
@@ -279,28 +279,30 @@ bool KGV::System::ApplicationWin32::init() {
     double lowestVertex = 1000;
     double highestVertex = -1000;
     double gridOffset = 1000;
-    for (auto &vert : gridVertices) {
-        double total = 0.0f;
-        double frequency = 1;
-        double amplitude = 1;
-        double maxValue = 0;
-        for (int i = 0; i < octaves; ++i) {
-            total += p.noiseDP(((vert.position.x + gridSize) / (gridSize) + gridOffset) * frequency, ((vert.position.z + gridSize) / (gridSize) + gridOffset) * frequency) * amplitude;
-            maxValue += amplitude;
-            amplitude *= persistence;
-            frequency *= 2;
-        }
-        total /= maxValue;
-        vert.position.y = total * 256.0f;
-        if (vert.position.y < lowestVertex)
-            lowestVertex = vert.position.y;
 
-        if (vert.position.y > highestVertex)
-            highestVertex = vert.position.y;
-    }
+    Procedural::NoiseBufferGenerator nbg;
+//    auto noiseBuffer = std::make_unique<double[]>(gridSize * gridSize);
+    std::vector<double> noiseBuffer;
+    noiseBuffer.resize(gridSize * gridSize);
+    Procedural::fBmConfig conf{};
+    conf.octaves = 8;
+    conf.persistence = 0.4;
+    conf.amplitude = 1;
+    conf.frequency = 1;
+    conf.lacunarity = 2;
+    nbg.generateNoiseTexture2DDP(conf, noiseBuffer.data(), sizeof(double), 0, 0, 0, gridSize, gridSize);
     ct = std::chrono::high_resolution_clock::now();
 
-    spdlog::info("Noise at position [0, 0]: {}", p.noiseDP(0, 0));
+    // we can do this because in all of our we app we've used the convention to go start at left to right top to bottom.
+    for (int i = 0; i < gridSize * gridSize; ++i) {
+        gridVertices[i].position.y = (noiseBuffer[i] * 256.0);
+        if (gridVertices[i].position.y > highestVertex)
+            highestVertex = gridVertices[i].position.y;
+        else if (gridVertices[i].position.y < lowestVertex) {
+            lowestVertex = gridVertices[i].position.y;
+        }
+    }
+
     spdlog::info("Time to generate generate perlin noise for {} vertices: {}s", gridVertices.size(), std::chrono::duration_cast<std::chrono::duration<double>>(ct - lt).count());
     spdlog::info("Lowest valley: {}, highest peak: {}", lowestVertex, highestVertex);
 
