@@ -1,9 +1,8 @@
 #pragma once
+#include "pch.h"
 #include "Window.h"
 #ifdef KGV_WIN
 #include "IWndProc.h"
-#define WIN32_LEAN_AND_MEAN 1
-#include <Windows.h>
 
 namespace KGV::System 
 {
@@ -36,10 +35,10 @@ namespace KGV::System
 		void resizeWindow( S32 width, S32 height )			override;
 		void repositionWindow( S32 xPos, S32 yPos )			override;
 		void setWindowCaption( const std::string& caption ) override;
-		virtual HWND getWin32Handle();
+		virtual void* getWin32Handle();
 		static	bool registerClass(WNDCLASSEX &wc);
 	protected:
-		HWND wndHandle;
+		void* wndHandle;
 		
 		// Inherited via Window
 		

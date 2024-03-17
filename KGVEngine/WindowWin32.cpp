@@ -1,6 +1,8 @@
 #include "WindowWin32.h"
-
 #ifdef KGV_WIN
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 
 
 using namespace KGV::System;
@@ -52,16 +54,16 @@ WindowWin32::WindowWin32(IWndProc *procObj, const std::string &className, S32 wi
         return;
     }
     // Store our window procedure object inside the extra window bytes.
-    SetWindowLongPtr(wndHandle, 0, reinterpret_cast< LONG_PTR >( procObj ));
+    SetWindowLongPtr((HWND)wndHandle, 0, reinterpret_cast< LONG_PTR >( procObj ));
 
-    ShowWindow(wndHandle, isVisible);
-    UpdateWindow(wndHandle);
+    ShowWindow((HWND)wndHandle, isVisible);
+    UpdateWindow((HWND)wndHandle);
 }
 
 WindowWin32::~WindowWin32() {
     // Cleanup window.
     if (wndHandle) {
-        DestroyWindow(wndHandle);
+        DestroyWindow((HWND)wndHandle);
     }
 
     wndHandle = nullptr;
@@ -69,38 +71,38 @@ WindowWin32::~WindowWin32() {
 
 bool KGV::System::WindowWin32::isWindowVisible() {
     // Returns true if window has the WS_VISIBLE style. Can be obsecured and will still return true.
-    return IsWindowVisible(wndHandle);
+    return IsWindowVisible((HWND)wndHandle);
 }
 
 void WindowWin32::showWindow(bool showState) {
-    ShowWindow(wndHandle, showState);
-    UpdateWindow(wndHandle);
+    ShowWindow((HWND)wndHandle, showState);
+    UpdateWindow((HWND)wndHandle);
 }
 
 void WindowWin32::resizeWindow(S32 width, S32 height) {
     // Resize the window but keep the x/y and z order.
-    SetWindowPos(wndHandle, nullptr, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER);
+    SetWindowPos((HWND)wndHandle, nullptr, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER);
 
     // Make sure the show state is consistent with before.
-    ShowWindow(wndHandle, isVisible);
-    UpdateWindow(wndHandle);
+    ShowWindow((HWND)wndHandle, isVisible);
+    UpdateWindow((HWND)wndHandle);
 }
 
 void KGV::System::WindowWin32::setWindowCaption(const std::string &caption) {
-    SetWindowTextA(wndHandle, caption.c_str());
-    UpdateWindow(wndHandle);
+    SetWindowTextA((HWND)wndHandle, caption.c_str());
+    UpdateWindow((HWND)wndHandle);
 }
 
 void WindowWin32::repositionWindow(S32 xPos, S32 yPos) {
     // Reposition the window but keep the width/height and z order.
-    SetWindowPos(wndHandle, nullptr, xPos, yPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+    SetWindowPos((HWND)wndHandle, nullptr, xPos, yPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 
     // Make sure the show state is consistent with before.
-    ShowWindow(wndHandle, isVisible);
-    UpdateWindow(wndHandle);
+    ShowWindow((HWND)wndHandle, isVisible);
+    UpdateWindow((HWND)wndHandle);
 }
 
-HWND KGV::System::WindowWin32::getWin32Handle() {
+void* KGV::System::WindowWin32::getWin32Handle() {
     return wndHandle;
 }
 

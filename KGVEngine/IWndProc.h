@@ -1,5 +1,5 @@
-#include "pch.h"
-
+#ifndef IWNDPROC_H_
+#define IWNDPROC_H_
 namespace KGV::System
 {
 	/**
@@ -12,6 +12,7 @@ namespace KGV::System
 	class IWndProc
 	{
 	public:
-		virtual LRESULT CALLBACK wndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam ) = 0;
+		virtual LRESULT __stdcall wndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam ) = 0;
 	};
 }
+#endif // IWNDPROC_H_

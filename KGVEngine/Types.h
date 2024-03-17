@@ -1,4 +1,3 @@
-#include "pch.h"
 #include <cstdint>
 
 typedef float		F32;

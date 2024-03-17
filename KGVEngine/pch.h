@@ -7,6 +7,8 @@
 #ifndef PCH_H
 #define PCH_H
 // STD
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
 #include <cstdarg>
 #include <iostream>
 #include <stdexcept>
@@ -16,6 +18,8 @@
 #include <fstream>
 #include <vector>
 #include <utility>
+#include <map>
+#include <queue>
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/sink.h>
