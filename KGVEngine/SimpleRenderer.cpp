@@ -49,6 +49,10 @@ struct MaterialConstantsDef {
     DirectX::XMFLOAT4A ambient;
     DirectX::XMFLOAT4A diffuse;
     DirectX::XMFLOAT4A specular;
+    float displacement;
+    float pad1;
+    float pad2;
+    float pad3;
 };
 
 //struct LightConstantsDef {
@@ -60,7 +64,7 @@ struct MaterialConstantsDef {
 struct FrameConstantsDef {
     DirectionalLight directionalLight;
     F32 deltaTime;
-    F32 terrainScale;
+    F32 pad1;
     F32 pad2;
     F32 pad3;
 };
@@ -112,7 +116,6 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
     fcd.directionalLight.ambient = light->ambient;
     fcd.directionalLight.diffuse = light->diffuse;
     fcd.directionalLight.specular = light->specular;
-    fcd.terrainScale = 256.0f;
 
     // Calculate direction of the light.
     auto lightRotation = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3A(&lightEntity->transform.rotation));
@@ -200,6 +203,7 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
             mcd.ambient = entity->material->ambient;
             mcd.diffuse = entity->material->diffuse;
             mcd.specular = entity->material->specular;
+            mcd.displacement = entity->material->displacement;
             memcpy(materialConstants.pData, &mcd, sizeof(MaterialConstantsDef));
             deviceContext->unmapResource(psMaterialConstantsBuffer.get(), 0);
 
@@ -215,7 +219,8 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
                 vsState.setShaderId(renderMat->vertexShaderId);
                 vsState.setConstantBuffersIds({vsObjectConstantsBuffer->getResourceId(),
                                                vsCameraConstantsBuffer->getResourceId(),
-                                               vsFrameConstantsBuffer->getResourceId()});
+                                               vsFrameConstantsBuffer->getResourceId(),
+                                               psMaterialConstantsBuffer->getResourceId()});
                 if (material->mapTexture) {
                     auto m = material->mapTexture.get();
                     vsState.setSrvIds({m->getSrvId()});

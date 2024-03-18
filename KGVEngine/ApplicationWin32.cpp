@@ -315,6 +315,7 @@ bool KGV::System::ApplicationWin32::init() {
     grid->transform.position.y = 0;
     grid->transform.rotation.y = 0;
     grid->material = std::make_unique<Engine::MaterialComponent>();
+    grid->material->displacement = 256.0f;
     grid->material->ambient = { 0.0215f, 0.1745f, 0.0215f, 1.0f };
     grid->material->diffuse = { 0.07568f, 0.61424f, 0.07568f, 1.0f };
     grid->material->specular = { 0.633f, 0.727811f, 0.633f, 0.001 * 128 };
@@ -493,7 +494,7 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
     nbg.generateNoiseTexture2D(conf, terrainRidgeNoiseBuffer.data(), gridOffset, gridOffset, textureSize, textureSize);
 //    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, ridgeOp);
     nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, circularGradientOp);
-    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, scalingOp);
+//    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, scalingOp);
     auto ct = std::chrono::high_resolution_clock::now();
     spdlog::info("Time to generate generate perlin noise for {} points: {}s", terrainRidgeNoiseBuffer.size(), std::chrono::duration_cast<std::chrono::duration<double>>(ct - lt).count());
 

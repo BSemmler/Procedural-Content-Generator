@@ -25,6 +25,10 @@ struct Material {
      float4 ambient;
      float4 diffuse;
      float4 specular;
+     float displacement;
+     float pad1;
+     float pad2;
+     float pad3;
 };
 
 cbuffer ObjectConstants : register(b0) {
@@ -40,7 +44,7 @@ cbuffer CameraConstants : register(b1) {
 cbuffer FrameConstantsDef : register(b2) {
     DirectionalLight gDirectionalLight;
     float gDeltaTime;
-    float terrainScale;
+    float pad1;
     float pad2;
     float pad3;
 };
@@ -59,8 +63,8 @@ float SampleHeightMap(float2 uv) {
 
 // Function to get the height difference between a texel and its neighboring texels
 float GetHeightDifference(float2 uv, float2 offset) {
-    float centerHeight = SampleHeightMap(uv);
-    float neighborHeight = SampleHeightMap(uv + offset);
+    float centerHeight = SampleHeightMap(uv).r * max(gMaterial.displacement, 1.0f);
+    float neighborHeight = SampleHeightMap(uv + offset).r * max(gMaterial.displacement, 1.0f);
     return neighborHeight - centerHeight;
 }
 
@@ -73,7 +77,7 @@ VertexOut VS(VertexIn input)
     gHeightMap.GetDimensions(width, height);
     float2 uv = input.texcoord;
     float2 offset = float2(1.0f / width, 1.0f / height);
-    input.position.y = gHeightMap.SampleLevel(gHeightMapSampler, uv, 0);
+    input.position.y = gHeightMap.SampleLevel(gHeightMapSampler, uv, 0).r * max(gMaterial.displacement, 1.0f);
 
     output.worldPosition = mul(float4(input.position, 1.0f), gWorldMatrix);
     output.position = mul(output.worldPosition, gViewProjectionMatrix);
