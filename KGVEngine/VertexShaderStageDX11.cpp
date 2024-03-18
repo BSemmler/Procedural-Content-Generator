@@ -32,7 +32,15 @@ void KGV::Render::VertexShaderStageDX11::applyDesiredState(ComPtr<ID3D11DeviceCo
         srvs.emplace_back(device->getSrvById(id)->getView().Get());
     }
 
+    // TODO: Update this so we can set start slots as well.
     context->VSSetShaderResources(0, srvs.size(), srvs.data());
+
+    std::vector<ID3D11SamplerState*> samplers;
+    for (S32 id : desiredState.getSamplerIds()) {
+        samplers.emplace_back(device->getSamplerStateById(id).Get());
+    }
+
+    context->VSSetSamplers(0, samplers.size(), samplers.data());
 
     std::vector<ID3D11Buffer*> constantBuffers;
     for (S32 id : desiredState.getConstantBuffersIds()) {
@@ -41,4 +49,8 @@ void KGV::Render::VertexShaderStageDX11::applyDesiredState(ComPtr<ID3D11DeviceCo
     }
 
     context->VSSetConstantBuffers(0, constantBuffers.size(), constantBuffers.data());
+
+
+
+    currentState = desiredState;
 }

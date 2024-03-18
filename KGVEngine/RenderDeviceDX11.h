@@ -41,9 +41,9 @@ namespace KGV::Render {
         std::vector<ComPtr<IDXGIAdapter1>> getAdapters(const ComPtr<IDXGIFactory2>& pFactory = nullptr);
 
         std::shared_ptr<ResourceViewDX11> createTexture2D(Texture2dConfigDX11 &texConfig, ResourceData *data,
-                                                           ShaderResourceViewConfigDX11 *srvConfig,
-                                                           RenderTargetViewConfigDX11 *rtvConfig,
-                                                           DepthStencilViewConfigDX11 *dsvConfig);
+                                                           ShaderResourceViewConfigDX11 *srvConfig = nullptr,
+                                                           RenderTargetViewConfigDX11 *rtvConfig = nullptr,
+                                                           DepthStencilViewConfigDX11 *dsvConfig = nullptr);
 
         std::shared_ptr<ResourceViewDX11> createVertexBuffer(BufferConfigDX11 &config, ResourceData *data);
         std::shared_ptr<ResourceViewDX11> createIndexBuffer(BufferConfigDX11 &config, ResourceData *data);
@@ -86,6 +86,10 @@ namespace KGV::Render {
 
         S32 createDepthStencilState(D3D11_DEPTH_STENCIL_DESC &desc);
 
+        S32 createSamplerState(D3D11_SAMPLER_DESC &desc);
+
+        ComPtr<ID3D11SamplerState> getSamplerStateById(S32 id);
+
         ComPtr<ID3D11RasterizerState> getRasterizerStateById(S32 id);
 
         ComPtr<ID3D11DepthStencilState> getDsvStateById(S32 id);
@@ -116,6 +120,7 @@ namespace KGV::Render {
         std::vector<ComPtr<ID3D11DepthStencilState>> depthStencilStates;
         std::vector<ComPtr<ID3D11InputLayout>> inputLayouts;
         std::vector<ComPtr<ID3D11RasterizerState>> rasterStates;
+        std::vector<ComPtr<ID3D11SamplerState>> samplerStates;
         std::vector<D3D11_VIEWPORT> viewPorts;
         std::vector<D3D11_RECT> scissorRects;
         std::vector<std::unique_ptr<ResourceDX11>> resources;

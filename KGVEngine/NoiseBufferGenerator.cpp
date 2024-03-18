@@ -6,71 +6,65 @@
 namespace KGV::Procedural {
 
 
-    void NoiseBufferGenerator::generateNoiseTexture2DSP(fBmConfig& fBmConf, void *buffer, int stride, int memOffset,
-                                                        int xPosOffset, int yPosOffset, int width, int height) {
+    void NoiseBufferGenerator::generateNoiseTexture2D(fBmConfig& fBmConf, float *buffer,
+                                                        double xPosOffset, double yPosOffset, int width, int height) {
         const unsigned int totalElements = width * height;
         const unsigned int elementsPerThread = (height / maxThreads) * width;
 
         for (int i = 0; i < maxThreads; ++i) {
             unsigned int begin = i * elementsPerThread;
             unsigned int end = (i == maxThreads - 1) ? totalElements : (i + 1) * elementsPerThread;
-            auto t = (char*)buffer + (stride * begin);
-            spdlog::info("Start: {}, End: {}, Address: {}", begin, end, t);
 
-            threadPool.emplace_back(([this, &fBmConf, width, height, stride, memOffset, xPosOffset, yPosOffset]
-            (int begin, int end, void* buffer) {
+            threadPool.emplace_back(([this, &fBmConf, width, height, xPosOffset, yPosOffset]
+            (int begin, int end, float* buffer) {
                 for (int i = begin; i < end; ++i) {
                     double xf = i % width;
                     double yf = i / width;
                     auto val = static_cast<float>(fBm(fBmConf, xf / width + xPosOffset, yf / height + yPosOffset));
-                    memcpy((char*)buffer + memOffset, &val, sizeof(float));
-
-                    // Need
-                    auto t = (char*)buffer;
-                    t += stride;
-                    buffer = t;
+                    buffer[i] = val;
+//                    memcpy(buffer, &val, sizeof(float));
+//                    buffer++;
                 }
 
-            }), begin, end, (char*)buffer + (stride * begin));
+            }), begin, end, buffer);
+            spdlog::info("begin: {}, end: {}", begin, end);
         }
 
         for (auto &t : threadPool) {
             t.join();
         }
+
+        threadPool.clear();
     }
 
-    void NoiseBufferGenerator::generateNoiseTexture2DDP(fBmConfig& fBmConf, void *buffer, int stride, int memOffset,
-                                                        int xPosOffset, int yPosOffset, int width, int height) {
+    void NoiseBufferGenerator::generateNoiseTexture2D(fBmConfig& fBmConf, double *buffer,
+                                                        double xPosOffset, double yPosOffset, int width, int height) {
         const unsigned int totalElements = width * height;
         const unsigned int elementsPerThread = (height / maxThreads) * width;
 
         for (int i = 0; i < maxThreads; ++i) {
             unsigned int begin = i * elementsPerThread;
             unsigned int end = (i == maxThreads - 1) ? totalElements : (i + 1) * elementsPerThread;
-            auto t = (char*)buffer + (stride * begin);
-            spdlog::info("Start: {}, End: {}, Address: {}", begin, end, (void*)t);
 
-            threadPool.emplace_back(([this, &fBmConf, width, height, stride, memOffset, xPosOffset, yPosOffset]
-                    (int begin, int end, void* buffer) {
+            threadPool.emplace_back(([this, &fBmConf, width, height, xPosOffset, yPosOffset]
+                    (int begin, int end, double* buffer) {
                 for (int i = begin; i < end; ++i) {
                     double xf = i % width;
                     double yf = i / width;
-//                    spdlog::info("xf {} yf {}", xf, yf);
+
                     auto val = fBm(fBmConf, xf / width + xPosOffset, yf / height + yPosOffset);
-                    memcpy((char*)buffer + memOffset, &val, sizeof(double));
-//                    spdlog::info("xf {} yf {} val {}", xf, yf, val);
-                    // Need
-                    auto t = (char*)buffer;
-                    t += stride;
-                    buffer = t;
+                    buffer[i] = val;
                 }
 
-            }), begin, end, (char*)buffer + (stride * begin));
+            }), begin, end, buffer);
+//            spdlog::info("begin: {}, end: {}", begin, end);
         }
 
         for (auto &t : threadPool) {
             t.join();
         }
+
+        threadPool.clear();
     }
 
 //    void NoiseBufferGenerator::generateNoise3DSP(fBmConfig& fBm, void *buffer, int stride, int memOffset, int xPosOffset, int yPosOffset,
@@ -114,6 +108,98 @@ namespace KGV::Procedural {
 
         return total / totalAmplitude;
     }
+
+    void NoiseBufferGenerator::execOp(float *buffer, int width, int height, const NoiseOp &func) {
+        const unsigned int totalElements = width * height;
+        const unsigned int elementsPerThread = (height / maxThreads) * width;
+
+        for (int i = 0; i < maxThreads; ++i) {
+            unsigned int begin = i * elementsPerThread;
+            unsigned int end = (i == maxThreads - 1) ? totalElements : (i + 1) * elementsPerThread;
+
+            threadPool.emplace_back(([width, height, func](int begin, int end, float* buffer) {
+                for (int i = begin; i < end; ++i) {
+                    auto xf = static_cast<double>(i % width);
+                    auto yf =  static_cast<double>(i / width);
+                    auto val = static_cast<float>(func(*buffer, xf, yf, width, height));
+
+                    memcpy(buffer, &val, sizeof(float));
+                    buffer++;
+                }
+
+            }), begin, end, buffer + begin);
+        }
+
+        for (auto &t : threadPool) {
+            t.join();
+        }
+
+        threadPool.clear();
+    }
+
+    void NoiseBufferGenerator::execOp(double *buffer, int width, int height, const NoiseOp& func) {
+        const unsigned int totalElements = width * height;
+        const unsigned int elementsPerThread = (height / maxThreads) * width;
+
+        for (int i = 0; i < maxThreads; ++i) {
+            unsigned int begin = i * elementsPerThread;
+            unsigned int end = (i == maxThreads - 1) ? totalElements : (i + 1) * elementsPerThread;
+
+            threadPool.emplace_back(([width, height, func](int begin, int end, double* buffer) {
+                for (int i = begin; i < end; ++i) {
+                    auto xf = static_cast<double>(i % width);
+                    auto yf =  static_cast<double>(i / width);
+                    auto val = func(*buffer, xf, yf, width, height);
+
+                    memcpy(buffer, &val, sizeof(double));
+                    buffer++;
+                }
+
+            }), begin, end, buffer + begin);
+        }
+
+        for (auto &t : threadPool) {
+            t.join();
+        }
+
+        threadPool.clear();
+    }
+
+    void NoiseBufferGenerator::combine(double *a, double *b, double *out, int width, int height,
+                                       const CombineNoiseOp& func) {
+
+        const unsigned int totalElements = width * height;
+        const unsigned int elementsPerThread = (height / maxThreads) * width;
+
+        for (int i = 0; i < maxThreads; ++i) {
+            unsigned int begin = i * elementsPerThread;
+            unsigned int end = (i == maxThreads - 1) ? totalElements : (i + 1) * elementsPerThread;
+
+            auto inA = a + begin;
+            auto inB = b + begin;
+            auto inOut = out + begin;
+
+            threadPool.emplace_back(([width, height, func](int begin, int end, double* a, double* b, double* out) {
+                for (int i = begin; i < end; ++i) {
+                    auto xf = static_cast<double>(i % width);
+                    auto yf =  static_cast<double>(i / width);
+                    auto val = func(*a, *b, xf, yf, width, height);
+
+                    memcpy(out, &val, sizeof(double));
+                    a++;
+                    b++;
+                    out++;
+                }
+
+            }), begin, end, inA, inB, inOut);
+        }
+
+        for (auto &t : threadPool) {
+            t.join();
+        }
+    }
+
+
 
 }
 

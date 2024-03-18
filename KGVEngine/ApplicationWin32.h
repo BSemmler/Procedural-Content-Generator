@@ -18,6 +18,8 @@ namespace KGV::System
 		int		run()		override;
         void draw(F32 dt);
 
+        void createHeightMaps();
+
 		// Inherited via IWndProc
 		virtual LRESULT CALLBACK wndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam ) override;
 
@@ -33,7 +35,11 @@ namespace KGV::System
         std::shared_ptr<Render::ResourceViewDX11> indexBuffer;
         std::shared_ptr<Render::ResourceViewDX11> constantBuffer;
         std::shared_ptr<Render::ResourceViewDX11> depthBuffer;
+        std::shared_ptr<Render::ResourceViewDX11> terrainMapTexture;
+        std::shared_ptr<Render::ResourceViewDX11> terrainColorTexture;
+        std::shared_ptr<Render::ResourceViewDX11> waterMapTexture;
         S32 vertexShaderId;
+        S32 terrainVertexShaderId;
         S32 pixelShaderId;
         S32 viewPortId;
         std::vector<std::shared_ptr<Engine::Entity>> cameras;

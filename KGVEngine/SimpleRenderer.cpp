@@ -60,7 +60,7 @@ struct MaterialConstantsDef {
 struct FrameConstantsDef {
     DirectionalLight directionalLight;
     F32 deltaTime;
-    F32 pad1;
+    F32 terrainScale;
     F32 pad2;
     F32 pad3;
 };
@@ -112,6 +112,7 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
     fcd.directionalLight.ambient = light->ambient;
     fcd.directionalLight.diffuse = light->diffuse;
     fcd.directionalLight.specular = light->specular;
+    fcd.terrainScale = 256.0f;
 
     // Calculate direction of the light.
     auto lightRotation = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3A(&lightEntity->transform.rotation));
@@ -215,6 +216,11 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
                 vsState.setConstantBuffersIds({vsObjectConstantsBuffer->getResourceId(),
                                                vsCameraConstantsBuffer->getResourceId(),
                                                vsFrameConstantsBuffer->getResourceId()});
+                if (material->mapTexture) {
+                    auto m = material->mapTexture.get();
+                    vsState.setSrvIds({m->getSrvId()});
+//                    vsState.setSamplerIds({m->getSam})
+                }
 
                 psState.setShaderId(renderMat->pixelShaderId);
                 psState.setConstantBuffersIds({

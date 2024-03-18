@@ -26,11 +26,16 @@ namespace KGV::Render {
 
         void setCbufferStartSlot(S32 cbufferStartSlot);
 
+        const std::vector<S32> &getSamplerIds() const;
+
+        void setSamplerIds(const std::vector<S32> &samplerIds);
+
     protected:
         S32 shaderId;
         S32 cbufferStartSlot;
         std::vector<S32> constantBuffersIds;
         std::vector<S32> srvIds;
+        std::vector<S32> samplerIds;
     };
 }
 

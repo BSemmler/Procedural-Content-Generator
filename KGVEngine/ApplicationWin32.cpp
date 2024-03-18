@@ -1,6 +1,7 @@
 #include "ApplicationWin32.h"
 #include "GeometryFactory.h"
 #include "NoiseBufferGenerator.h"
+#include "immintrin.h"
 
 using namespace DirectX;
 
@@ -167,6 +168,7 @@ bool KGV::System::ApplicationWin32::init() {
 
 
     vertexShaderId = device->loadShader("../KGVEngine/shaders/basicLighting.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
+    terrainVertexShaderId = device->loadShader("../KGVEngine/shaders/heightmapTerrain.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
     pixelShaderId = device->loadShader("../KGVEngine/shaders/basicLighting.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
 
     std::vector<D3D11_INPUT_ELEMENT_DESC> inputElements = {
@@ -215,8 +217,8 @@ bool KGV::System::ApplicationWin32::init() {
     camera->camera->setDsvId(depthBuffer->getDsvId());
     camera->camera->setRtvId(rtvId);
     camera->camera->setViewPortId(viewPortId);
-    camera->camera->setPerspectiveProject(XMConvertToRadians(70), (float)window1->getWidth()/(float)window1->getHeight(), 0.1, 1024.0f);
-    camera->transform.position.z = -500.0f;
+    camera->camera->setPerspectiveProject(XMConvertToRadians(70), (float)window1->getWidth()/(float)window1->getHeight(), 1, 2000.0f);
+    camera->transform.position.z = -600.0f;
     camera->transform.position.x = 0;
     camera->transform.position.y = 500;
     camera->transform.rotation.x = XMConvertToRadians(45);
@@ -271,61 +273,53 @@ bool KGV::System::ApplicationWin32::init() {
     auto ct = std::chrono::high_resolution_clock::now();
     spdlog::info("Time to generate grid of {} vertices, {} triangles: {}s", gridVertices.size(), gridIndices.size() / 3, std::chrono::duration_cast<std::chrono::duration<double>>(ct - lt).count());
 
-    Procedural::PerlinNoise p;
-    lt = std::chrono::high_resolution_clock::now();
-    spdlog::info("Noise at position [0, 0]: {}", p.noiseDP(0, 0));
-    int octaves = 8;
-    double persistence = 0.4;
-    double lowestVertex = 1000;
-    double highestVertex = -1000;
-    double gridOffset = 1000;
-
-    Procedural::NoiseBufferGenerator nbg;
-//    auto noiseBuffer = std::make_unique<double[]>(gridSize * gridSize);
-    std::vector<double> noiseBuffer;
-    noiseBuffer.resize(gridSize * gridSize);
-    Procedural::fBmConfig conf{};
-    conf.octaves = 8;
-    conf.persistence = 0.4;
-    conf.amplitude = 1;
-    conf.frequency = 1;
-    conf.lacunarity = 2;
-    nbg.generateNoiseTexture2DDP(conf, noiseBuffer.data(), sizeof(double), 0, 0, 0, gridSize, gridSize);
-    ct = std::chrono::high_resolution_clock::now();
-
-    // we can do this because in all of our we app we've used the convention to go start at left to right top to bottom.
-    for (int i = 0; i < gridSize * gridSize; ++i) {
-        gridVertices[i].position.y = (noiseBuffer[i] * 256.0);
-        if (gridVertices[i].position.y > highestVertex)
-            highestVertex = gridVertices[i].position.y;
-        else if (gridVertices[i].position.y < lowestVertex) {
-            lowestVertex = gridVertices[i].position.y;
-        }
-    }
-
-    spdlog::info("Time to generate generate perlin noise for {} vertices: {}s", gridVertices.size(), std::chrono::duration_cast<std::chrono::duration<double>>(ct - lt).count());
-    spdlog::info("Lowest valley: {}, highest peak: {}", lowestVertex, highestVertex);
-
-    CalculatePerVertexNormals(gridVertices, gridIndices);
-//    for (int i = 0; i < 10; i++) {
-//        for (int j = 0; j < 10; j++) {
-//            p.noiseDP((float)i / 512.0,(float)j / 512.0, (float)0);
-//            spdlog::info("noise at {} {} : {}", i, j, p.noiseDP((float)i / 512.0,(float)j / 512.0, (float)0));
+//    Procedural::PerlinNoise p;
+//    lt = std::chrono::high_resolution_clock::now();
+//
+//    double lowestVertex = 1000;
+//    double highestVertex = -1000;
+//    double gridOffset = 1000;
+//
+//    Procedural::NoiseBufferGenerator nbg;
+////    auto noiseBuffer = std::make_unique<double[]>(gridSize * gridSize);
+//    std::vector<double> noiseBuffer;
+//    noiseBuffer.resize(gridSize * gridSize);
+//    Procedural::fBmConfig conf{};
+//    conf.octaves = 1;
+//    conf.persistence = 0.5;
+//    conf.amplitude = 1;
+//    conf.frequency = 1;
+//    conf.lacunarity = 2;
+//    nbg.generateNoiseTexture2DDP(conf, noiseBuffer.data(), 0, 0, gridSize, gridSize);
+//    ct = std::chrono::high_resolution_clock::now();
+//
+//    // we can do this because in all of our we app we've used the convention to go start at left to right top to bottom.
+//    for (int i = 0; i < gridSize * gridSize; ++i) {
+//        gridVertices[i].position.y = (noiseBuffer[i] * 256.0);
+//        if (gridVertices[i].position.y > highestVertex)
+//            highestVertex = gridVertices[i].position.y;
+//        else if (gridVertices[i].position.y < lowestVertex) {
+//            lowestVertex = gridVertices[i].position.y;
 //        }
 //    }
+//
+//    spdlog::info("Time to generate generate perlin noise for {} vertices: {}s", gridVertices.size(), std::chrono::duration_cast<std::chrono::duration<double>>(ct - lt).count());
+//    spdlog::info("Lowest valley: {}, highest peak: {}", lowestVertex, highestVertex);
+
+//    CalculatePerVertexNormals(gridVertices, gridIndices);
+    createHeightMaps();
 
     gridMeshId = renderer->createMesh({gridVertices}, gridIndices, Render::eBufferUpdateType::kImmutable);
 
     auto grid = std::make_shared<Engine::Entity>();
     grid->transform.position.y = 0;
-//    grid->transform.scale.x = 0.1;
-//    grid->transform.scale.y = 0.1;
-//    grid->transform.scale.z = 0.1;
+    grid->transform.rotation.y = 0;
     grid->material = std::make_unique<Engine::MaterialComponent>();
     grid->material->ambient = { 0.0215f, 0.1745f, 0.0215f, 1.0f };
     grid->material->diffuse = { 0.07568f, 0.61424f, 0.07568f, 1.0f };
     grid->material->specular = { 0.633f, 0.727811f, 0.633f, 0.001 * 128 };
-    grid->material->materialId = basicMatId;
+    grid->material->materialId = renderer->createMaterial(inputLayoutId, terrainVertexShaderId, pixelShaderId);
+    grid->material->mapTexture = terrainMapTexture;
 
     grid->mesh = std::make_unique<Engine::MeshComponent>();
     grid->mesh->meshId = gridMeshId;
@@ -340,9 +334,6 @@ bool KGV::System::ApplicationWin32::init() {
 
     auto water = std::make_shared<Engine::Entity>();
     water->transform.position.y = 0;
-//    water->transform.scale.x = 1024;
-//    water->transform.scale.y = 1024;
-//    water->transform.scale.z = 1024;
     water->material = std::make_unique<Engine::MaterialComponent>();
     water->material->ambient = { 0, 0, 1, 1.0f };
     water->material->diffuse = { 0, 0, 1.0f, 1.0f };
@@ -450,7 +441,7 @@ void KGV::System::ApplicationWin32::draw(F32 dt) {
     else if (entities[0]->transform.rotation.y < 0)
         entities[0]->transform.rotation.y += 360.0f;
 
-    device->presentSwapChain(swapChainId, 0, 0);
+    device->presentSwapChain(swapChainId, 1, 0);
     gAvgFps = static_cast<S32>(1.0f/dt + static_cast<F32>(gAvgFps)) / 2;
     gAvgFrameTime = (dt + gAvgFrameTime) / 2;
     cumulativeTime += dt;
@@ -459,4 +450,65 @@ void KGV::System::ApplicationWin32::draw(F32 dt) {
         window1->setWindowCaption(fmt::format("Frame rate: {:d}, Frame time: {:.3f}", gAvgFps, gAvgFrameTime));
         cumulativeTime = 0.0f;
     }
+}
+
+void KGV::System::ApplicationWin32::createHeightMaps() {
+    double lowestVertex = 1000;
+    double highestVertex = -1000;
+    double gridOffset = 0;
+    int textureSize = 1024;
+
+    Procedural::NoiseOp ridgeOp = [](double val, double xf, double yf, int width, int height) -> double {
+        return abs(val);
+    };
+
+    double radius = 1000;
+    Procedural::NoiseOp circularGradientOp = [radius](double val, double xf, double yf, int width, int height) -> double {
+        double centerX = width / 2;
+        double centerY = height / 2;
+        double distX = abs(xf - centerX);
+        double distY = abs(yf - centerY);
+
+        double distance = std::sqrt(distX * distX + distY * distY);
+        return distance > radius ? 0 : val;
+    };
+
+    double scale = 256;
+    Procedural::NoiseOp scalingOp = [scale](double val, double xf, double yf, int width, int height) -> double {
+        return val * scale;
+    };
+
+    auto lt = std::chrono::high_resolution_clock::now();
+    Procedural::NoiseBufferGenerator nbg;
+    std::vector<float> terrainRidgeNoiseBuffer;
+    std::vector<float> finalNoiseBuffer;
+    terrainRidgeNoiseBuffer.resize(textureSize * textureSize);
+    finalNoiseBuffer.resize(textureSize * textureSize);
+    Procedural::fBmConfig conf{};
+    conf.octaves = 8;
+    conf.persistence = 0.5;
+    conf.amplitude = 1;
+    conf.frequency = 1;
+    conf.lacunarity = 2;
+    nbg.generateNoiseTexture2D(conf, terrainRidgeNoiseBuffer.data(), gridOffset, gridOffset, textureSize, textureSize);
+//    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, ridgeOp);
+    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, circularGradientOp);
+    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, scalingOp);
+    auto ct = std::chrono::high_resolution_clock::now();
+    spdlog::info("Time to generate generate perlin noise for {} points: {}s", terrainRidgeNoiseBuffer.size(), std::chrono::duration_cast<std::chrono::duration<double>>(ct - lt).count());
+
+    Render::Texture2dConfigDX11 terrainMapTexConfig;
+    terrainMapTexConfig.setColorTexture(textureSize, textureSize);
+    terrainMapTexConfig.setFormat(DXGI_FORMAT_R32_FLOAT);
+    ResourceData data{};
+    data.Data = terrainRidgeNoiseBuffer.data();
+    data.memPitch = sizeof(float) * textureSize;
+    Render::ShaderResourceViewConfigDX11 terrainMapSrvConfig{};
+
+    D3D11_TEX2D_SRV srvDesc;
+    srvDesc.MipLevels = 1;
+    srvDesc.MostDetailedMip = 0;
+
+    terrainMapSrvConfig.setTexture2D(srvDesc);
+    terrainMapTexture = device->createTexture2D(terrainMapTexConfig, &data, &terrainMapSrvConfig);
 }

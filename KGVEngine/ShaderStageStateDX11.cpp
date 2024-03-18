@@ -36,3 +36,11 @@ S32 KGV::Render::ShaderStageStateDX11::getCbufferStartSlot() const {
 void KGV::Render::ShaderStageStateDX11::setCbufferStartSlot(S32 cbufferStartSlot) {
     ShaderStageStateDX11::cbufferStartSlot = cbufferStartSlot;
 }
+
+const std::vector<S32> &KGV::Render::ShaderStageStateDX11::getSamplerIds() const {
+    return samplerIds;
+}
+
+void KGV::Render::ShaderStageStateDX11::setSamplerIds(const std::vector<S32> &samplerIds) {
+    ShaderStageStateDX11::samplerIds = samplerIds;
+}

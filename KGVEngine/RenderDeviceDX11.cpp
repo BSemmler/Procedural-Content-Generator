@@ -109,7 +109,7 @@ namespace KGV::Render {
         HRESULT hr = device->CreateTexture2D(&texConfig.desc, reinterpret_cast<D3D11_SUBRESOURCE_DATA *>(data), tex.GetAddressOf());
 
         if (FAILED(hr)) {
-            logger->error("Failed to create D3D11 Texture2D");
+            logger->error("Failed to create D3D11 Texture2D, ({:X})", (unsigned int)hr);
 
             // Trigger a breakpoint if we're in a debug build.
             // KGV_debugBreak();
@@ -601,6 +601,26 @@ namespace KGV::Render {
     ComPtr<ID3D11DepthStencilState> RenderDeviceDX11::getDsvStateById(S32 id) {
         if (id < depthStencilStates.size() && id >= 0)
             return depthStencilStates[id];
+
+        return nullptr;
+    }
+
+    S32 RenderDeviceDX11::createSamplerState(D3D11_SAMPLER_DESC &desc) {
+        ComPtr<ID3D11SamplerState> sampler;
+
+        HRESULT hr;
+        if (FAILED(hr = device->CreateSamplerState(&desc, sampler.GetAddressOf()))) {
+            logger->error("Failed to create sampler state.");
+            return -1;
+        }
+
+        samplerStates.emplace_back(sampler);
+        return static_cast<S32>(samplerStates.size()) - 1;
+    }
+
+    ComPtr<ID3D11SamplerState> RenderDeviceDX11::getSamplerStateById(S32 id) {
+        if (id < samplerStates.size() && id >= 0)
+            return samplerStates[id];
 
         return nullptr;
     }
