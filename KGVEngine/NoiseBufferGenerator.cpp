@@ -22,12 +22,9 @@ namespace KGV::Procedural {
                     double yf = i / width;
                     auto val = static_cast<float>(fBm(fBmConf, xf / width + xPosOffset, yf / height + yPosOffset));
                     buffer[i] = val;
-//                    memcpy(buffer, &val, sizeof(float));
-//                    buffer++;
                 }
 
             }), begin, end, buffer);
-            spdlog::info("begin: {}, end: {}", begin, end);
         }
 
         for (auto &t : threadPool) {
@@ -57,7 +54,6 @@ namespace KGV::Procedural {
                 }
 
             }), begin, end, buffer);
-//            spdlog::info("begin: {}, end: {}", begin, end);
         }
 
         for (auto &t : threadPool) {
