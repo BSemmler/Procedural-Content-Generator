@@ -6,8 +6,8 @@
 
 using namespace DirectX;
 
-void KGV::Engine::Camera::setOrthographicProject(F32 left, F32 right, F32 top, F32 bottom, F32 nearPlane, F32 farPlane) {
-    projectionMatrix = XMMatrixOrthographicLH( right - left, bottom - top, nearPlane, farPlane);
+void KGV::Engine::Camera::setOrthographicProject(float width, float height, F32 nearPlane, F32 farPlane) {
+    projectionMatrix = XMMatrixOrthographicLH( width, height, nearPlane, farPlane);
 //    DirectX::XMFLOAT4X4A matrix;
 //    matrix._11 = 2.0f / (right - left);
 //    matrix._22 = 2.0f / (bottom - top);

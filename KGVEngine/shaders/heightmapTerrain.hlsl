@@ -10,6 +10,7 @@ struct VertexOut
     float4 position : SV_POSITION;
     float4 worldPosition : WORLD_POSITION;
     float4 normal : NORMAL;
+    float2 texcoord : TEXCOORD0;
 };
 
 struct DirectionalLight
@@ -93,6 +94,7 @@ VertexOut VS(VertexIn input)
     normal.y = 2.0;
     normal.z = heightDifferenceDown - heightDifferenceUp;
     output.normal = normalize(mul(float4(normal, 0), gWorldInvTranspose));
+    output.texcoord = uv;
 
 	return output;
 }

@@ -153,10 +153,10 @@ void KGV::Engine::GeometryFactory::getVertexGridU32(U32 size, std::vector<Render
      * |  t1 / |
      * |   /   |
      * | /  t2 |
-     * 4-------3
+     * 3-------2
      *
-     * Indices for t1 = 0 1 4
-     * Indices for t2 = 1 3 4
+     * Indices for t1 = 0 1 3
+     * Indices for t2 = 1 2 3
     */
     for (int i = 0; i < size - 1; ++i) {
         for (int j = 0; j < size - 1; ++j) {
@@ -173,4 +173,19 @@ void KGV::Engine::GeometryFactory::getVertexGridU32(U32 size, std::vector<Render
 //            spdlog::info("{} {} {}", indices[indices.size() - 3], indices[indices.size() - 2], indices[indices.size() - 1]);
         }
     }
+}
+
+void KGV::Engine::GeometryFactory::getPlane(std::vector<Render::Vertex> &vertices, std::vector<U32> &indices) {
+
+    vertices.emplace_back(Render::Vertex{{ 0.5, -0.5, 0.0}, {0, 0, -1}, {0.0, 0.0}}); // top left
+    vertices.emplace_back(Render::Vertex{{-0.5, -0.5, 0.0}, {0, 0, -1}, {1.0, 0.0}}); // Top Right
+    vertices.emplace_back(Render::Vertex{{-0.5,  0.5, 0.0}, {0, 0, -1}, {1.0, 1.0}}); // Bot Right
+    vertices.emplace_back(Render::Vertex{{ 0.5,  0.5, 0.0}, {0, 0, -1}, {0.0, 1.0}}); // Bot Left
+
+    indices.emplace_back(2);
+    indices.emplace_back(0);
+    indices.emplace_back(1);
+    indices.emplace_back(0);
+    indices.emplace_back(2);
+    indices.emplace_back(3);
 }

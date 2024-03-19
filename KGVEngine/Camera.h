@@ -11,7 +11,7 @@
 namespace KGV::Engine {
     class Camera {
     public:
-        void setOrthographicProject(F32 left, F32 right, F32 top, F32 bottom, F32 nearPlane, F32 farPlane);
+        void setOrthographicProject(float width, float height, F32 nearPlane, F32 farPlane);
 
         void setPerspectiveProject(F32 fovY, F32 aspect, F32 nearPlane, F32 farPlane);
 

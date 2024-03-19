@@ -170,6 +170,8 @@ bool KGV::System::ApplicationWin32::init() {
     vertexShaderId = device->loadShader("../KGVEngine/shaders/basicLighting.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
     terrainVertexShaderId = device->loadShader("../KGVEngine/shaders/heightmapTerrain.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
     pixelShaderId = device->loadShader("../KGVEngine/shaders/basicLighting.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
+    planeVertexShaderId = device->loadShader("../KGVEngine/shaders/texturePlane.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
+    planePixelShaderId = device->loadShader("../KGVEngine/shaders/texturePlane.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
 
     std::vector<D3D11_INPUT_ELEMENT_DESC> inputElements = {
             {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -320,7 +322,7 @@ bool KGV::System::ApplicationWin32::init() {
     grid->material->diffuse = { 0.07568f, 0.61424f, 0.07568f, 1.0f };
     grid->material->specular = { 0.633f, 0.727811f, 0.633f, 0.001 * 128 };
     grid->material->materialId = renderer->createMaterial(inputLayoutId, terrainVertexShaderId, pixelShaderId);
-    grid->material->mapTexture = terrainMapTexture;
+    grid->material->mapTexture = terrainMapTextureF32;
 
     grid->mesh = std::make_unique<Engine::MeshComponent>();
     grid->mesh->meshId = gridMeshId;
@@ -346,6 +348,38 @@ bool KGV::System::ApplicationWin32::init() {
     water->mesh->render = true;
     entities.emplace_back(water);
 
+    D3D11_VIEWPORT vp;
+    vp.MinDepth = 0;
+    vp.MaxDepth = 1;
+    vp.TopLeftX = window1->getWidth() * (2.0 / 3.0);
+    vp.TopLeftY = 0;
+    vp.Width = window1->getWidth() * 0.33;
+    vp.Height = window1->getWidth() * 0.33;
+
+    auto heightMapCamera = std::make_shared<Engine::Entity>();
+    heightMapCamera->camera = std::make_unique<Engine::Camera>();
+    heightMapCamera->camera->setDsvStateId(device->createDepthStencilState(dsDesc));
+    heightMapCamera->camera->setDsvId(depthBuffer->getDsvId());
+    heightMapCamera->camera->setRtvId(rtvId);
+    heightMapCamera->camera->setViewPortId(device->createViewPort(vp));
+    heightMapCamera->camera->setOrthographicProject(1, 1, 0.01, 5);
+    heightMapCamera->camera->setIsActive(true);
+    heightMapCamera->transform.position.z = -1;
+    texturePlaneCamera = heightMapCamera;
+
+    std::vector<Render::Vertex> planeVertices;
+    std::vector<U32> planeIndices;
+    Engine::GeometryFactory::getPlane(planeVertices, planeIndices);
+
+    auto textureViewingPlane = std::make_shared<Engine::Entity>();
+    textureViewingPlane->mesh = std::make_unique<Engine::MeshComponent>();
+    textureViewingPlane->mesh->meshId = renderer->createMesh({planeVertices}, planeIndices, Render::kImmutable);
+    textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
+    textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
+    textureViewingPlane->mesh->render = true;
+    textureViewingPlane->material->colorTexture = terrainMapTextureF32;
+
+    texturePlaneEntity = textureViewingPlane;
 
     return true;
 }
@@ -419,6 +453,11 @@ void KGV::System::ApplicationWin32::draw(F32 dt) {
     deviceContext->clearColorBuffers({0.1f, 0.1f, 0.1f, 1.0f});
     deviceContext->clearDepthStencilBuffers();
     renderer->renderScene(entities, cameras, &lights, dt);
+    std::vector tE = {texturePlaneEntity};
+    std::vector tC = {texturePlaneCamera};
+
+//    deviceContext->clearDepthStencilBuffers();
+    renderer->renderScene(tE, tC, &lights, dt);
     constexpr float degPerSec = 1.0f;
 //
 //    auto cameraRotate = XMMatrixRotationY(XMConvertToRadians(degPerSec * dt));
@@ -489,10 +528,10 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
     conf.octaves = 8;
     conf.persistence = 0.5;
     conf.amplitude = 1;
-    conf.frequency = 1;
+    conf.frequency = 3;
     conf.lacunarity = 2;
     nbg.generateNoiseTexture2D(conf, terrainRidgeNoiseBuffer.data(), gridOffset, gridOffset, textureSize, textureSize);
-//    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, ridgeOp);
+    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, ridgeOp);
     nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, circularGradientOp);
 //    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, scalingOp);
     auto ct = std::chrono::high_resolution_clock::now();
@@ -511,5 +550,5 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
     srvDesc.MostDetailedMip = 0;
 
     terrainMapSrvConfig.setTexture2D(srvDesc);
-    terrainMapTexture = device->createTexture2D(terrainMapTexConfig, &data, &terrainMapSrvConfig);
+    terrainMapTextureF32 = device->createTexture2D(terrainMapTexConfig, &data, &terrainMapSrvConfig);
 }
