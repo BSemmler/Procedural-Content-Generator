@@ -185,7 +185,7 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
             iaState.setIndexFormat(DXGI_FORMAT_R32_UINT);
             if (currentMaterial >= 0 || currentMesh >= 0) {
                 iaState.setInputLayout(materials[currentMaterial].inputLayoutId);
-                iaState.setVertexBuffers(meshes[currentMesh].vertexBuffers);
+                iaState.setVertexBuffers(meshes[currentMesh].vertexBuffers, {sizeof(Vertex)}, {0});
                 iaState.setIndexBuffer(meshes[currentMesh].indexBuffer->getResourceId());
             }
 

@@ -27,7 +27,8 @@ namespace KGV::Procedural {
 
     typedef std::function<double(double, double, double, int, int)> NoiseOp;
     typedef std::function<unsigned int(double, double, double, int, int)> ImageOp;
-    typedef std::function<double(double, double, double, double, int, int)> CombineNoiseOp;
+    typedef std::function<double(double, double, double, double, int, int)> Combine2NoiseOp;
+    typedef std::function<double(double, double, double, double, double, int, int)> Combine3NoiseOp;
 
     class NoiseBufferGenerator {
     public:
@@ -40,8 +41,9 @@ namespace KGV::Procedural {
 
         void execOp(float* buffer, int width, int height, const NoiseOp& func);
         void execOp(double* buffer, int width, int height, const NoiseOp& func);
-        void combine(double *a, double *b, double *out, int width, int height, const CombineNoiseOp& func);
-        void combine(float *a, float *b, float *out, int width, int height, const CombineNoiseOp& func);
+        void combine(double *a, double *b, double *out, int width, int height, const Combine2NoiseOp& func);
+        void combine(float *a, float *b, float *out, int width, int height, const Combine2NoiseOp& func);
+        void combine(float *a, float *b, float *c, float *out, int width, int height, const Combine3NoiseOp& func);
         void createPixelBufferFromData(unsigned int* out, float* in, int width, int height, ImageOp& func);
 
     protected:

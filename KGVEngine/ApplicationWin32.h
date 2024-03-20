@@ -35,10 +35,11 @@ namespace KGV::System
         std::shared_ptr<Render::ResourceViewDX11> indexBuffer;
         std::shared_ptr<Render::ResourceViewDX11> constantBuffer;
         std::shared_ptr<Render::ResourceViewDX11> depthBuffer;
-        std::shared_ptr<Render::ResourceViewDX11> terrainMapTextureF32;
+        std::shared_ptr<Render::ResourceViewDX11> terrainMapDisplacementTextureF32;
         std::shared_ptr<Render::ResourceViewDX11> terrainMapTextureBaseRGBA;
         std::shared_ptr<Render::ResourceViewDX11> terrainMapTextureRidgedRGBA;
-        std::shared_ptr<Render::ResourceViewDX11> terrainMapTextureRGBA;
+        std::shared_ptr<Render::ResourceViewDX11> terrainMapTextureBillowRGBA;
+        std::shared_ptr<Render::ResourceViewDX11> terrainMapTextureFinalRGBA;
         std::shared_ptr<Render::ResourceViewDX11> terrainColorTexture;
         std::shared_ptr<Render::ResourceViewDX11> waterMapTexture;
         S32 vertexShaderId;
