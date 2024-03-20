@@ -316,13 +316,14 @@ bool KGV::System::ApplicationWin32::init() {
     entities.emplace_back(water);
 
     D3D11_VIEWPORT vp;
-    float viewPortSizeRatio = 0.25f;
+    float viewPortHeightRatio = 0.125f;
+    float viewPortWidthRatio = 0.5f;
     vp.MinDepth = 0;
     vp.MaxDepth = 1;
-    vp.TopLeftX = window1->getWidth() - (window1->getWidth() * viewPortSizeRatio);
+    vp.TopLeftX = window1->getWidth() - (window1->getWidth() * viewPortWidthRatio);
     vp.TopLeftY = 0;
-    vp.Width = window1->getWidth() * viewPortSizeRatio;
-    vp.Height = window1->getWidth() * viewPortSizeRatio;
+    vp.Width = window1->getWidth() * viewPortWidthRatio;
+    vp.Height = window1->getWidth() * viewPortHeightRatio;
 
     auto heightMapCamera = std::make_shared<Engine::Entity>();
     heightMapCamera->camera = std::make_unique<Engine::Camera>();
@@ -330,7 +331,7 @@ bool KGV::System::ApplicationWin32::init() {
     heightMapCamera->camera->setDsvId(depthBuffer->getDsvId());
     heightMapCamera->camera->setRtvId(rtvId);
     heightMapCamera->camera->setViewPortId(device->createViewPort(vp));
-    heightMapCamera->camera->setOrthographicProject(1, 1, 0.01, 5);
+    heightMapCamera->camera->setOrthographicProject(3, 1, 0.01, 5);
     heightMapCamera->camera->setIsActive(true);
     heightMapCamera->transform.position.z = -1;
     texturePlaneCamera = heightMapCamera;
@@ -346,8 +347,29 @@ bool KGV::System::ApplicationWin32::init() {
     textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
     textureViewingPlane->mesh->render = true;
     textureViewingPlane->material->colorTexture = terrainMapTextureRGBA;
+    textureViewingPlane->transform.position.x = -1;
 
     texturePlaneEntity = textureViewingPlane;
+    texturePlanes.emplace_back(textureViewingPlane);
+
+    textureViewingPlane = std::make_shared<Engine::Entity>();
+    textureViewingPlane->mesh = std::make_unique<Engine::MeshComponent>();
+    textureViewingPlane->mesh->meshId = renderer->createMesh({planeVertices}, planeIndices, Render::kImmutable);
+    textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
+    textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
+    textureViewingPlane->mesh->render = true;
+    textureViewingPlane->material->colorTexture = terrainMapTextureBaseRGBA;
+    texturePlanes.emplace_back(textureViewingPlane);
+
+    textureViewingPlane = std::make_shared<Engine::Entity>();
+    textureViewingPlane->mesh = std::make_unique<Engine::MeshComponent>();
+    textureViewingPlane->mesh->meshId = renderer->createMesh({planeVertices}, planeIndices, Render::kImmutable);
+    textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
+    textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
+    textureViewingPlane->mesh->render = true;
+    textureViewingPlane->material->colorTexture = terrainMapTextureRidgedRGBA;
+    textureViewingPlane->transform.position.x = 1;
+    texturePlanes.emplace_back(textureViewingPlane);
 
     return true;
 }
@@ -423,11 +445,11 @@ void KGV::System::ApplicationWin32::draw(F32 dt) {
     deviceContext->clearColorBuffers({0.1f, 0.1f, 0.1f, 1.0f});
     deviceContext->clearDepthStencilBuffers();
     renderer->renderScene(entities, cameras, &lights, dt);
-    std::vector tE = {texturePlaneEntity};
+//    std::vector tE = texturePlanes;
     std::vector tC = {texturePlaneCamera};
 
 //    deviceContext->clearDepthStencilBuffers();
-    renderer->renderScene(tE, tC, &lights, dt);
+    renderer->renderScene(texturePlanes, tC, &lights, dt);
     constexpr float degPerSec = 1.0f;
 //
 //    auto cameraRotate = XMMatrixRotationY(XMConvertToRadians(degPerSec * dt));
@@ -473,7 +495,7 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
     };
 
     Procedural::NoiseOp ridgeOp = [](double val, double xf, double yf, int width, int height) -> double {
-        return abs(val);
+        return 1 - abs(val);
     };
 
     double radius = 1000;
@@ -488,9 +510,12 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
     };
 
     double ridgeWeight = 0.85;
-    Procedural::CombineNoiseOp combineNoiseMaps = [ridgeWeight, &lagrangianScale]
+    double ridgeFactor = 8;
+    double baseFactor = 2;
+    Procedural::CombineNoiseOp combineNoiseMaps = [baseFactor, ridgeFactor]
             (double val1, double val2, double xf, double yf, int width, int height) -> double {
         auto val = val1 * val2;
+//        auto val = val2 * (val1 < 0.5 ? pow(val1 * 2, baseFactor) : 1 - (pow((1 - val1) * 2, baseFactor) / 2));
 //        auto res =  lagrangianScale(-1, 1, -2, 2, val);
         return val;
     };
@@ -506,17 +531,18 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
     conf.octaves = 8;
     conf.persistence = 0.5;
     conf.amplitude = 1;
-    conf.frequency = 3;
+    conf.frequency = 1;
     conf.lacunarity = 2;
     nbg.generateNoiseTexture2D(conf, baseNoiseBuffer.data(), gridOffset, gridOffset, textureSize, textureSize);
 
     Procedural::fBmConfig ridgeFBM{};
-    ridgeFBM.octaves = 4;
-    ridgeFBM.persistence = 0.5;
-    ridgeFBM.amplitude = 2;
-    ridgeFBM.frequency = 2;
-    ridgeFBM.lacunarity = 2;
-    nbg.generateNoiseTexture2D(ridgeFBM, terrainRidgeNoiseBuffer.data(), gridOffset, gridOffset, textureSize, textureSize);
+    ridgeFBM.octaves = 2;
+    ridgeFBM.persistence = 5;
+    ridgeFBM.amplitude = 1;
+    ridgeFBM.frequency = 2.5;
+    ridgeFBM.lacunarity = 2.5;
+    double ridgeOffset = 100;
+    nbg.generateNoiseTexture2D(ridgeFBM, terrainRidgeNoiseBuffer.data(), ridgeOffset, ridgeOffset / 2, textureSize, textureSize);
     nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, ridgeOp);
 
     std::vector<float> finalNoiseBuffer;
@@ -543,12 +569,6 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
     terrainMapSrvConfig.setTexture2D(srvDesc);
     terrainMapTextureF32 = device->createTexture2D(terrainMapTexConfig, &data, &terrainMapSrvConfig);
 
-    // Heightmap Display
-    Render::Texture2dConfigDX11 terrainMapDisplayTexConfig;
-    terrainMapDisplayTexConfig.setColorTexture(textureSize, textureSize);
-    terrainMapDisplayTexConfig.setFormat(DXGI_FORMAT_R8G8B8A8_UNORM);
-//    terrainMapDisplayTexConfig.setBindflags()
-
     double highScale = 255;
     double lowScale = 0;
     double lowRaw = -1;
@@ -564,6 +584,11 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
         return retValue;
     };
 
+    // Heightmap Display
+    Render::Texture2dConfigDX11 terrainMapDisplayTexConfig;
+    terrainMapDisplayTexConfig.setColorTexture(textureSize, textureSize);
+    terrainMapDisplayTexConfig.setFormat(DXGI_FORMAT_R8G8B8A8_UNORM);
+
     std::vector<unsigned int> heightMapDisplayBuffer;
     heightMapDisplayBuffer.resize(textureSize * textureSize);
     nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), finalNoiseBuffer.data(), textureSize, textureSize, imageOp);
@@ -574,4 +599,11 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
     Render::ShaderResourceViewConfigDX11 terrainMapDisplaySrvConfig{};
     terrainMapDisplaySrvConfig.setTexture2D(srvDesc);
     terrainMapTextureRGBA = device->createTexture2D(terrainMapDisplayTexConfig, &data, &terrainMapDisplaySrvConfig);
+
+    nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), terrainRidgeNoiseBuffer.data(), textureSize, textureSize, imageOp);
+    terrainMapTextureRidgedRGBA = device->createTexture2D(terrainMapDisplayTexConfig, &data, &terrainMapDisplaySrvConfig);
+
+    nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), baseNoiseBuffer.data(), textureSize, textureSize, imageOp);
+    terrainMapTextureBaseRGBA = device->createTexture2D(terrainMapDisplayTexConfig, &data, &terrainMapDisplaySrvConfig);
 }
+

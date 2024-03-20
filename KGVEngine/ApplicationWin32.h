@@ -36,6 +36,8 @@ namespace KGV::System
         std::shared_ptr<Render::ResourceViewDX11> constantBuffer;
         std::shared_ptr<Render::ResourceViewDX11> depthBuffer;
         std::shared_ptr<Render::ResourceViewDX11> terrainMapTextureF32;
+        std::shared_ptr<Render::ResourceViewDX11> terrainMapTextureBaseRGBA;
+        std::shared_ptr<Render::ResourceViewDX11> terrainMapTextureRidgedRGBA;
         std::shared_ptr<Render::ResourceViewDX11> terrainMapTextureRGBA;
         std::shared_ptr<Render::ResourceViewDX11> terrainColorTexture;
         std::shared_ptr<Render::ResourceViewDX11> waterMapTexture;
@@ -48,6 +50,7 @@ namespace KGV::System
         std::vector<std::shared_ptr<Engine::Entity>> cameras;
         std::vector<std::shared_ptr<Engine::Entity>> lights;
         std::vector<std::shared_ptr<Engine::Entity>> entities;
+        std::vector<std::shared_ptr<Engine::Entity>> texturePlanes;
         std::shared_ptr<Engine::Entity> texturePlaneEntity;
         std::shared_ptr<Engine::Entity> texturePlaneCamera;
         std::shared_ptr<Engine::Entity> waterPlane;

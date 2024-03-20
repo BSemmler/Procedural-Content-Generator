@@ -20,7 +20,7 @@ namespace KGV::Procedural {
                 for (int i = begin; i < end; ++i) {
                     double xf = i % width;
                     double yf = i / width;
-                    auto val = static_cast<float>(fBm(fBmConf, xf / width + xPosOffset, yf / height + yPosOffset));
+                    auto val = static_cast<float>(fBm(fBmConf, (xf / width) + xPosOffset, (yf / height) + yPosOffset));
                     buffer[i] = val;
                 }
 
@@ -49,7 +49,7 @@ namespace KGV::Procedural {
                     double xf = i % width;
                     double yf = i / width;
 
-                    auto val = fBm(fBmConf, xf / width + xPosOffset, yf / height + yPosOffset);
+                    auto val = fBm(fBmConf, (xf / width) + xPosOffset, (yf / height) + yPosOffset);
                     buffer[i] = val;
                 }
 
