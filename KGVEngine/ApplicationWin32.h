@@ -50,6 +50,7 @@ namespace KGV::System
         std::vector<std::shared_ptr<Engine::Entity>> entities;
         std::shared_ptr<Engine::Entity> texturePlaneEntity;
         std::shared_ptr<Engine::Entity> texturePlaneCamera;
+        std::shared_ptr<Engine::Entity> waterPlane;
         S32 cubeMeshId;
         S32 gridMeshId;
         S32 basicMatId;

@@ -275,40 +275,6 @@ bool KGV::System::ApplicationWin32::init() {
     auto ct = std::chrono::high_resolution_clock::now();
     spdlog::info("Time to generate grid of {} vertices, {} triangles: {}s", gridVertices.size(), gridIndices.size() / 3, std::chrono::duration_cast<std::chrono::duration<double>>(ct - lt).count());
 
-//    Procedural::PerlinNoise p;
-//    lt = std::chrono::high_resolution_clock::now();
-//
-//    double lowestVertex = 1000;
-//    double highestVertex = -1000;
-//    double gridOffset = 1000;
-//
-//    Procedural::NoiseBufferGenerator nbg;
-////    auto noiseBuffer = std::make_unique<double[]>(gridSize * gridSize);
-//    std::vector<double> noiseBuffer;
-//    noiseBuffer.resize(gridSize * gridSize);
-//    Procedural::fBmConfig conf{};
-//    conf.octaves = 1;
-//    conf.persistence = 0.5;
-//    conf.amplitude = 1;
-//    conf.frequency = 1;
-//    conf.lacunarity = 2;
-//    nbg.generateNoiseTexture2DDP(conf, noiseBuffer.data(), 0, 0, gridSize, gridSize);
-//    ct = std::chrono::high_resolution_clock::now();
-//
-//    // we can do this because in all of our we app we've used the convention to go start at left to right top to bottom.
-//    for (int i = 0; i < gridSize * gridSize; ++i) {
-//        gridVertices[i].position.y = (noiseBuffer[i] * 256.0);
-//        if (gridVertices[i].position.y > highestVertex)
-//            highestVertex = gridVertices[i].position.y;
-//        else if (gridVertices[i].position.y < lowestVertex) {
-//            lowestVertex = gridVertices[i].position.y;
-//        }
-//    }
-//
-//    spdlog::info("Time to generate generate perlin noise for {} vertices: {}s", gridVertices.size(), std::chrono::duration_cast<std::chrono::duration<double>>(ct - lt).count());
-//    spdlog::info("Lowest valley: {}, highest peak: {}", lowestVertex, highestVertex);
-
-//    CalculatePerVertexNormals(gridVertices, gridIndices);
     createHeightMaps();
 
     gridMeshId = renderer->createMesh({gridVertices}, gridIndices, Render::eBufferUpdateType::kImmutable);
@@ -346,15 +312,17 @@ bool KGV::System::ApplicationWin32::init() {
     water->mesh = std::make_unique<Engine::MeshComponent>();
     water->mesh->meshId = waterMeshId;
     water->mesh->render = true;
+    waterPlane = water;
     entities.emplace_back(water);
 
     D3D11_VIEWPORT vp;
+    float viewPortSizeRatio = 0.25f;
     vp.MinDepth = 0;
     vp.MaxDepth = 1;
-    vp.TopLeftX = window1->getWidth() * (2.0 / 3.0);
+    vp.TopLeftX = window1->getWidth() - (window1->getWidth() * viewPortSizeRatio);
     vp.TopLeftY = 0;
-    vp.Width = window1->getWidth() * 0.33;
-    vp.Height = window1->getWidth() * 0.33;
+    vp.Width = window1->getWidth() * viewPortSizeRatio;
+    vp.Height = window1->getWidth() * viewPortSizeRatio;
 
     auto heightMapCamera = std::make_shared<Engine::Entity>();
     heightMapCamera->camera = std::make_unique<Engine::Camera>();
@@ -423,6 +391,8 @@ LRESULT KGV::System::ApplicationWin32::wndProc( HWND hWnd, UINT msg, WPARAM wPar
             spdlog::get("engine")->info("Escape Key Pressed, exiting.", wParam);
         }
 
+        if (wParam == 0x57) // w key
+            waterPlane->mesh->render = !waterPlane->mesh->render;
         if (wParam == 0x5a)  { // Z key
             cameras[0]->camera->setIsWireframe(!cameras[0]->camera->isWireframe());
         }
@@ -498,6 +468,10 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
     double gridOffset = 0;
     int textureSize = 1024;
 
+    auto lagrangianScale = [](double lowScale, double highScale, double lowRaw, double highRaw, double value) {
+        return (highScale - 0)*((value - lowRaw)/(highRaw - lowRaw)) + lowScale;
+    };
+
     Procedural::NoiseOp ridgeOp = [](double val, double xf, double yf, int width, int height) -> double {
         return abs(val);
     };
@@ -513,27 +487,43 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
         return distance > radius ? 0 : val;
     };
 
-    double scale = 256;
-    Procedural::NoiseOp scalingOp = [scale](double val, double xf, double yf, int width, int height) -> double {
-        return val * scale;
+    double ridgeWeight = 0.85;
+    Procedural::CombineNoiseOp combineNoiseMaps = [ridgeWeight, &lagrangianScale]
+            (double val1, double val2, double xf, double yf, int width, int height) -> double {
+        auto val = val1 * val2;
+//        auto res =  lagrangianScale(-1, 1, -2, 2, val);
+        return val;
     };
+
 
     auto lt = std::chrono::high_resolution_clock::now();
     Procedural::NoiseBufferGenerator nbg;
     std::vector<float> terrainRidgeNoiseBuffer;
-    std::vector<float> finalNoiseBuffer;
+    std::vector<float> baseNoiseBuffer;
     terrainRidgeNoiseBuffer.resize(textureSize * textureSize);
-    finalNoiseBuffer.resize(textureSize * textureSize);
+    baseNoiseBuffer.resize(textureSize * textureSize);
     Procedural::fBmConfig conf{};
     conf.octaves = 8;
     conf.persistence = 0.5;
     conf.amplitude = 1;
     conf.frequency = 3;
     conf.lacunarity = 2;
-    nbg.generateNoiseTexture2D(conf, terrainRidgeNoiseBuffer.data(), gridOffset, gridOffset, textureSize, textureSize);
-//    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, ridgeOp);
+    nbg.generateNoiseTexture2D(conf, baseNoiseBuffer.data(), gridOffset, gridOffset, textureSize, textureSize);
+
+    Procedural::fBmConfig ridgeFBM{};
+    ridgeFBM.octaves = 4;
+    ridgeFBM.persistence = 0.5;
+    ridgeFBM.amplitude = 2;
+    ridgeFBM.frequency = 2;
+    ridgeFBM.lacunarity = 2;
+    nbg.generateNoiseTexture2D(ridgeFBM, terrainRidgeNoiseBuffer.data(), gridOffset, gridOffset, textureSize, textureSize);
+    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, ridgeOp);
+
+    std::vector<float> finalNoiseBuffer;
+    finalNoiseBuffer.resize(textureSize * textureSize);
+    nbg.combine(baseNoiseBuffer.data(), terrainRidgeNoiseBuffer.data(), finalNoiseBuffer.data(), textureSize, textureSize, combineNoiseMaps);
 //    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, circularGradientOp);
-//    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, scalingOp);
+
     auto ct = std::chrono::high_resolution_clock::now();
     spdlog::info("Time to generate generate perlin noise for {} points: {}s", terrainRidgeNoiseBuffer.size(), std::chrono::duration_cast<std::chrono::duration<double>>(ct - lt).count());
 
@@ -542,7 +532,7 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
     terrainMapTexConfig.setColorTexture(textureSize, textureSize);
     terrainMapTexConfig.setFormat(DXGI_FORMAT_R32_FLOAT);
     ResourceData data{};
-    data.Data = terrainRidgeNoiseBuffer.data();
+    data.Data = finalNoiseBuffer.data();
     data.memPitch = sizeof(float) * textureSize;
     Render::ShaderResourceViewConfigDX11 terrainMapSrvConfig{};
 
@@ -576,7 +566,7 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
 
     std::vector<unsigned int> heightMapDisplayBuffer;
     heightMapDisplayBuffer.resize(textureSize * textureSize);
-    nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), terrainRidgeNoiseBuffer.data(), textureSize, textureSize, imageOp);
+    nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), finalNoiseBuffer.data(), textureSize, textureSize, imageOp);
 
     data.Data = heightMapDisplayBuffer.data();
     data.memPitch = sizeof(unsigned int) * textureSize;

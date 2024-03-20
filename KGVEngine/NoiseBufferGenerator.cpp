@@ -168,23 +168,41 @@ namespace KGV::Procedural {
             unsigned int begin = i * elementsPerThread;
             unsigned int end = (i == maxThreads - 1) ? totalElements : (i + 1) * elementsPerThread;
 
-            auto inA = a + begin;
-            auto inB = b + begin;
-            auto inOut = out + begin;
-
             threadPool.emplace_back(([width, height, func](int begin, int end, double* a, double* b, double* out) {
                 for (int i = begin; i < end; ++i) {
                     auto xf = static_cast<double>(i % width);
                     auto yf =  static_cast<double>(i / width);
-                    auto val = func(*a, *b, xf, yf, width, height);
-
-                    memcpy(out, &val, sizeof(double));
-                    a++;
-                    b++;
-                    out++;
+                    out[i] = func(a[i], b[i], xf, yf, width, height);
                 }
 
-            }), begin, end, inA, inB, inOut);
+            }), begin, end, a, b, out);
+        }
+
+        for (auto &t : threadPool) {
+            t.join();
+        }
+
+        threadPool.clear();
+    }
+
+    void NoiseBufferGenerator::combine(float *a, float *b, float *out, int width, int height,
+                                       const CombineNoiseOp& func) {
+
+        const unsigned int totalElements = width * height;
+        const unsigned int elementsPerThread = (height / maxThreads) * width;
+
+        for (int i = 0; i < maxThreads; ++i) {
+            unsigned int begin = i * elementsPerThread;
+            unsigned int end = (i == maxThreads - 1) ? totalElements : (i + 1) * elementsPerThread;
+
+            threadPool.emplace_back(([width, height, func](int begin, int end, float* a, float* b, float* out) {
+                for (int i = begin; i < end; ++i) {
+                    auto xf = static_cast<double>(i % width);
+                    auto yf =  static_cast<double>(i / width);
+                    out[i] = static_cast<float>(func(a[i], b[i], xf, yf, width, height));
+                }
+
+            }), begin, end, a, b, out);
         }
 
         for (auto &t : threadPool) {

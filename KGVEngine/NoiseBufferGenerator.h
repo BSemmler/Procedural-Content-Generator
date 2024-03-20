@@ -41,6 +41,7 @@ namespace KGV::Procedural {
         void execOp(float* buffer, int width, int height, const NoiseOp& func);
         void execOp(double* buffer, int width, int height, const NoiseOp& func);
         void combine(double *a, double *b, double *out, int width, int height, const CombineNoiseOp& func);
+        void combine(float *a, float *b, float *out, int width, int height, const CombineNoiseOp& func);
         void createPixelBufferFromData(unsigned int* out, float* in, int width, int height, ImageOp& func);
 
     protected:
