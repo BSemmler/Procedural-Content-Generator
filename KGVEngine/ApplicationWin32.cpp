@@ -121,7 +121,7 @@ bool KGV::System::ApplicationWin32::init() {
     wc.hIconSm = LoadIcon( nullptr, IDI_APPLICATION );
     
     WindowWin32::registerClass( wc );
-    window1 = std::make_unique<WindowWin32>( this, "KGV_Win32", 1920, 1080, 0, 0, "Hello World 1!", true );
+    window1 = std::make_unique<WindowWin32>( this, "KGV_Win32", 1600, 900, 0, 0, "Hello World 1!", true );
 //    window2 = std::make_unique<WindowWin32>( this, "KGV_Win32", 800, 600, 800, 0, "Hello World 2!", true );
 
     if ( !window1->getWin32Handle() ) {
@@ -536,11 +536,11 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
     nbg.generateNoiseTexture2D(conf, baseNoiseBuffer.data(), gridOffset, gridOffset, textureSize, textureSize);
 
     Procedural::fBmConfig ridgeFBM{};
-    ridgeFBM.octaves = 2;
-    ridgeFBM.persistence = 5;
+    ridgeFBM.octaves = 1;
+    ridgeFBM.persistence = 0.2;
     ridgeFBM.amplitude = 1;
-    ridgeFBM.frequency = 2.5;
-    ridgeFBM.lacunarity = 2.5;
+    ridgeFBM.frequency = 3.5;
+    ridgeFBM.lacunarity = 1.5;
     double ridgeOffset = 100;
     nbg.generateNoiseTexture2D(ridgeFBM, terrainRidgeNoiseBuffer.data(), ridgeOffset, ridgeOffset / 2, textureSize, textureSize);
     nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, ridgeOp);
