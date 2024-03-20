@@ -55,7 +55,7 @@ namespace KGV::Render {
 
         if ((_bindFlags & D3D11_BIND_SHADER_RESOURCE) == D3D11_BIND_SHADER_RESOURCE ) {
             D3D11_SHADER_RESOURCE_VIEW_DESC* desc = srvConfig ? &srvConfig->getDesc() : nullptr;
-            rtvId = _device->createShaderResourceView(resourceId, desc);
+            srvId = _device->createShaderResourceView(resourceId, desc);
         }
 
         if ((_bindFlags & D3D11_BIND_DEPTH_STENCIL) == D3D11_BIND_DEPTH_STENCIL) {

@@ -377,7 +377,7 @@ bool KGV::System::ApplicationWin32::init() {
     textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
     textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
     textureViewingPlane->mesh->render = true;
-    textureViewingPlane->material->colorTexture = terrainMapTextureF32;
+    textureViewingPlane->material->colorTexture = terrainMapTextureRGBA;
 
     texturePlaneEntity = textureViewingPlane;
 
@@ -531,12 +531,13 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
     conf.frequency = 3;
     conf.lacunarity = 2;
     nbg.generateNoiseTexture2D(conf, terrainRidgeNoiseBuffer.data(), gridOffset, gridOffset, textureSize, textureSize);
-    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, ridgeOp);
-    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, circularGradientOp);
+//    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, ridgeOp);
+//    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, circularGradientOp);
 //    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, scalingOp);
     auto ct = std::chrono::high_resolution_clock::now();
     spdlog::info("Time to generate generate perlin noise for {} points: {}s", terrainRidgeNoiseBuffer.size(), std::chrono::duration_cast<std::chrono::duration<double>>(ct - lt).count());
 
+    //Height map
     Render::Texture2dConfigDX11 terrainMapTexConfig;
     terrainMapTexConfig.setColorTexture(textureSize, textureSize);
     terrainMapTexConfig.setFormat(DXGI_FORMAT_R32_FLOAT);
@@ -551,4 +552,36 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
 
     terrainMapSrvConfig.setTexture2D(srvDesc);
     terrainMapTextureF32 = device->createTexture2D(terrainMapTexConfig, &data, &terrainMapSrvConfig);
+
+    // Heightmap Display
+    Render::Texture2dConfigDX11 terrainMapDisplayTexConfig;
+    terrainMapDisplayTexConfig.setColorTexture(textureSize, textureSize);
+    terrainMapDisplayTexConfig.setFormat(DXGI_FORMAT_R8G8B8A8_UNORM);
+//    terrainMapDisplayTexConfig.setBindflags()
+
+    double highScale = 255;
+    double lowScale = 0;
+    double lowRaw = -1;
+    double highRaw = 1;
+    Procedural::ImageOp imageOp = [highScale, lowScale, highRaw, lowRaw]
+            (double val, double xf, double yf, int width, int height) -> unsigned int {
+        auto _value = (highScale - 0)*((val - lowRaw)/(highRaw - lowRaw)) + lowScale;
+        auto intValue = static_cast<unsigned int>(_value);
+        unsigned int retValue = intValue; // Alpha channel to max
+        retValue |= intValue << 8;
+        retValue |= intValue << 16;
+        retValue |= 255 << 24; // Alpha channel to max
+        return retValue;
+    };
+
+    std::vector<unsigned int> heightMapDisplayBuffer;
+    heightMapDisplayBuffer.resize(textureSize * textureSize);
+    nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), terrainRidgeNoiseBuffer.data(), textureSize, textureSize, imageOp);
+
+    data.Data = heightMapDisplayBuffer.data();
+    data.memPitch = sizeof(unsigned int) * textureSize;
+
+    Render::ShaderResourceViewConfigDX11 terrainMapDisplaySrvConfig{};
+    terrainMapDisplaySrvConfig.setTexture2D(srvDesc);
+    terrainMapTextureRGBA = device->createTexture2D(terrainMapDisplayTexConfig, &data, &terrainMapDisplaySrvConfig);
 }

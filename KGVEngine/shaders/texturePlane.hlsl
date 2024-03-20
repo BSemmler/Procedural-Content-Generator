@@ -34,6 +34,7 @@ VertexOut VS(VertexIn input) {
 
     // Transform the normals to homogeneous clip space.
     output.normal = mul(input.normal, gWorldInvTranspose);
+    output.texcoord = input.texcoord;
 
     return output;
 }

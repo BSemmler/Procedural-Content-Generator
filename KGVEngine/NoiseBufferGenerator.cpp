@@ -119,11 +119,10 @@ namespace KGV::Procedural {
                     auto yf =  static_cast<double>(i / width);
                     auto val = static_cast<float>(func(*buffer, xf, yf, width, height));
 
-                    memcpy(buffer, &val, sizeof(float));
-                    buffer++;
+                    buffer[i] = val;
                 }
 
-            }), begin, end, buffer + begin);
+            }), begin, end, buffer);
         }
 
         for (auto &t : threadPool) {
@@ -146,12 +145,10 @@ namespace KGV::Procedural {
                     auto xf = static_cast<double>(i % width);
                     auto yf =  static_cast<double>(i / width);
                     auto val = func(*buffer, xf, yf, width, height);
-
-                    memcpy(buffer, &val, sizeof(double));
-                    buffer++;
+                    buffer[i] = val;
                 }
 
-            }), begin, end, buffer + begin);
+            }), begin, end, buffer);
         }
 
         for (auto &t : threadPool) {
@@ -193,8 +190,33 @@ namespace KGV::Procedural {
         for (auto &t : threadPool) {
             t.join();
         }
+
+        threadPool.clear();
     }
 
+    void NoiseBufferGenerator::createPixelBufferFromData(unsigned int* out, float *in, int width, int height, ImageOp &func) {
+        const unsigned int totalElements = width * height;
+        const unsigned int elementsPerThread = (height / maxThreads) * width;
+
+        for (int i = 0; i < maxThreads; ++i) {
+            unsigned int begin = i * elementsPerThread;
+            unsigned int end = (i == maxThreads - 1) ? totalElements : (i + 1) * elementsPerThread;
+
+            threadPool.emplace_back(([width, height, func](int begin, int end, float* buffer, unsigned int* out) {
+                for (int i = begin; i < end; ++i) {
+                    auto xf = static_cast<double>(i % width);
+                    auto yf =  static_cast<double>(i / width);
+                    out[i] = func(buffer[i], xf, yf, width, height);
+                }
+            }), begin, end, in, out);
+        }
+
+        for (auto &t : threadPool) {
+            t.join();
+        }
+
+        threadPool.clear();
+    }
 
 
 }

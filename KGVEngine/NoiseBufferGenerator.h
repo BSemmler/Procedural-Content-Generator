@@ -18,7 +18,15 @@ namespace KGV::Procedural {
         int octaves;
     };
 
+    enum eBufferFormat {
+        kR8G8B8 = 0,
+        kR8G8B8A8 = 1,
+        kR32G32B32 = 2,
+        kR32G32B32A32 = 3
+    };
+
     typedef std::function<double(double, double, double, int, int)> NoiseOp;
+    typedef std::function<unsigned int(double, double, double, int, int)> ImageOp;
     typedef std::function<double(double, double, double, double, int, int)> CombineNoiseOp;
 
     class NoiseBufferGenerator {
@@ -33,6 +41,7 @@ namespace KGV::Procedural {
         void execOp(float* buffer, int width, int height, const NoiseOp& func);
         void execOp(double* buffer, int width, int height, const NoiseOp& func);
         void combine(double *a, double *b, double *out, int width, int height, const CombineNoiseOp& func);
+        void createPixelBufferFromData(unsigned int* out, float* in, int width, int height, ImageOp& func);
 
     protected:
         double fBm(fBmConfig& fBmConf, double x, double y);
