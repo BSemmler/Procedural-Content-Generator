@@ -117,7 +117,7 @@ namespace KGV::Procedural {
                 for (int i = begin; i < end; ++i) {
                     auto xf = static_cast<double>(i % width);
                     auto yf =  static_cast<double>(i / width);
-                    auto val = static_cast<float>(func(*buffer, xf, yf, width, height));
+                    auto val = static_cast<float>(func(buffer[i], xf, yf, width, height));
 
                     buffer[i] = val;
                 }
@@ -144,7 +144,7 @@ namespace KGV::Procedural {
                 for (int i = begin; i < end; ++i) {
                     auto xf = static_cast<double>(i % width);
                     auto yf =  static_cast<double>(i / width);
-                    auto val = func(*buffer, xf, yf, width, height);
+                    auto val = func(buffer[i], xf, yf, width, height);
                     buffer[i] = val;
                 }
 
