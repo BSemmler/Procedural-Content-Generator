@@ -114,14 +114,21 @@ namespace KGV::Procedural {
             unsigned int end = (i == maxThreads - 1) ? totalElements : (i + 1) * elementsPerThread;
 
             threadPool.emplace_back(([width, height, func](int begin, int end, float* buffer) {
+                float min = 1000;
+                float max = -1000;
                 for (int i = begin; i < end; ++i) {
                     auto xf = static_cast<double>(i % width);
                     auto yf =  static_cast<double>(i / width);
                     auto val = static_cast<float>(func(buffer[i], xf, yf, width, height));
 
                     buffer[i] = val;
-                }
 
+//                    if (val < min)
+//                        min = val;
+//
+//                    if (val > max)
+//                        max = val;
+                }
             }), begin, end, buffer);
         }
 

@@ -18,7 +18,11 @@ namespace KGV::System
 		int		run()		override;
         void draw(F32 dt);
 
-        void createHeightMaps();
+        void generateHeightMaps(int textureSize, int seed, double scale);
+        void createHeightMapBuffers(int textureSize);
+
+        void setupPrimaryCamera(int width, int height, int topX, int topY);
+        void setupTextureViewer(int width, int height, int topX, int topY);
 
 		// Inherited via IWndProc
 		virtual LRESULT CALLBACK wndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam ) override;
@@ -59,5 +63,11 @@ namespace KGV::System
         S32 gridMeshId;
         S32 basicMatId;
         std::chrono::high_resolution_clock::time_point lastTime;
+        unsigned int mapSeed = 0;
+        bool keyDown[0xFF];
+        double lastSeedChangeTime = 0;
+        double lastScaleChangeTime = 0;
+        double mapScale = 512;
+        int mapSize = 1024;
 	};
 }

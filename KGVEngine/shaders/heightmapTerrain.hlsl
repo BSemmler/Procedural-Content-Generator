@@ -78,7 +78,7 @@ VertexOut VS(VertexIn input)
     gHeightMap.GetDimensions(width, height);
     float2 uv = input.texcoord;
     float2 offset = float2(1.0f / width, 1.0f / height);
-    input.position.y = gHeightMap.SampleLevel(gHeightMapSampler, uv, 0).r * max(gMaterial.displacement, 1.0f);
+    input.position.y = gHeightMap.SampleLevel(gHeightMapSampler, uv, 0).r * max(gMaterial.displacement, 1.0f) - (max(gMaterial.displacement, 1.0f) / 2);
 
     output.worldPosition = mul(float4(input.position, 1.0f), gWorldMatrix);
     output.position = mul(output.worldPosition, gViewProjectionMatrix);

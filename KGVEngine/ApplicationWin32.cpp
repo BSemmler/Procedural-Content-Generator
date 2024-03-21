@@ -1,3 +1,4 @@
+#include <random>
 #include "ApplicationWin32.h"
 #include "GeometryFactory.h"
 #include "NoiseBufferGenerator.h"
@@ -106,6 +107,9 @@ void CalculatePerVertexNormals(std::vector<KGV::Render::Vertex>& vertices, const
 }
 
 bool KGV::System::ApplicationWin32::init() {
+    for (auto &key : keyDown)
+        key = false;
+
     WNDCLASSEX wc;
     memset( &wc, 0, sizeof( WNDCLASSEX ) );
     wc.cbSize = sizeof( WNDCLASSEX );
@@ -122,16 +126,10 @@ bool KGV::System::ApplicationWin32::init() {
     
     WindowWin32::registerClass( wc );
     window1 = std::make_unique<WindowWin32>( this, "KGV_Win32", 1600, 900, 0, 0, "Hello World 1!", true );
-//    window2 = std::make_unique<WindowWin32>( this, "KGV_Win32", 800, 600, 800, 0, "Hello World 2!", true );
 
     if ( !window1->getWin32Handle() ) {
         return false;
     }
-//    } else if( !window2->getWin32Handle() )
-//    {
-//        g_log->writeToLog( Util::LogVerbosity::kInfo, Util::LogChannel::kSystem, "%s", "Failed to create Window 2" );
-//        return false;
-//    }
 
     window1->showWindow( true );
     auto log = spdlog::get("render");
@@ -141,31 +139,6 @@ bool KGV::System::ApplicationWin32::init() {
 
     renderer = std::make_unique<Render::SimpleRenderer>(device.get(), deviceContext.get());
     spdlog::get("engine")->info("Initialization complete!");
-
-    Render::SwapChainConfigDX11 swapChainConf;
-    swapChainConf.setWidth(window1->getWidth());
-    swapChainConf.setHeight(window1->getHeight());
-    swapChainId = device->createSwapChain(window1->getWin32Handle(), swapChainConf);
-    auto swapChain = device->getSwapChainById(swapChainId);
-
-//    spdlog::get("engine")->info("RTV ID: {}", swapChain->getResource()->getRtvId());
-//    rtvId = device->createRenderTargetView(swapChain->getResource()->getResourceId(), nullptr);
-    rtvId = swapChain->getResource()->getRtvId();
-    Render::Texture2dConfigDX11 texConfig;
-    texConfig.setDepthTexture(window1->getWidth(), window1->getHeight());
-    texConfig.setFormat(DXGI_FORMAT_D32_FLOAT);
-
-    Render::DepthStencilViewConfigDX11 dsvConfig;
-    dsvConfig.setFormat(DXGI_FORMAT_D32_FLOAT);
-    D3D11_TEX2D_DSV dsvState;
-    dsvState.MipSlice = 0;
-    dsvConfig.SetTexture2D(dsvState);
-    depthBuffer = device->createTexture2D(texConfig, nullptr, nullptr, nullptr, &dsvConfig);
-
-    D3D11_DEPTH_STENCIL_DESC dsDesc;
-
-
-
 
     vertexShaderId = device->loadShader("../KGVEngine/shaders/basicLighting.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
     terrainVertexShaderId = device->loadShader("../KGVEngine/shaders/heightmapTerrain.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
@@ -181,52 +154,13 @@ bool KGV::System::ApplicationWin32::init() {
 
     inputLayoutId = device->createInputLayout(vertexShaderId, inputElements);
 
-    D3D11_VIEWPORT viewport;
-    viewport.Width = static_cast<FLOAT>(window1->getWidth());
-    viewport.Height = static_cast<FLOAT>(window1->getHeight()),
-    viewport.MinDepth = 0.0f;
-    viewport.MaxDepth = 1.0f;
-    viewport.TopLeftX = 0.0f;
-    viewport.TopLeftY = 0.0f;
+    float viewPortHeightRatio = 0.125f;
+    float viewPortWidthRatio = 1.0f;
+    setupPrimaryCamera(window1->getWidth(), window1->getHeight(), 0, window1->getHeight() * viewPortHeightRatio);
+    setupTextureViewer(window1->getWidth() * viewPortWidthRatio, window1->getHeight() * viewPortHeightRatio, 0, 0);
 
-    viewPortId = device->createViewPort(viewport);
-
-    // Depth test parameters
-    dsDesc.DepthEnable = true;
-    dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-    dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
-
-// Stencil test parameters
-    dsDesc.StencilEnable = true;
-    dsDesc.StencilReadMask = 0xFF;
-    dsDesc.StencilWriteMask = 0xFF;
-
-// Stencil operations if pixel is front-facing
-    dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-    dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-    dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-    dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-// Stencil operations if pixel is back-facing
-    dsDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-    dsDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-    dsDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-    dsDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-    auto camera = std::make_shared<Engine::Entity>();
-    camera->camera = std::make_unique<Engine::Camera>();
-    camera->camera->setDsvStateId(device->createDepthStencilState(dsDesc));
-    camera->camera->setDsvId(depthBuffer->getDsvId());
-    camera->camera->setRtvId(rtvId);
-    camera->camera->setViewPortId(viewPortId);
-    camera->camera->setPerspectiveProject(XMConvertToRadians(70), (float)window1->getWidth()/(float)window1->getHeight(), 1, 2000.0f);
-    camera->transform.position.z = -600.0f;
-    camera->transform.position.x = 0;
-    camera->transform.position.y = 500;
-    camera->transform.rotation.x = XMConvertToRadians(45);
-
-    cameras.emplace_back(camera);
-
+    createHeightMapBuffers(mapSize);
+    generateHeightMaps(mapSize, mapSeed, mapScale);
 
     std::vector<XMFLOAT3> verts;
     std::vector<XMFLOAT3> normals;
@@ -269,13 +203,11 @@ bool KGV::System::ApplicationWin32::init() {
     std::vector<U32> gridIndices;
     std::vector<Render::Vertex> gridVertices;
     auto lt = std::chrono::high_resolution_clock::now();
-    int gridSize = 1024;
     double stepSize = 1;
-    Engine::GeometryFactory::getVertexGridU32(gridSize, gridVertices, gridIndices, stepSize);
+
+    Engine::GeometryFactory::getVertexGridU32(mapSize, gridVertices, gridIndices, stepSize);
     auto ct = std::chrono::high_resolution_clock::now();
     spdlog::info("Time to generate grid of {} vertices, {} triangles: {}s", gridVertices.size(), gridIndices.size() / 3, std::chrono::duration_cast<std::chrono::duration<double>>(ct - lt).count());
-
-    createHeightMaps();
 
     gridMeshId = renderer->createMesh({gridVertices}, gridIndices, Render::eBufferUpdateType::kImmutable);
 
@@ -295,12 +227,6 @@ bool KGV::System::ApplicationWin32::init() {
     grid->mesh->render = true;
     entities.emplace_back(grid);
 
-    std::vector<Render::Vertex> waterVerts;
-    std::vector<U32> waterIndices;
-    Engine::GeometryFactory::getVertexGridU32(gridSize, waterVerts, waterIndices, 1);
-
-    auto waterMeshId = renderer->createMesh({waterVerts}, waterIndices, Render::eBufferUpdateType::kImmutable);
-
     auto water = std::make_shared<Engine::Entity>();
     water->transform.position.y = 0;
     water->material = std::make_unique<Engine::MaterialComponent>();
@@ -310,80 +236,10 @@ bool KGV::System::ApplicationWin32::init() {
     water->material->materialId = basicMatId;
 
     water->mesh = std::make_unique<Engine::MeshComponent>();
-    water->mesh->meshId = waterMeshId;
+    water->mesh->meshId = gridMeshId;
     water->mesh->render = true;
     waterPlane = water;
     entities.emplace_back(water);
-
-    std::vector<Render::Vertex> planeVertices;
-    std::vector<U32> planeIndices;
-    Engine::GeometryFactory::getPlane(planeVertices, planeIndices);
-
-    // TODO: Need to fix material change detection to include textures so that single material pipeline definition can be reused.
-    auto planeMeshId = renderer->createMesh({planeVertices}, planeIndices, Render::kImmutable);
-
-    auto textureViewingPlane = std::make_shared<Engine::Entity>();
-    textureViewingPlane->mesh = std::make_unique<Engine::MeshComponent>();
-    textureViewingPlane->mesh->meshId = planeMeshId;
-    textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
-    textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
-    textureViewingPlane->mesh->render = true;
-    textureViewingPlane->material->colorTexture = terrainMapTextureFinalRGBA;
-    textureViewingPlane->transform.position.x = -1.5;
-
-    texturePlaneEntity = textureViewingPlane;
-    texturePlanes.emplace_back(textureViewingPlane);
-
-    textureViewingPlane = std::make_shared<Engine::Entity>();
-    textureViewingPlane->mesh = std::make_unique<Engine::MeshComponent>();
-    textureViewingPlane->mesh->meshId = planeMeshId;
-    textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
-    textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
-    textureViewingPlane->mesh->render = true;
-    textureViewingPlane->material->colorTexture = terrainMapTextureBaseRGBA;
-    textureViewingPlane->transform.position.x = -0.5;
-    texturePlanes.emplace_back(textureViewingPlane);
-
-    textureViewingPlane = std::make_shared<Engine::Entity>();
-    textureViewingPlane->mesh = std::make_unique<Engine::MeshComponent>();
-    textureViewingPlane->mesh->meshId = planeMeshId;
-    textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
-    textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
-    textureViewingPlane->mesh->render = true;
-    textureViewingPlane->material->colorTexture = terrainMapTextureRidgedRGBA;
-    textureViewingPlane->transform.position.x = 0.5;
-    texturePlanes.emplace_back(textureViewingPlane);
-
-    textureViewingPlane = std::make_shared<Engine::Entity>();
-    textureViewingPlane->mesh = std::make_unique<Engine::MeshComponent>();
-    textureViewingPlane->mesh->meshId = planeMeshId;
-    textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
-    textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
-    textureViewingPlane->mesh->render = true;
-    textureViewingPlane->material->colorTexture = terrainMapTextureBillowRGBA;
-    textureViewingPlane->transform.position.x = 1.5;
-    texturePlanes.emplace_back(textureViewingPlane);
-
-    D3D11_VIEWPORT vp;
-    float viewPortHeightRatio = 0.125f;
-    float viewPortWidthRatio = 1.0f;
-    vp.MinDepth = 0;
-    vp.MaxDepth = 1;
-    vp.TopLeftX = window1->getWidth() - (window1->getWidth() * viewPortWidthRatio);
-    vp.TopLeftY = 0;
-    vp.Width = window1->getWidth() * viewPortWidthRatio;
-    vp.Height = window1->getWidth() * viewPortHeightRatio;
-
-    auto heightMapCamera = std::make_shared<Engine::Entity>();
-    heightMapCamera->camera = std::make_unique<Engine::Camera>();
-    heightMapCamera->camera->setDsvStateId(device->createDepthStencilState(dsDesc));
-    heightMapCamera->camera->setDsvId(depthBuffer->getDsvId());
-    heightMapCamera->camera->setRtvId(rtvId);
-    heightMapCamera->camera->setViewPortId(device->createViewPort(vp));
-    heightMapCamera->camera->setOrthographicProject(texturePlanes.size(), 1, 0.01, 5);
-    heightMapCamera->camera->setIsActive(true);
-    heightMapCamera->transform.position.z = -1;
-    texturePlaneCamera = heightMapCamera;
 
     return true;
 }
@@ -419,33 +275,39 @@ int KGV::System::ApplicationWin32::run() {
 LRESULT KGV::System::ApplicationWin32::wndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam ) {
     switch ( msg ) 	
     {
-    case WM_LBUTTONDOWN:
-        break;
-    case WM_KEYDOWN:
-        if ( wParam == VK_ESCAPE ) {
+        case WM_LBUTTONDOWN:
+            break;
+        case WM_KEYDOWN:
+            keyDown[wParam] = true;
+            if ( wParam == VK_ESCAPE ) {
+                DestroyWindow( hWnd );
+                spdlog::get("engine")->info("Escape Key Pressed, exiting.", wParam);
+            }
+
+
+
+            if (wParam == 0x57) // w key
+                waterPlane->mesh->render = !waterPlane->mesh->render;
+            if (wParam == 0x5a)  { // Z key
+                cameras[0]->camera->setIsWireframe(!cameras[0]->camera->isWireframe());
+            }
+
+            spdlog::get("engine")->info("Keydown, Keycode: {}", wParam);
+            break;
+        case WM_KEYUP:
+            keyDown[wParam] = false;
+            break;
+        case WM_DESTROY:
             DestroyWindow( hWnd );
-            spdlog::get("engine")->info("Escape Key Pressed, exiting.", wParam);
-        }
-
-        if (wParam == 0x57) // w key
-            waterPlane->mesh->render = !waterPlane->mesh->render;
-        if (wParam == 0x5a)  { // Z key
-            cameras[0]->camera->setIsWireframe(!cameras[0]->camera->isWireframe());
-        }
-
-        spdlog::get("engine")->info("Keydown, Keycode: {}", wParam);
-        break;
-    case WM_DESTROY:
-        DestroyWindow( hWnd );
-        if ( window1 )
-            PostQuitMessage( 0 );
-        else if ( window1->getWin32Handle() == hWnd )
-            window1.release();
-//        else if ( window2->getWin32Handle() == hWnd )
-//            window2.release();
-        return 0;
-    default:
-        break;
+            if ( window1 )
+                PostQuitMessage( 0 );
+            else if ( window1->getWin32Handle() == hWnd )
+                window1.release();
+    //        else if ( window2->getWin32Handle() == hWnd )
+    //            window2.release();
+            return 0;
+        default:
+            break;
     }
 
     return DefWindowProc( hWnd, msg, wParam, lParam );
@@ -496,15 +358,138 @@ void KGV::System::ApplicationWin32::draw(F32 dt) {
         window1->setWindowCaption(fmt::format("Frame rate: {:d}, Frame time: {:.3f}", gAvgFps, gAvgFrameTime));
         cumulativeTime = 0.0f;
     }
+
+    if (keyDown[VK_UP] && lastSeedChangeTime > 0.3) {
+        mapSeed++;
+        generateHeightMaps(mapSize, mapSeed, mapScale);
+        lastSeedChangeTime = 0;
+    } else if (keyDown[VK_DOWN] && lastSeedChangeTime > 0.3) {
+        mapSeed--;
+        generateHeightMaps(mapSize, mapSeed, mapScale);
+        lastSeedChangeTime = 0;
+    }
+
+    if (keyDown[VK_RIGHT] && lastScaleChangeTime > 0.3) {
+        mapScale++;
+        generateHeightMaps(mapSize, mapSeed, mapScale);
+        lastScaleChangeTime = 0;
+    } else if (keyDown[VK_LEFT] && lastScaleChangeTime > 0.3) {
+        mapScale--;
+        generateHeightMaps(mapSize, mapSeed, mapScale);
+        lastScaleChangeTime = 0;
+    }
+    lastScaleChangeTime += dt;
+    lastSeedChangeTime += dt;
 }
 
-void KGV::System::ApplicationWin32::createHeightMaps() {
-    constexpr double gridOffset = 0;
-    constexpr int textureSize = 1024;
-
+void KGV::System::ApplicationWin32::generateHeightMaps(int _textureSize, int _seed, double _scale) {
     auto lagrangianScale = [](double lowScale, double highScale, double lowRaw, double highRaw, double value) {
         return (highScale - 0)*((value - lowRaw)/(highRaw - lowRaw)) + lowScale;
     };
+
+    Procedural::NoiseBufferGenerator nbg;
+    Procedural::PerlinNoise perlinNoise;
+    Procedural::fBmConfig conf{};
+    conf.octaves = 8;
+    conf.persistence = 0.5;
+    conf.amplitude = 1;
+    conf.frequency = 1;
+    conf.lacunarity = 2;
+
+    // Combine all of the noise layers into a single buffer.
+    const double sharpness = -.5;
+    const double sharpnessEnhance = 4;
+
+    auto lerp = [](double a, double b, double t) -> double {
+        return a + t * (b - a);
+    };
+
+    std::vector<float> finalNoiseBuffer;
+    finalNoiseBuffer.resize(_textureSize * _textureSize);
+
+    std::vector<XMFLOAT2> octaveOffsets;
+    std::mt19937 mt(_seed);
+
+    auto lt = std::chrono::high_resolution_clock::now();
+    std::uniform_int_distribution<> distrib(-256,256);
+    for (int i = 0; i < conf.octaves; ++i) {
+        octaveOffsets.emplace_back(distrib(mt), distrib(mt));
+    }
+
+    float halfWidth = static_cast<float>(_textureSize) / 2.0f;
+
+    Procedural::NoiseOp sharpnessFilter = [&lerp, sharpness, sharpnessEnhance, &conf, &perlinNoise, _scale, octaveOffsets, halfWidth]
+            (double a, double xf, double yf, int width, int height) -> double {
+
+        auto freq = conf.frequency;
+        auto amplitude = conf.amplitude;
+        double sum = 0;
+        double min = 0;
+        double max = 0;
+        for (int i = 0; i < conf.octaves; ++i) {
+            auto x = (xf * freq + octaveOffsets[i].x ) / _scale;
+            auto y = (yf * freq + octaveOffsets[i].y) / _scale;
+            auto noise = perlinNoise.noiseDP(x, y);
+
+//            auto billowNoise = std::abs(noise);
+//            auto ridgeNoise = 1 - billowNoise;
+//            noise = noise + (ridgeNoise * billowNoise);
+
+//            noise = std::abs(noise);
+//            noise = lagrangianScale(-1, 1, 0, 1, noise);
+//            noise = lerp(-1, 1, noise);
+
+//            auto billowLerped = lerp(noise, billowNoise, abs(sharpness));
+//            noise = lerp(billowLerped, ridgeNoise, -sharpness);
+//            noise = sharpness >= 0 ? lerp(noise, billowNoise, sharpness) : lerp(noise, ridgeNoise, -sharpness);
+//            noise = noise * std::pow(std::abs(noise), sharpnessEnhance);
+
+            sum += noise * amplitude;
+            min -= amplitude;
+            max += amplitude;
+            freq *= conf.lacunarity;
+            amplitude *= conf.persistence;
+        }
+
+        return sum / max;
+//        return (sum - min) / (max - min) - 0.2;
+    };
+
+    nbg.execOp(finalNoiseBuffer.data(), _textureSize, _textureSize, sharpnessFilter);
+
+    double min = 1000;
+    double max = -1000;
+    for (auto val : finalNoiseBuffer) {
+        if (val < min)
+            min = val;
+
+        if (val > max)
+            max = val;
+    }
+
+    double newMin = 1000;
+    double newMax = -1000;
+    for (auto &val : finalNoiseBuffer) {
+        val = (val - min)/(max - min);
+    }
+
+    auto ct = std::chrono::high_resolution_clock::now();
+    spdlog::info("Time to generate generate perlin noise for {} points: {}s", finalNoiseBuffer.size(), std::chrono::duration_cast<std::chrono::duration<double>>(ct - lt).count());
+
+    spdlog::info("min: {}, max: {}", min, max);
+    spdlog::info("new min: {}, max: {}", newMin, newMax);
+
+    D3D11_BOX box;
+    box.left = 0;
+    box.right = _textureSize;
+    box.top = 0;
+    box.bottom = _textureSize;
+    box.front = 0;
+    box.back = 1; // Assuming 2D texture
+
+    int rowPitch = _textureSize * sizeof(float);
+    deviceContext->updateSubresource(terrainMapDisplacementTextureF32.get(), 0, &box, finalNoiseBuffer.data(), rowPitch, _textureSize * rowPitch);
+
 
     double radius = 1000;
     Procedural::NoiseOp circularGradientOp = [radius](double val, double xf, double yf, int width, int height) -> double {
@@ -517,51 +502,51 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
         return distance > radius ? 0 : val;
     };
 
-    auto lt = std::chrono::high_resolution_clock::now();
-    Procedural::NoiseBufferGenerator nbg;
+
+
 
     std::vector<float> baseNoiseBuffer;
-    baseNoiseBuffer.resize(textureSize * textureSize);
-    Procedural::fBmConfig conf{};
-    conf.octaves = 8;
-    conf.persistence = 0.5;
-    conf.amplitude = 1;
-    conf.frequency = 1;
-    conf.lacunarity = 2;
-    nbg.generateNoiseTexture2D(conf, baseNoiseBuffer.data(), gridOffset, gridOffset, textureSize, textureSize);
-//    nbg.execOp(baseNoiseBuffer.data(), textureSize, textureSize, billowNoiseOp);
+    baseNoiseBuffer.resize(_textureSize * _textureSize);
+//    Procedural::fBmConfig conf{};
+//    conf.octaves = 1;
+//    conf.persistence = 0.2;
+//    conf.amplitude = 1;
+//    conf.frequency = 1;
+//    conf.lacunarity = 2;
+//    nbg.generateNoiseTexture2D(conf, baseNoiseBuffer.data(), gridOffset, gridOffset, textureSize, textureSize);
+////    nbg.execOp(baseNoiseBuffer.data(), textureSize, textureSize, billowNoiseOp);
 
     Procedural::NoiseOp ridgeNoiseOp = [](double val, double xf, double yf, int width, int height) -> double {
         return 1 - abs(val);
     };
 
     std::vector<float> terrainRidgeNoiseBuffer;
-    terrainRidgeNoiseBuffer.resize(textureSize * textureSize);
+    terrainRidgeNoiseBuffer.resize(_textureSize * _textureSize);
     Procedural::fBmConfig ridgeFBM{};
     ridgeFBM.octaves = 1;
     ridgeFBM.persistence = 0.5;
     ridgeFBM.amplitude = 1;
-    ridgeFBM.frequency = 1;
+    ridgeFBM.frequency = 0.001;
     ridgeFBM.lacunarity = 2;
     double ridgeOffset = 0;
-    nbg.generateNoiseTexture2D(ridgeFBM, terrainRidgeNoiseBuffer.data(), ridgeOffset, ridgeOffset, textureSize, textureSize);
-    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, ridgeNoiseOp);
+//    nbg.generateNoiseTexture2D(ridgeFBM, terrainRidgeNoiseBuffer.data(), ridgeOffset, ridgeOffset, textureSize, textureSize);
+//    nbg.execOp(terrainRidgeNoiseBuffer.data(), textureSize, textureSize, ridgeNoiseOp);
 
     Procedural::NoiseOp billowNoiseOp = [](double val, double xf, double yf, int width, int height) -> double {
         return abs(val);
     };
 
     std::vector<float> billowNoiseBuffer;
-    billowNoiseBuffer.resize(textureSize * textureSize);
+    billowNoiseBuffer.resize(_textureSize * _textureSize);
     Procedural::fBmConfig billowFBM{};
     billowFBM.octaves = 1;
     billowFBM.persistence = 0.5;
     billowFBM.amplitude = 1;
-    billowFBM.frequency = 1;
+    billowFBM.frequency = 0.001;
     billowFBM.lacunarity = 2;
     double billowOffset = 0;
-    nbg.generateNoiseTexture2D(billowFBM, billowNoiseBuffer.data(), billowOffset, billowOffset , textureSize, textureSize);
-    nbg.execOp(billowNoiseBuffer.data(), textureSize, textureSize, billowNoiseOp);
+//    nbg.generateNoiseTexture2D(billowFBM, billowNoiseBuffer.data(), billowOffset, billowOffset , textureSize, textureSize);
+//    nbg.execOp(billowNoiseBuffer.data(), textureSize, textureSize, billowNoiseOp);
 
     // Combine all of the noise layers into a single buffer.
     Procedural::Combine2NoiseOp multiplicativeCombination = []
@@ -569,43 +554,14 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
         return val1 * val2;
     };
 
-    auto lerp = [](double a, double b, double t) -> double {
-        return a + t * (b - a);
-    };
+//    std::vector<float> finalNoiseBuffer;
+//    finalNoiseBuffer.resize(textureSize * textureSize);
 
-    // Combine all of the noise layers into a single buffer.
-    const double sharpness = -1;
-    Procedural::Combine3NoiseOp sharpnessFilter = [&lerp, sharpness]
-            (double perlinNoise, double ridgeNoise, double billowNoise, double xf, double yf, int width, int height) -> double {
-        return sharpness >= 0 ? lerp(perlinNoise, billowNoise, sharpness) : lerp(perlinNoise, ridgeNoise, sharpness);
-    };
-
-    std::vector<float> finalNoiseBuffer;
-    finalNoiseBuffer.resize(textureSize * textureSize);
-    nbg.combine(baseNoiseBuffer.data(), terrainRidgeNoiseBuffer.data(), billowNoiseBuffer.data(), finalNoiseBuffer.data(), textureSize, textureSize, sharpnessFilter);
-
-    auto ct = std::chrono::high_resolution_clock::now();
-    spdlog::info("Time to generate generate perlin noise for {} points: {}s", terrainRidgeNoiseBuffer.size(), std::chrono::duration_cast<std::chrono::duration<double>>(ct - lt).count());
-
-    //Height map
-    Render::Texture2dConfigDX11 terrainMapTexConfig;
-    terrainMapTexConfig.setColorTexture(textureSize, textureSize);
-    terrainMapTexConfig.setFormat(DXGI_FORMAT_R32_FLOAT);
-    ResourceData data{};
-    data.Data = finalNoiseBuffer.data();
-    data.memPitch = sizeof(float) * textureSize;
-    Render::ShaderResourceViewConfigDX11 terrainMapSrvConfig{};
-
-    D3D11_TEX2D_SRV srvDesc;
-    srvDesc.MipLevels = 1;
-    srvDesc.MostDetailedMip = 0;
-
-    terrainMapSrvConfig.setTexture2D(srvDesc);
-    terrainMapDisplacementTextureF32 = device->createTexture2D(terrainMapTexConfig, &data, &terrainMapSrvConfig);
+//    nbg.combine(baseNoiseBuffer.data(), terrainRidgeNoiseBuffer.data(), billowNoiseBuffer.data(), finalNoiseBuffer.data(), textureSize, textureSize, sharpnessFilter);
 
     double highScale = 255;
     double lowScale = 0;
-    double lowRaw = -1;
+    double lowRaw = 0;
     double highRaw = 1;
     Procedural::ImageOp imageOp = [highScale, lowScale, highRaw, lowRaw]
             (double val, double xf, double yf, int width, int height) -> unsigned int {
@@ -618,29 +574,215 @@ void KGV::System::ApplicationWin32::createHeightMaps() {
         return retValue;
     };
 
+
+    std::vector<unsigned int> heightMapDisplayBuffer;
+    heightMapDisplayBuffer.resize(_textureSize * _textureSize);
+
+    nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), finalNoiseBuffer.data(), _textureSize, _textureSize, imageOp);
+    deviceContext->updateSubresource(terrainMapTextureFinalRGBA.get(), 0, nullptr, finalNoiseBuffer.data(), sizeof(int) * _textureSize, 0);
+
+    nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), terrainRidgeNoiseBuffer.data(), _textureSize, _textureSize, imageOp);
+    deviceContext->updateSubresource(terrainMapTextureRidgedRGBA.get(), 0, nullptr, finalNoiseBuffer.data(), sizeof(int) * _textureSize, 0);
+
+    nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), baseNoiseBuffer.data(), _textureSize, _textureSize, imageOp);
+    deviceContext->updateSubresource(terrainMapTextureBaseRGBA.get(), 0, nullptr, finalNoiseBuffer.data(), sizeof(int) * _textureSize, 0);
+
+    nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), billowNoiseBuffer.data(), _textureSize, _textureSize, imageOp);
+    deviceContext->updateSubresource(terrainMapTextureBillowRGBA.get(), 0, nullptr, finalNoiseBuffer.data(), sizeof(int) * _textureSize, 0);
+}
+
+void KGV::System::ApplicationWin32::createHeightMapBuffers(int textureSize) {
+    //Height map
+    Render::Texture2dConfigDX11 terrainMapTexConfig;
+    terrainMapTexConfig.setColorTexture(textureSize, textureSize);
+    terrainMapTexConfig.setFormat(DXGI_FORMAT_R32_FLOAT);
+
+    Render::ShaderResourceViewConfigDX11 terrainMapSrvConfig{};
+
+    D3D11_TEX2D_SRV srvDesc;
+    srvDesc.MipLevels = 1;
+    srvDesc.MostDetailedMip = 0;
+
+    terrainMapSrvConfig.setTexture2D(srvDesc);
+    terrainMapDisplacementTextureF32 = device->createTexture2D(terrainMapTexConfig, nullptr, &terrainMapSrvConfig);
+
     // Heightmap Display
     Render::Texture2dConfigDX11 terrainMapDisplayTexConfig;
     terrainMapDisplayTexConfig.setColorTexture(textureSize, textureSize);
     terrainMapDisplayTexConfig.setFormat(DXGI_FORMAT_R8G8B8A8_UNORM);
 
-    std::vector<unsigned int> heightMapDisplayBuffer;
-    heightMapDisplayBuffer.resize(textureSize * textureSize);
-    nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), finalNoiseBuffer.data(), textureSize, textureSize, imageOp);
 
-    data.Data = heightMapDisplayBuffer.data();
-    data.memPitch = sizeof(unsigned int) * textureSize;
 
     Render::ShaderResourceViewConfigDX11 terrainMapDisplaySrvConfig{};
     terrainMapDisplaySrvConfig.setTexture2D(srvDesc);
-    terrainMapTextureFinalRGBA = device->createTexture2D(terrainMapDisplayTexConfig, &data, &terrainMapDisplaySrvConfig);
+    terrainMapTextureFinalRGBA = device->createTexture2D(terrainMapDisplayTexConfig, nullptr, &terrainMapDisplaySrvConfig);
 
-    nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), terrainRidgeNoiseBuffer.data(), textureSize, textureSize, imageOp);
-    terrainMapTextureRidgedRGBA = device->createTexture2D(terrainMapDisplayTexConfig, &data, &terrainMapDisplaySrvConfig);
+    terrainMapTextureRidgedRGBA = device->createTexture2D(terrainMapDisplayTexConfig, nullptr, &terrainMapDisplaySrvConfig);
 
-    nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), baseNoiseBuffer.data(), textureSize, textureSize, imageOp);
-    terrainMapTextureBaseRGBA = device->createTexture2D(terrainMapDisplayTexConfig, &data, &terrainMapDisplaySrvConfig);
+    terrainMapTextureBaseRGBA = device->createTexture2D(terrainMapDisplayTexConfig, nullptr, &terrainMapDisplaySrvConfig);
 
-    nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), billowNoiseBuffer.data(), textureSize, textureSize, imageOp);
-    terrainMapTextureBillowRGBA = device->createTexture2D(terrainMapDisplayTexConfig, &data, &terrainMapDisplaySrvConfig);
+    terrainMapTextureBillowRGBA = device->createTexture2D(terrainMapDisplayTexConfig, nullptr, &terrainMapDisplaySrvConfig);
+}
+
+void KGV::System::ApplicationWin32::setupPrimaryCamera(int width, int height, int topX, int topY) {
+    Render::SwapChainConfigDX11 swapChainConf;
+    swapChainConf.setWidth(window1->getWidth());
+    swapChainConf.setHeight(window1->getHeight());
+    swapChainId = device->createSwapChain(window1->getWin32Handle(), swapChainConf);
+    auto swapChain = device->getSwapChainById(swapChainId);
+
+//    spdlog::get("engine")->info("RTV ID: {}", swapChain->getResource()->getRtvId());
+//    rtvId = device->createRenderTargetView(swapChain->getResource()->getResourceId(), nullptr);
+    rtvId = swapChain->getResource()->getRtvId();
+    Render::Texture2dConfigDX11 texConfig;
+    texConfig.setDepthTexture(window1->getWidth(), window1->getHeight());
+    texConfig.setFormat(DXGI_FORMAT_D32_FLOAT);
+
+    Render::DepthStencilViewConfigDX11 dsvConfig;
+    dsvConfig.setFormat(DXGI_FORMAT_D32_FLOAT);
+    D3D11_TEX2D_DSV dsvState;
+    dsvState.MipSlice = 0;
+    dsvConfig.SetTexture2D(dsvState);
+    depthBuffer = device->createTexture2D(texConfig, nullptr, nullptr, nullptr, &dsvConfig);
+
+    D3D11_VIEWPORT viewport;
+    viewport.Width = width;
+    viewport.Height = height,
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+    viewport.TopLeftX = topX;
+    viewport.TopLeftY = topY;
+
+    viewPortId = device->createViewPort(viewport);
+
+    D3D11_DEPTH_STENCIL_DESC dsDesc;
+    // Depth test parameters
+    dsDesc.DepthEnable = true;
+    dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+    dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+// Stencil test parameters
+    dsDesc.StencilEnable = true;
+    dsDesc.StencilReadMask = 0xFF;
+    dsDesc.StencilWriteMask = 0xFF;
+
+// Stencil operations if pixel is front-facing
+    dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+    dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+// Stencil operations if pixel is back-facing
+    dsDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    dsDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+    dsDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    dsDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+    auto camera = std::make_shared<Engine::Entity>();
+    camera->camera = std::make_unique<Engine::Camera>();
+    camera->camera->setDsvStateId(device->createDepthStencilState(dsDesc));
+    camera->camera->setDsvId(depthBuffer->getDsvId());
+    camera->camera->setRtvId(rtvId);
+    camera->camera->setViewPortId(viewPortId);
+    camera->camera->setPerspectiveProject(XMConvertToRadians(70), (float)width / (float)height, 1, 2000.0f);
+    camera->transform.position.z = -600.0f;
+    camera->transform.position.x = 0;
+    camera->transform.position.y = 500;
+    camera->transform.rotation.x = XMConvertToRadians(45);
+
+    cameras.emplace_back(camera);
+}
+
+void KGV::System::ApplicationWin32::setupTextureViewer(int width, int height, int topX, int topY) {
+    std::vector<Render::Vertex> planeVertices;
+    std::vector<U32> planeIndices;
+    Engine::GeometryFactory::getPlane(planeVertices, planeIndices);
+
+    // TODO: Need to fix material change detection to include textures so that single material pipeline definition can be reused.
+    auto planeMeshId = renderer->createMesh({planeVertices}, planeIndices, Render::kImmutable);
+
+    auto textureViewingPlane = std::make_shared<Engine::Entity>();
+    textureViewingPlane->mesh = std::make_unique<Engine::MeshComponent>();
+    textureViewingPlane->mesh->meshId = planeMeshId;
+    textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
+    textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
+    textureViewingPlane->mesh->render = true;
+    textureViewingPlane->material->colorTexture = terrainMapTextureFinalRGBA;
+    textureViewingPlane->transform.position.x = -1.5;
+
+    texturePlaneEntity = textureViewingPlane;
+    texturePlanes.emplace_back(textureViewingPlane);
+
+    textureViewingPlane = std::make_shared<Engine::Entity>();
+    textureViewingPlane->mesh = std::make_unique<Engine::MeshComponent>();
+    textureViewingPlane->mesh->meshId = planeMeshId;
+    textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
+    textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
+    textureViewingPlane->mesh->render = true;
+    textureViewingPlane->material->colorTexture = terrainMapTextureBaseRGBA;
+    textureViewingPlane->transform.position.x = -0.5;
+    texturePlanes.emplace_back(textureViewingPlane);
+
+    textureViewingPlane = std::make_shared<Engine::Entity>();
+    textureViewingPlane->mesh = std::make_unique<Engine::MeshComponent>();
+    textureViewingPlane->mesh->meshId = planeMeshId;
+    textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
+    textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
+    textureViewingPlane->mesh->render = true;
+    textureViewingPlane->material->colorTexture = terrainMapTextureRidgedRGBA;
+    textureViewingPlane->transform.position.x = 0.5;
+    texturePlanes.emplace_back(textureViewingPlane);
+
+    textureViewingPlane = std::make_shared<Engine::Entity>();
+    textureViewingPlane->mesh = std::make_unique<Engine::MeshComponent>();
+    textureViewingPlane->mesh->meshId = planeMeshId;
+    textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
+    textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
+    textureViewingPlane->mesh->render = true;
+    textureViewingPlane->material->colorTexture = terrainMapTextureBillowRGBA;
+    textureViewingPlane->transform.position.x = 1.5;
+    texturePlanes.emplace_back(textureViewingPlane);
+
+    D3D11_VIEWPORT vp;
+    vp.MinDepth = 0;
+    vp.MaxDepth = 1;
+    vp.TopLeftX = topX;
+    vp.TopLeftY = topY;
+    vp.Width = width;
+    vp.Height = height;
+
+    D3D11_DEPTH_STENCIL_DESC dsDesc;
+    // Depth test parameters
+    dsDesc.DepthEnable = true;
+    dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+    dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+// Stencil test parameters
+    dsDesc.StencilEnable = true;
+    dsDesc.StencilReadMask = 0xFF;
+    dsDesc.StencilWriteMask = 0xFF;
+
+// Stencil operations if pixel is front-facing
+    dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+    dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+// Stencil operations if pixel is back-facing
+    dsDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    dsDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+    dsDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    dsDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+    auto heightMapCamera = std::make_shared<Engine::Entity>();
+    heightMapCamera->camera = std::make_unique<Engine::Camera>();
+    heightMapCamera->camera->setDsvStateId(device->createDepthStencilState(dsDesc));
+    heightMapCamera->camera->setDsvId(depthBuffer->getDsvId());
+    heightMapCamera->camera->setRtvId(rtvId);
+    heightMapCamera->camera->setViewPortId(device->createViewPort(vp));
+    heightMapCamera->camera->setOrthographicProject(texturePlanes.size(), 1, 0.01, 5);
+    heightMapCamera->camera->setIsActive(true);
+    heightMapCamera->transform.position.z = -1;
+    texturePlaneCamera = heightMapCamera;
 }
 
