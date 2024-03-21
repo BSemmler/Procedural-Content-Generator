@@ -154,13 +154,15 @@ bool KGV::System::ApplicationWin32::init() {
 
     inputLayoutId = device->createInputLayout(vertexShaderId, inputElements);
 
-    float viewPortHeightRatio = 0.125f;
-    float viewPortWidthRatio = 1.0f;
-    setupPrimaryCamera(window1->getWidth(), window1->getHeight(), 0, window1->getHeight() * viewPortHeightRatio);
-    setupTextureViewer(window1->getWidth() * viewPortWidthRatio, window1->getHeight() * viewPortHeightRatio, 0, 0);
-
     createHeightMapBuffers(mapSize);
     generateHeightMaps(mapSize, mapSeed, mapScale);
+
+    float viewPortHeightRatio = 0.25f;
+    float viewPortWidthRatio = 1.0f;
+//    window1->getWidth() * viewPortHeightRatio
+//    window1->getHeight() * (1 - viewPortHeightRatio)
+    setupPrimaryCamera(window1->getWidth(), window1->getHeight(), 0, 0);
+    setupTextureViewer(window1->getWidth() * viewPortWidthRatio, window1->getWidth() * viewPortHeightRatio, 0, 0);
 
     std::vector<XMFLOAT3> verts;
     std::vector<XMFLOAT3> normals;
@@ -526,20 +528,20 @@ void KGV::System::ApplicationWin32::generateHeightMaps(int _textureSize, int _se
     box.front = 0;
     box.back = 1; // Assuming 2D texture
 
-    int rowPitch = _textureSize * sizeof(float);
-    deviceContext->updateSubresource(terrainMapDisplacementTextureF32.get(), 0, &box, finalNoiseBuffer.data(), rowPitch, _textureSize * rowPitch);
+    int displacementRowPitch = _textureSize * sizeof(float);
+    deviceContext->updateSubresource(terrainMapDisplacementTextureF32.get(), 0, &box, finalNoiseBuffer.data(), displacementRowPitch, _textureSize * displacementRowPitch);
 
 
-    double radius = 1000;
-    Procedural::NoiseOp circularGradientOp = [radius](double val, double xf, double yf, int width, int height) -> double {
-        double centerX = width / 2;
-        double centerY = height / 2;
-        double distX = abs(xf - centerX);
-        double distY = abs(yf - centerY);
-
-        double distance = std::sqrt(distX * distX + distY * distY);
-        return distance > radius ? 0 : val;
-    };
+//    double radius = 1000;
+//    Procedural::NoiseOp circularGradientOp = [radius](double val, double xf, double yf, int width, int height) -> double {
+//        double centerX = width / 2;
+//        double centerY = height / 2;
+//        double distX = abs(xf - centerX);
+//        double distY = abs(yf - centerY);
+//
+//        double distance = std::sqrt(distX * distX + distY * distY);
+//        return distance > radius ? 0 : val;
+//    };
 
 
 
@@ -617,17 +619,18 @@ void KGV::System::ApplicationWin32::generateHeightMaps(int _textureSize, int _se
     std::vector<unsigned int> heightMapDisplayBuffer;
     heightMapDisplayBuffer.resize(_textureSize * _textureSize);
 
+    unsigned int heightMapTextureRowPitch = _textureSize * sizeof(unsigned int);
     nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), finalNoiseBuffer.data(), _textureSize, _textureSize, imageOp);
-    deviceContext->updateSubresource(terrainMapTextureFinalRGBA.get(), 0, nullptr, finalNoiseBuffer.data(), sizeof(int) * _textureSize, 0);
+    deviceContext->updateSubresource(terrainMapTextureFinalRGBA.get(), 0, &box, heightMapDisplayBuffer.data(), heightMapTextureRowPitch, heightMapTextureRowPitch * _textureSize);
 
     nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), terrainRidgeNoiseBuffer.data(), _textureSize, _textureSize, imageOp);
-    deviceContext->updateSubresource(terrainMapTextureRidgedRGBA.get(), 0, nullptr, finalNoiseBuffer.data(), sizeof(int) * _textureSize, 0);
+    deviceContext->updateSubresource(terrainMapTextureRidgedRGBA.get(), 0, &box, heightMapDisplayBuffer.data(), heightMapTextureRowPitch, heightMapTextureRowPitch * _textureSize);
 
     nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), baseNoiseBuffer.data(), _textureSize, _textureSize, imageOp);
-    deviceContext->updateSubresource(terrainMapTextureBaseRGBA.get(), 0, nullptr, finalNoiseBuffer.data(), sizeof(int) * _textureSize, 0);
+    deviceContext->updateSubresource(terrainMapTextureBaseRGBA.get(), 0, &box, heightMapDisplayBuffer.data(), heightMapTextureRowPitch, heightMapTextureRowPitch * _textureSize);
 
     nbg.createPixelBufferFromData(heightMapDisplayBuffer.data(), billowNoiseBuffer.data(), _textureSize, _textureSize, imageOp);
-    deviceContext->updateSubresource(terrainMapTextureBillowRGBA.get(), 0, nullptr, finalNoiseBuffer.data(), sizeof(int) * _textureSize, 0);
+    deviceContext->updateSubresource(terrainMapTextureBillowRGBA.get(), 0, &box, heightMapDisplayBuffer.data(), heightMapTextureRowPitch, heightMapTextureRowPitch * _textureSize);
 }
 
 void KGV::System::ApplicationWin32::createHeightMapBuffers(int textureSize) {
@@ -757,7 +760,7 @@ void KGV::System::ApplicationWin32::setupTextureViewer(int width, int height, in
     textureViewingPlane->mesh->meshId = planeMeshId;
     textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
     textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
-    textureViewingPlane->mesh->render = true;
+    textureViewingPlane->mesh->render = false;
     textureViewingPlane->material->colorTexture = terrainMapTextureBaseRGBA;
     textureViewingPlane->transform.position.x = -0.5;
     texturePlanes.emplace_back(textureViewingPlane);
@@ -767,7 +770,7 @@ void KGV::System::ApplicationWin32::setupTextureViewer(int width, int height, in
     textureViewingPlane->mesh->meshId = planeMeshId;
     textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
     textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
-    textureViewingPlane->mesh->render = true;
+    textureViewingPlane->mesh->render = false;
     textureViewingPlane->material->colorTexture = terrainMapTextureRidgedRGBA;
     textureViewingPlane->transform.position.x = 0.5;
     texturePlanes.emplace_back(textureViewingPlane);
@@ -777,7 +780,7 @@ void KGV::System::ApplicationWin32::setupTextureViewer(int width, int height, in
     textureViewingPlane->mesh->meshId = planeMeshId;
     textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
     textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
-    textureViewingPlane->mesh->render = true;
+    textureViewingPlane->mesh->render = false;
     textureViewingPlane->material->colorTexture = terrainMapTextureBillowRGBA;
     textureViewingPlane->transform.position.x = 1.5;
     texturePlanes.emplace_back(textureViewingPlane);
