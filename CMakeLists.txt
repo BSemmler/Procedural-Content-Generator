@@ -132,6 +132,8 @@ add_executable(Engine
         KGVEngine/SamplerStateDX11.h
         KGVEngine/NoiseBufferGenerator.cpp
         KGVEngine/NoiseBufferGenerator.h
+        KGVEngine/TargaImage.cpp
+        KGVEngine/TargaImage.h
 )
 
 target_link_libraries(Engine PRIVATE spdlog::spdlog d3d11.lib dxgi.lib d3dcompiler.lib)

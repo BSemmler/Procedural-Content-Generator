@@ -3,6 +3,7 @@
 #include "GeometryFactory.h"
 #include "NoiseBufferGenerator.h"
 #include "immintrin.h"
+#include "TargaImage.h"
 
 using namespace DirectX;
 
@@ -156,6 +157,8 @@ bool KGV::System::ApplicationWin32::init() {
 
     createHeightMapBuffers(mapSize);
     generateHeightMaps(mapSize, mapSeed, mapScale);
+
+    loadTextures();
 
     float viewPortHeightRatio = 0.25f;
     float viewPortWidthRatio = 1.0f;
@@ -749,7 +752,7 @@ void KGV::System::ApplicationWin32::setupTextureViewer(int width, int height, in
     textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
     textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
     textureViewingPlane->mesh->render = true;
-    textureViewingPlane->material->colorTexture = terrainMapTextureFinalRGBA;
+    textureViewingPlane->material->colorTextures.emplace_back(terrainMapTextureFinalRGBA);
     textureViewingPlane->transform.position.x = -1.5;
 
     texturePlaneEntity = textureViewingPlane;
@@ -761,7 +764,7 @@ void KGV::System::ApplicationWin32::setupTextureViewer(int width, int height, in
     textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
     textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
     textureViewingPlane->mesh->render = false;
-    textureViewingPlane->material->colorTexture = terrainMapTextureBaseRGBA;
+    textureViewingPlane->material->colorTextures.emplace_back(terrainMapTextureBaseRGBA);
     textureViewingPlane->transform.position.x = -0.5;
     texturePlanes.emplace_back(textureViewingPlane);
 
@@ -771,7 +774,7 @@ void KGV::System::ApplicationWin32::setupTextureViewer(int width, int height, in
     textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
     textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
     textureViewingPlane->mesh->render = false;
-    textureViewingPlane->material->colorTexture = terrainMapTextureRidgedRGBA;
+    textureViewingPlane->material->colorTextures.emplace_back(terrainMapTextureRidgedRGBA);
     textureViewingPlane->transform.position.x = 0.5;
     texturePlanes.emplace_back(textureViewingPlane);
 
@@ -780,8 +783,9 @@ void KGV::System::ApplicationWin32::setupTextureViewer(int width, int height, in
     textureViewingPlane->mesh->meshId = planeMeshId;
     textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
     textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
-    textureViewingPlane->mesh->render = false;
-    textureViewingPlane->material->colorTexture = terrainMapTextureBillowRGBA;
+    textureViewingPlane->mesh->render = true;
+//    textureViewingPlane->material->colorTextures = terrainMapTextureBillowRGBA;
+    textureViewingPlane->material->colorTextures.emplace_back(rockTexture);
     textureViewingPlane->transform.position.x = 1.5;
     texturePlanes.emplace_back(textureViewingPlane);
 
@@ -826,5 +830,35 @@ void KGV::System::ApplicationWin32::setupTextureViewer(int width, int height, in
     heightMapCamera->camera->setIsActive(true);
     heightMapCamera->transform.position.z = -1;
     texturePlaneCamera = heightMapCamera;
+}
+
+void KGV::System::ApplicationWin32::loadTextures() {
+    Engine::TargaImage rockTextureImage;
+    Engine::LoadTargaFromFile("../assets/textures/rocks.tga", rockTextureImage);
+
+    // Heightmap Display
+    Render::Texture2dConfigDX11 rockTextureConfig;
+    rockTextureConfig.setColorTexture(rockTextureImage.getWidth(), rockTextureImage.getHeight());
+    rockTextureConfig.setFormat(DXGI_FORMAT_R8G8B8A8_UNORM);
+    rockTextureConfig.setUsage(D3D11_USAGE_IMMUTABLE); // We don't intend to update this.
+
+    D3D11_TEX2D_SRV srvDesc;
+    srvDesc.MipLevels = 1;
+    srvDesc.MostDetailedMip = 0;
+
+    Render::ShaderResourceViewConfigDX11 rockTextureSrvConfig{};
+    rockTextureSrvConfig.setTexture2D(srvDesc);
+
+    unsigned int numPixels = rockTextureImage.getWidth() * rockTextureImage.getHeight();
+    auto rockImageBuffer = std::make_unique<unsigned int[]>(numPixels);
+    Engine::Convert24BitTo32Bit(rockTextureImage.getData(), numPixels, rockImageBuffer.get());
+
+    ResourceData data{};
+    data.Data = rockImageBuffer.get();
+    data.memPitch = sizeof(unsigned int) * rockTextureImage.getWidth();
+//    data.Data = rockTextureImage.getData();
+//    data.memPitch = 3 * rockTextureImage.getWidth();
+
+    rockTexture = device->createTexture2D(rockTextureConfig, &data, &rockTextureSrvConfig);
 }
 

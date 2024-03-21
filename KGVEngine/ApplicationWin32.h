@@ -23,6 +23,7 @@ namespace KGV::System
 
         void setupPrimaryCamera(int width, int height, int topX, int topY);
         void setupTextureViewer(int width, int height, int topX, int topY);
+        void loadTextures();
 
 		// Inherited via IWndProc
 		virtual LRESULT CALLBACK wndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam ) override;
@@ -46,6 +47,7 @@ namespace KGV::System
         std::shared_ptr<Render::ResourceViewDX11> terrainMapTextureFinalRGBA;
         std::shared_ptr<Render::ResourceViewDX11> terrainColorTexture;
         std::shared_ptr<Render::ResourceViewDX11> waterMapTexture;
+        std::shared_ptr<Render::ResourceViewDX11> rockTexture;
         S32 vertexShaderId;
         S32 terrainVertexShaderId;
         S32 pixelShaderId;

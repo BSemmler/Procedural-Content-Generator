@@ -233,9 +233,12 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
                     vsFrameConstantsBuffer->getResourceId(),
                     psMaterialConstantsBuffer->getResourceId()}, 1); // TODO: Define start slot enum for various cbuffer positions.
 
-                if (material->colorTexture) {
-                    auto m = material->colorTexture.get();
-                    psState.setSrvIds({m->getSrvId()});
+                if (!material->colorTextures.empty()) {
+                    std::vector<S32> srvIds;
+                    for(auto texture : material->colorTextures) {
+                        srvIds.emplace_back(texture->getSrvId());
+                    }
+                    psState.setSrvIds(srvIds);
                 }
 
 
