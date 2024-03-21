@@ -121,6 +121,10 @@ void calcDirectionalLighting(Material mat, DirectionalLight light, float3 normal
     }
 }
 
+
+Texture2D<float> gRockTexture : register(t0);
+SamplerState gRockSampler : register(s0);
+
 float4 PS(VertexOut input) : SV_TARGET {
     input.normal = normalize(input.normal);
 
@@ -136,11 +140,18 @@ float4 PS(VertexOut input) : SV_TARGET {
     diffuse += D;
     spec    += S;
 
-   // TODO: Implement point and spot lights
+    // TODO: Implement point and spot lights
+    float4 litColor;
+    float4 texColor;
 
-   float4 litColor = ambient + diffuse + spec;
-   litColor.a = gMaterial.diffuse.a;
 
+   if (input.worldPosition.y > 64)
+        texColor = gRockTexture.Sample(gRockSampler, input.texcoord);
+   else
+        texColor = float4(0.2, 0.5, 0.2, 1);
+
+    litColor = texColor * (ambient + diffuse) + spec;
+    litColor.a = gMaterial.diffuse.a * texColor.a;
    return litColor;
 }
 

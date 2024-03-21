@@ -50,6 +50,7 @@ namespace KGV::System
         std::shared_ptr<Render::ResourceViewDX11> rockTexture;
         S32 vertexShaderId;
         S32 terrainVertexShaderId;
+        S32 terrainPixelShaderId;
         S32 pixelShaderId;
         S32 planeVertexShaderId;
         S32 planePixelShaderId;

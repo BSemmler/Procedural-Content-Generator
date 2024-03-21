@@ -143,6 +143,7 @@ bool KGV::System::ApplicationWin32::init() {
 
     vertexShaderId = device->loadShader("../KGVEngine/shaders/basicLighting.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
     terrainVertexShaderId = device->loadShader("../KGVEngine/shaders/heightmapTerrain.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
+    terrainPixelShaderId = device->loadShader("../KGVEngine/shaders/heightmapTerrain.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
     pixelShaderId = device->loadShader("../KGVEngine/shaders/basicLighting.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
     planeVertexShaderId = device->loadShader("../KGVEngine/shaders/texturePlane.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
     planePixelShaderId = device->loadShader("../KGVEngine/shaders/texturePlane.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
@@ -199,7 +200,7 @@ bool KGV::System::ApplicationWin32::init() {
     light->transform.rotation.y = XMConvertToRadians(5.15);
     light->light = std::make_unique<Engine::LightComponent>();
     light->light->ambient = {0.2f, 0.2f, 0.2f, 1.0f };
-    light->light->diffuse = {0.7f, 0.7f, 0.7f, 1.0f };
+    light->light->diffuse = {1.0f, 1.0f, 1.0f, 1.0f };
     light->light->specular = { 0.1f, 0.1f, 0.1f, 1.0f };
 
     entities.emplace_back(light);
@@ -221,11 +222,12 @@ bool KGV::System::ApplicationWin32::init() {
     grid->transform.rotation.y = 0;
     grid->material = std::make_unique<Engine::MaterialComponent>();
     grid->material->displacement = 256.0f;
-    grid->material->ambient = { 0.0215f, 0.1745f, 0.0215f, 1.0f };
-    grid->material->diffuse = { 0.07568f, 0.61424f, 0.07568f, 1.0f };
-    grid->material->specular = { 0.633f, 0.727811f, 0.633f, 0.001 * 128 };
-    grid->material->materialId = renderer->createMaterial(inputLayoutId, terrainVertexShaderId, pixelShaderId);
+    grid->material->ambient = { 0.5f, 0.5f, 0.5f, 1.0f };
+    grid->material->diffuse = { 0.5f, 0.5f, 0.5f, 1.0f };
+    grid->material->specular = { 0.5f, 0.5f, 0.5f, 0.001 * 128 };
+    grid->material->materialId = renderer->createMaterial(inputLayoutId, terrainVertexShaderId, terrainPixelShaderId);
     grid->material->mapTexture = terrainMapDisplacementTextureF32;
+    grid->material->colorTextures.emplace_back(rockTexture);
 
     grid->mesh = std::make_unique<Engine::MeshComponent>();
     grid->mesh->meshId = gridMeshId;
