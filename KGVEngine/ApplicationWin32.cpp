@@ -284,10 +284,6 @@ LRESULT KGV::System::ApplicationWin32::wndProc( HWND hWnd, UINT msg, WPARAM wPar
                 spdlog::get("engine")->info("Escape Key Pressed, exiting.", wParam);
             }
 
-
-
-            if (wParam == 0x57) // w key
-                waterPlane->mesh->render = !waterPlane->mesh->render;
             if (wParam == 0x5a)  { // Z key
                 cameras[0]->camera->setIsWireframe(!cameras[0]->camera->isWireframe());
             }
@@ -359,30 +355,63 @@ void KGV::System::ApplicationWin32::draw(F32 dt) {
         cumulativeTime = 0.0f;
     }
 
-    if (keyDown[VK_UP] && lastSeedChangeTime > 0.3) {
+    bool regenMap = false;
+    if (keyDown[VK_UP] && seedChangeKeyDebounce > 0.3) {
         mapSeed++;
-        generateHeightMaps(mapSize, mapSeed, mapScale);
-        lastSeedChangeTime = 0;
-    } else if (keyDown[VK_DOWN] && lastSeedChangeTime > 0.3) {
+        seedChangeKeyDebounce = 0;
+        regenMap = true;
+    } else if (keyDown[VK_DOWN] && seedChangeKeyDebounce > 0.3) {
         mapSeed--;
-        generateHeightMaps(mapSize, mapSeed, mapScale);
-        lastSeedChangeTime = 0;
+        seedChangeKeyDebounce = 0;
+        regenMap = true;
     }
 
-    if (keyDown[VK_RIGHT] && lastScaleChangeTime > 0.3) {
-        mapScale++;
-        generateHeightMaps(mapSize, mapSeed, mapScale);
-        lastScaleChangeTime = 0;
-    } else if (keyDown[VK_LEFT] && lastScaleChangeTime > 0.3) {
-        mapScale--;
-        generateHeightMaps(mapSize, mapSeed, mapScale);
-        lastScaleChangeTime = 0;
+    static double xOffset = 0.0;
+    static double yOffset = 0.0;
+    if (keyDown[0x55]) {
+        yOffset += 30 * dt;
+        regenMap = true;
+    } else if (keyDown[0x4A]) {
+        yOffset -= 30 * dt;
+        regenMap = true;
     }
-    lastScaleChangeTime += dt;
-    lastSeedChangeTime += dt;
+
+    if (keyDown[0x48]) {
+        xOffset += 30 * dt;
+        regenMap = true;
+    } else if (keyDown[0x4B]) {
+        xOffset -= 30 * dt;
+        regenMap = true;
+    }
+
+    // Q key
+    static bool waterKeyPressed = false;
+    if (keyDown[0x51] && !waterKeyPressed) {
+        waterPlane->mesh->render = !waterPlane->mesh->render;
+        waterKeyDebounceTime = 0;
+        waterKeyPressed = true;
+    } else if (!keyDown[0x51]) {
+        waterKeyPressed = false;
+    }
+
+    if (keyDown[VK_RIGHT]) {
+        mapScale += 10 * dt;
+        regenMap = true;
+    } else if (keyDown[VK_LEFT]) {
+        mapScale -= 10 * dt;
+        regenMap = true;
+    }
+
+    if (regenMap) {
+        generateHeightMaps(mapSize, mapSeed, mapScale, xOffset, yOffset);
+        regenMap = false;
+    }
+
+    seedChangeKeyDebounce += dt;
+    waterKeyDebounceTime += dt;
 }
 
-void KGV::System::ApplicationWin32::generateHeightMaps(int _textureSize, int _seed, double _scale) {
+void KGV::System::ApplicationWin32::generateHeightMaps(int _textureSize, int _seed, double _scale, double xOffset, double yOffset) {
     auto lagrangianScale = [](double lowScale, double highScale, double lowRaw, double highRaw, double value) {
         return (highScale - 0)*((value - lowRaw)/(highRaw - lowRaw)) + lowScale;
     };
@@ -411,14 +440,15 @@ void KGV::System::ApplicationWin32::generateHeightMaps(int _textureSize, int _se
     std::mt19937 mt(_seed);
 
     auto lt = std::chrono::high_resolution_clock::now();
-    std::uniform_int_distribution<> distrib(-256,256);
+    std::uniform_real_distribution<> distrib(-50,50);
     for (int i = 0; i < conf.octaves; ++i) {
-        octaveOffsets.emplace_back(distrib(mt), distrib(mt));
+        octaveOffsets.emplace_back(distrib(mt) + xOffset, distrib(mt) + yOffset);
     }
 
-    float halfWidth = static_cast<float>(_textureSize) / 2.0f;
 
-    Procedural::NoiseOp sharpnessFilter = [&lerp, sharpness, sharpnessEnhance, &conf, &perlinNoise, _scale, octaveOffsets, halfWidth]
+//    _scale = 1;
+    _scale /= 2;
+    Procedural::NoiseOp sharpnessFilter = [&lerp, sharpness, sharpnessEnhance, &conf, &perlinNoise, _scale, octaveOffsets]
             (double a, double xf, double yf, int width, int height) -> double {
 
         auto freq = conf.frequency;
@@ -426,9 +456,12 @@ void KGV::System::ApplicationWin32::generateHeightMaps(int _textureSize, int _se
         double sum = 0;
         double min = 0;
         double max = 0;
+        float halfWidth = static_cast<float>(width) / 2.0f;
         for (int i = 0; i < conf.octaves; ++i) {
             auto x = (xf * freq + octaveOffsets[i].x ) / _scale;
             auto y = (yf * freq + octaveOffsets[i].y) / _scale;
+//            auto x = (xf) / _scale * freq + octaveOffsets[i].x;
+//            auto y = (yf) / _scale * freq + octaveOffsets[i].y;
             auto noise = perlinNoise.noiseDP(x, y);
 
 //            auto billowNoise = std::abs(noise);
@@ -452,7 +485,7 @@ void KGV::System::ApplicationWin32::generateHeightMaps(int _textureSize, int _se
         }
 
         return sum / max;
-//        return (sum - min) / (max - min) - 0.2;
+//        return (sum - min) / (max - min);
     };
 
     nbg.execOp(finalNoiseBuffer.data(), _textureSize, _textureSize, sharpnessFilter);
@@ -471,6 +504,12 @@ void KGV::System::ApplicationWin32::generateHeightMaps(int _textureSize, int _se
     double newMax = -1000;
     for (auto &val : finalNoiseBuffer) {
         val = (val - min)/(max - min);
+
+        if (val < newMin)
+            newMin = val;
+
+        if (val > newMax)
+            newMax = val;
     }
 
     auto ct = std::chrono::high_resolution_clock::now();

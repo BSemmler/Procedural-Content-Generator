@@ -18,7 +18,7 @@ namespace KGV::System
 		int		run()		override;
         void draw(F32 dt);
 
-        void generateHeightMaps(int textureSize, int seed, double scale);
+        void generateHeightMaps(int textureSize, int seed, double scale, double xOffset = 0, double yOffset = 0);
         void createHeightMapBuffers(int textureSize);
 
         void setupPrimaryCamera(int width, int height, int topX, int topY);
@@ -65,8 +65,8 @@ namespace KGV::System
         std::chrono::high_resolution_clock::time_point lastTime;
         unsigned int mapSeed = 0;
         bool keyDown[0xFF];
-        double lastSeedChangeTime = 0;
-        double lastScaleChangeTime = 0;
+        double waterKeyDebounceTime = 0;
+        double seedChangeKeyDebounce = 0;
         double mapScale = 512;
         int mapSize = 1024;
 	};
