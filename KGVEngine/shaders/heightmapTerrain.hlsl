@@ -131,7 +131,7 @@ Texture2D gSandTexture : register(t2);
 
 
 float4 PS(VertexOut input) : SV_TARGET {
-    const float gMinRockSlope = 0.5;
+    const float gMinRockSlope = 0.7;
     const float gMaxGrassSlope = 0.9;
     const float gMinRockGrassHeight = 4.0f;
     const float gMaxSandHeight = 6.0f;
@@ -144,18 +144,15 @@ float4 PS(VertexOut input) : SV_TARGET {
     float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
     float4 spec    = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-//     float4 A, D, S;
-//     calcDirectionalLighting(gMaterial, gDirectionalLight, input.normal, toEyeW, A, D, S);
-//     ambient += A;
-//     diffuse += D;
-//     spec    += S;
+    float4 A, D, S;
+    calcDirectionalLighting(gMaterial, gDirectionalLight, input.normal, toEyeW, A, D, S);
+    ambient += A;
+    diffuse += D;
+    spec    += S;
 
-    // TODO: Implement point and spot lights
-    float4 litColor;
-
-    float3 rockAlbedo = gRockTexture.Sample(gColorSampler, input.texcoord);
-    float3 grassAlbedo = gGrassTexture.Sample(gColorSampler, input.texcoord);
-    float3 sandAlbedo = gSandTexture.Sample(gColorSampler, input.texcoord);
+    float3 rockAlbedo = gRockTexture.Sample(gColorSampler, input.texcoord * 512);
+    float3 grassAlbedo = gGrassTexture.Sample(gColorSampler, input.texcoord * 512);
+    float3 sandAlbedo = gSandTexture.Sample(gColorSampler, input.texcoord * 512);
 
     float rockGrassWeighting = input.normal.y;
 
@@ -174,11 +171,10 @@ float4 PS(VertexOut input) : SV_TARGET {
     float3 rockGrassAlbedo = lerp(rockAlbedo, grassAlbedo, rockGrassWeighting);
     float3 finalColor = lerp(sandAlbedo, rockGrassAlbedo, sandRockGrassWeighting);
 
-//     litColor = finalColor * (ambient + diffuse) + spec;
-//     litColor.a = gMaterial.diffuse.a * finalColor.a;
-//     return litColor;
+    float3 litColor = finalColor * (ambient.rgb + diffuse.rgb) + spec.rgb;
+    return float4(litColor, 1);
 //     return float4(rockGrassAlbedo, 1);
 //     return float4(sandAlbedo, 1.0f);
-    return float4(finalColor, 1.0f);
+//     return float4(finalColor, 1.0f);
 }
 

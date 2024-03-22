@@ -35,6 +35,13 @@ void KGV::Render::PixelShaderStageDX11::applyDesiredState(ComPtr<ID3D11DeviceCon
 
     context->PSSetShaderResources(0, srvs.size(), srvs.data());
 
+    std::vector<ID3D11SamplerState*> samplers;
+    for (auto id : desiredState.getSamplerIds()) {
+        samplers.emplace_back(device->getSamplerStateById(id).Get());
+    }
+
+    context->PSSetSamplers(0, samplers.size(), samplers.data());
+
     std::vector<ID3D11Buffer*> constantBuffers;
     for (S32 id : desiredState.getConstantBuffersIds()) {
         auto* buff = dynamic_cast<ConstantBufferDX11 *>(device->getResourceById(id));

@@ -238,6 +238,8 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
                     for(auto texture : material->colorTextures) {
                         srvIds.emplace_back(texture->getSrvId());
                     }
+
+                    psState.setSamplerIds(material->samplerIds);
                     psState.setSrvIds(srvIds);
                 }
 

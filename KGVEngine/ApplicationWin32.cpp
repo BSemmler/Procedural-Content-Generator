@@ -230,6 +230,7 @@ bool KGV::System::ApplicationWin32::init() {
     grid->material->colorTextures.emplace_back(rockTexture);
     grid->material->colorTextures.emplace_back(grassTexture);
     grid->material->colorTextures.emplace_back(sandTexture);
+    grid->material->samplerIds.emplace_back(terrainWrapSampler);
 
     grid->mesh = std::make_unique<Engine::MeshComponent>();
     grid->mesh->meshId = gridMeshId;
@@ -918,5 +919,14 @@ void KGV::System::ApplicationWin32::loadTextures() {
     }
 
     grassTexture = device->createTexture2D(grassTextureConfig, &grassTexResourceData, &rockTextureSrvConfig);
+
+    D3D11_SAMPLER_DESC samplerDesc{};
+    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+    samplerDesc.MaxAnisotropy = 16;
+
+    terrainWrapSampler = device->createSamplerState(samplerDesc);
 }
 
