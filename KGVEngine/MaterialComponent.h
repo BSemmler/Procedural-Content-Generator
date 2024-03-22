@@ -21,6 +21,7 @@ namespace KGV::Engine {
         float displacement;
         std::shared_ptr<Render::ResourceViewDX11> mapTexture;
         std::vector<std::shared_ptr<Render::ResourceViewDX11>> colorTextures;
+        std::vector<S32> samplerIds;
     };
 }
 

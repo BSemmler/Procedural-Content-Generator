@@ -122,10 +122,20 @@ void calcDirectionalLighting(Material mat, DirectionalLight light, float3 normal
 }
 
 
-Texture2D<float> gRockTexture : register(t0);
-SamplerState gRockSampler : register(s0);
+Texture2D gRockTexture : register(t0);
+SamplerState gColorSampler : register(s0);
+Texture2D gGrassTexture : register(t1);
+Texture2D gSandTexture : register(t2);
+
+// TODO: Move these to constant buffer so they're adjustable.
+
 
 float4 PS(VertexOut input) : SV_TARGET {
+    const float gMinRockSlope = 0.5;
+    const float gMaxGrassSlope = 0.9;
+    const float gMinRockGrassHeight = 4.0f;
+    const float gMaxSandHeight = 6.0f;
+    const float gMaxSnowHeight = 100.0f;
     input.normal = normalize(input.normal);
 
     float3 toEyeW = normalize(gCameraPos - input.worldPosition);
@@ -134,24 +144,41 @@ float4 PS(VertexOut input) : SV_TARGET {
     float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
     float4 spec    = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-    float4 A, D, S;
-    calcDirectionalLighting(gMaterial, gDirectionalLight, input.normal, toEyeW, A, D, S);
-    ambient += A;
-    diffuse += D;
-    spec    += S;
+//     float4 A, D, S;
+//     calcDirectionalLighting(gMaterial, gDirectionalLight, input.normal, toEyeW, A, D, S);
+//     ambient += A;
+//     diffuse += D;
+//     spec    += S;
 
     // TODO: Implement point and spot lights
     float4 litColor;
-    float4 texColor;
 
+    float3 rockAlbedo = gRockTexture.Sample(gColorSampler, input.texcoord);
+    float3 grassAlbedo = gGrassTexture.Sample(gColorSampler, input.texcoord);
+    float3 sandAlbedo = gSandTexture.Sample(gColorSampler, input.texcoord);
 
-   if (input.worldPosition.y > 64)
-        texColor = gRockTexture.Sample(gRockSampler, input.texcoord);
-   else
-        texColor = float4(0.2, 0.5, 0.2, 1);
+    float rockGrassWeighting = input.normal.y;
 
-    litColor = texColor * (ambient + diffuse) + spec;
-    litColor.a = gMaterial.diffuse.a * texColor.a;
-   return litColor;
+    rockGrassWeighting = max(gMinRockSlope, rockGrassWeighting);
+    rockGrassWeighting = min(gMaxGrassSlope, rockGrassWeighting);
+    rockGrassWeighting -= gMinRockSlope;
+    rockGrassWeighting /= gMaxGrassSlope - gMinRockSlope;
+
+    float sandRockGrassWeighting = input.position.y;
+    sandRockGrassWeighting = max(gMinRockGrassHeight, sandRockGrassWeighting);
+    sandRockGrassWeighting = min(gMaxSandHeight, sandRockGrassWeighting);
+    sandRockGrassWeighting -= gMinRockGrassHeight;
+    sandRockGrassWeighting /= gMaxSandHeight - gMinRockGrassHeight;
+//     printf("%d", sandRockGrassWeighting);
+
+    float3 rockGrassAlbedo = lerp(rockAlbedo, grassAlbedo, rockGrassWeighting);
+    float3 finalColor = lerp(sandAlbedo, rockGrassAlbedo, sandRockGrassWeighting);
+
+//     litColor = finalColor * (ambient + diffuse) + spec;
+//     litColor.a = gMaterial.diffuse.a * finalColor.a;
+//     return litColor;
+//     return float4(rockGrassAlbedo, 1);
+//     return float4(sandAlbedo, 1.0f);
+    return float4(finalColor, 1.0f);
 }
 

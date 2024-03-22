@@ -48,6 +48,8 @@ namespace KGV::System
         std::shared_ptr<Render::ResourceViewDX11> terrainColorTexture;
         std::shared_ptr<Render::ResourceViewDX11> waterMapTexture;
         std::shared_ptr<Render::ResourceViewDX11> rockTexture;
+        std::shared_ptr<Render::ResourceViewDX11> sandTexture;
+        std::shared_ptr<Render::ResourceViewDX11> grassTexture;
         S32 vertexShaderId;
         S32 terrainVertexShaderId;
         S32 terrainPixelShaderId;
@@ -70,7 +72,7 @@ namespace KGV::System
         bool keyDown[0xFF];
         double waterKeyDebounceTime = 0;
         double seedChangeKeyDebounce = 0;
-        double mapScale = 512;
+        double mapScale = 1024;
         int mapSize = 1024;
 	};
 }

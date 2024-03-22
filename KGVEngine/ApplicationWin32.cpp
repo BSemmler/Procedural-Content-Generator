@@ -222,12 +222,14 @@ bool KGV::System::ApplicationWin32::init() {
     grid->transform.rotation.y = 0;
     grid->material = std::make_unique<Engine::MaterialComponent>();
     grid->material->displacement = 256.0f;
-    grid->material->ambient = { 0.5f, 0.5f, 0.5f, 1.0f };
-    grid->material->diffuse = { 0.5f, 0.5f, 0.5f, 1.0f };
-    grid->material->specular = { 0.5f, 0.5f, 0.5f, 0.001 * 128 };
+    grid->material->ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
+    grid->material->diffuse = { 1.0f, 1.0f, 1.0f, 1.0f };
+    grid->material->specular = {0.5f, 0.5f, 0.5f, 0.001 * 128 };
     grid->material->materialId = renderer->createMaterial(inputLayoutId, terrainVertexShaderId, terrainPixelShaderId);
     grid->material->mapTexture = terrainMapDisplacementTextureF32;
     grid->material->colorTextures.emplace_back(rockTexture);
+    grid->material->colorTextures.emplace_back(grassTexture);
+    grid->material->colorTextures.emplace_back(sandTexture);
 
     grid->mesh = std::make_unique<Engine::MeshComponent>();
     grid->mesh->meshId = gridMeshId;
@@ -787,7 +789,7 @@ void KGV::System::ApplicationWin32::setupTextureViewer(int width, int height, in
     textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
     textureViewingPlane->mesh->render = true;
 //    textureViewingPlane->material->colorTextures = terrainMapTextureBillowRGBA;
-    textureViewingPlane->material->colorTextures.emplace_back(rockTexture);
+    textureViewingPlane->material->colorTextures.emplace_back(grassTexture);
     textureViewingPlane->transform.position.x = 1.5;
     texturePlanes.emplace_back(textureViewingPlane);
 
@@ -835,13 +837,15 @@ void KGV::System::ApplicationWin32::setupTextureViewer(int width, int height, in
 }
 
 void KGV::System::ApplicationWin32::loadTextures() {
+    /**
+     * Rock Texture
+     */
     Engine::TargaImage rockTextureImage;
-    Engine::LoadTargaFromFile("../assets/textures/rocks.tga", rockTextureImage);
+    Engine::LoadTargaFromFile("../assets/textures/rock_1/rocks_COLOR.tga", rockTextureImage);
 
-    // Heightmap Display
     Render::Texture2dConfigDX11 rockTextureConfig;
     rockTextureConfig.setColorTexture(rockTextureImage.getWidth(), rockTextureImage.getHeight());
-    rockTextureConfig.setFormat(DXGI_FORMAT_R8G8B8A8_UNORM);
+    rockTextureConfig.setFormat(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB);
     rockTextureConfig.setUsage(D3D11_USAGE_IMMUTABLE); // We don't intend to update this.
 
     D3D11_TEX2D_SRV srvDesc;
@@ -851,16 +855,68 @@ void KGV::System::ApplicationWin32::loadTextures() {
     Render::ShaderResourceViewConfigDX11 rockTextureSrvConfig{};
     rockTextureSrvConfig.setTexture2D(srvDesc);
 
-    unsigned int numPixels = rockTextureImage.getWidth() * rockTextureImage.getHeight();
-    auto rockImageBuffer = std::make_unique<unsigned int[]>(numPixels);
-    Engine::Convert24BitTo32Bit(rockTextureImage.getData(), numPixels, rockImageBuffer.get());
+    ResourceData rockTexResourceData{};
+    rockTexResourceData.Data = rockTextureImage.getData();
+    rockTexResourceData.memPitch = sizeof(unsigned int) * rockTextureImage.getWidth();
+    
+    std::unique_ptr<unsigned int[]> rockImageBuffer;
+    if (rockTextureImage.getBitDepth() < 32) {
+        unsigned int numPixels = rockTextureImage.getWidth() * rockTextureImage.getHeight();
+        rockImageBuffer = std::make_unique<unsigned int[]>(numPixels);
+        Engine::Convert24BitTo32Bit(rockTextureImage.getData(), numPixels, rockImageBuffer.get());
+        rockTexResourceData.Data = rockImageBuffer.get();
+    }
+    
+    rockTexture = device->createTexture2D(rockTextureConfig, &rockTexResourceData, &rockTextureSrvConfig);
 
-    ResourceData data{};
-    data.Data = rockImageBuffer.get();
-    data.memPitch = sizeof(unsigned int) * rockTextureImage.getWidth();
-//    data.Data = rockTextureImage.getData();
-//    data.memPitch = 3 * rockTextureImage.getWidth();
+    /**
+     * Sand Texture
+     */
+    Engine::TargaImage sandTextureImage;
+    Engine::LoadTargaFromFile("../assets/textures/sand_3/sand_3_1.tga", sandTextureImage);
+    
+    Render::Texture2dConfigDX11 sandTextureConfig;
+    sandTextureConfig.setColorTexture(sandTextureImage.getWidth(), sandTextureImage.getHeight());
+    sandTextureConfig.setFormat(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB);
+    sandTextureConfig.setUsage(D3D11_USAGE_IMMUTABLE); // We don't intend to update this.
 
-    rockTexture = device->createTexture2D(rockTextureConfig, &data, &rockTextureSrvConfig);
+    ResourceData sandTexResourceData{};
+    sandTexResourceData.Data = sandTextureImage.getData();
+    sandTexResourceData.memPitch = sizeof(unsigned int) * sandTextureImage.getWidth();
+
+    std::unique_ptr<unsigned int[]> sandImageBuffer;
+    if (sandTextureImage.getBitDepth() < 32) {
+        unsigned int numPixels = sandTextureImage.getWidth() * sandTextureImage.getHeight();
+        sandImageBuffer = std::make_unique<unsigned int[]>(numPixels);
+        Engine::Convert24BitTo32Bit(sandTextureImage.getData(), numPixels, sandImageBuffer.get());
+        sandTexResourceData.Data = sandImageBuffer.get();
+    }
+
+    sandTexture = device->createTexture2D(sandTextureConfig, &sandTexResourceData, &rockTextureSrvConfig);
+
+    /**
+     * Grass Texture
+     */
+    Engine::TargaImage grassTextureImage;
+    Engine::LoadTargaFromFile("../assets/textures/ground_veg_1/ground_veg_1.tga", grassTextureImage);
+
+    Render::Texture2dConfigDX11 grassTextureConfig;
+    grassTextureConfig.setColorTexture(grassTextureImage.getWidth(), grassTextureImage.getHeight());
+    grassTextureConfig.setFormat(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB);
+    grassTextureConfig.setUsage(D3D11_USAGE_IMMUTABLE); // We don't intend to update this.
+
+    ResourceData grassTexResourceData{};
+    grassTexResourceData.Data = grassTextureImage.getData();
+    grassTexResourceData.memPitch = sizeof(unsigned int) * grassTextureImage.getWidth();
+
+    std::unique_ptr<unsigned int[]> grassImageBuffer;
+    if (grassTextureImage.getBitDepth() < 32) {
+        unsigned int numPixels = grassTextureImage.getWidth() * grassTextureImage.getHeight();
+        grassImageBuffer = std::make_unique<unsigned int[]>(numPixels);
+        Engine::Convert24BitTo32Bit(grassTextureImage.getData(), numPixels, grassImageBuffer.get());
+        grassTexResourceData.Data = grassImageBuffer.get();
+    }
+
+    grassTexture = device->createTexture2D(grassTextureConfig, &grassTexResourceData, &rockTextureSrvConfig);
 }
 
