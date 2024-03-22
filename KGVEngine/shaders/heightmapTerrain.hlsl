@@ -150,9 +150,9 @@ float4 PS(VertexOut input) : SV_TARGET {
     diffuse += D;
     spec    += S;
 
-    float3 rockAlbedo = gRockTexture.Sample(gColorSampler, input.texcoord * 512);
-    float3 grassAlbedo = gGrassTexture.Sample(gColorSampler, input.texcoord * 512);
-    float3 sandAlbedo = gSandTexture.Sample(gColorSampler, input.texcoord * 512);
+    float3 rockAlbedo = gRockTexture.Sample(gColorSampler, input.texcoord * 256);
+    float3 grassAlbedo = gGrassTexture.Sample(gColorSampler, input.texcoord * 256);
+    float3 sandAlbedo = gSandTexture.Sample(gColorSampler, input.texcoord * 256);
 
     float rockGrassWeighting = input.normal.y;
 

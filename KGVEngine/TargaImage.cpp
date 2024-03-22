@@ -21,8 +21,11 @@ namespace KGV::Engine {
         }
 
         // Get the file header.
-        char header[18];
-        file.read((char *) &image.tHeader, sizeof(TargaHeader));
+        uint8_t header[18];
+//        file.read((char *) header, 18);
+        spdlog::info("sizeof targa header: {}", sizeof (TargaHeader));
+        file.read(reinterpret_cast<char *>(&image.tHeader), 18);
+//        memcpy(&image.tHeader, header, 18);
 
         if (image.tHeader.descriptor & 0x10) {
             log->info("Image {} is orientated top to bottom", filePath);
@@ -40,7 +43,7 @@ namespace KGV::Engine {
             image.isRightToLeft = false;
         }
 
-        int length = image.tHeader.width * image.tHeader.height * 4; // width * height * bytes per pixel
+        int length = image.tHeader.width * image.tHeader.height * (image.tHeader.bitsPerPixel / 8); // width * height * bytes per pixel
         auto data = std::make_shared<char[]>(length);
         image.data = std::make_shared<char[]>(length);
         file.read(data.get(), length);

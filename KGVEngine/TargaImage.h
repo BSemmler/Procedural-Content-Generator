@@ -11,13 +11,54 @@ namespace KGV::Engine {
 
     class TargaImage;
 
-    struct TargaHeader {
-        unsigned char miscData[ 12 ];
-        unsigned short width;
-        unsigned short height;
-        unsigned char bitsPerPixel;
-        unsigned char descriptor;
+    enum eTargaColourMapType : uint8_t {
+        kNoImageData = 0,
+        kUncompressColorMapped = 1,
+        kUncompressedRGB = 2,
+        kUncompressBlackAndWhite = 3,
+        kRunlengthEncodedColorMapped = 9,
+        kRunlengthEncodedRGB = 9,
+        kCompressBlackAndWhite = 11,
+        kCompressed1 = 32,
+        kCompressed2 = 33
     };
+
+    // Disable padding in buffer.
+#ifdef _WIN32
+#pragma pack(push, 1)
+    struct TargaHeader {
+        uint8_t idLength;
+        uint8_t colorMapType;
+        uint8_t dataTypeCode;
+        uint16_t colorMapOrigin;
+        uint16_t colorMapLength;
+        uint8_t colorMapDepth;
+        uint16_t xOrigin;
+        uint16_t yOrigin;
+        uint16_t width;
+        uint16_t height;
+        uint8_t bitsPerPixel;
+        uint8_t descriptor;
+    };
+#pragma pack(pop)
+#elif
+    #pragma pack(1)
+    struct TargaHeader {
+        uint8_t idLength;
+        uint8_t colorMapType;
+        uint8_t dataTypeCode;
+        uint16_t colorMapOrigin;
+        uint16_t colorMapLength;
+        uint8_t colorMapDepth;
+        uint16_t xOrigin;
+        uint16_t yOrigin;
+        uint16_t width;
+        uint16_t height;
+        uint8_t bitsPerPixel;
+        uint8_t descriptor;
+    };
+#pragma pack()
+#endif
 
     bool LoadTargaFromFile( const std::string& filePath, TargaImage& image );
     void Convert24BitTo32Bit(char* in, unsigned int numPixels, unsigned int* out);

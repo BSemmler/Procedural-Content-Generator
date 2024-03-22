@@ -222,7 +222,7 @@ bool KGV::System::ApplicationWin32::init() {
     grid->transform.rotation.y = 0;
     grid->material = std::make_unique<Engine::MaterialComponent>();
     grid->material->displacement = 256.0f;
-    grid->material->ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
+    grid->material->ambient = { 0.4f, 0.4f, 0.4f, 1.0f };
     grid->material->diffuse = { 1.0f, 1.0f, 1.0f, 1.0f };
     grid->material->specular = {0.5f, 0.5f, 0.5f, 0.001 * 128 };
     grid->material->materialId = renderer->createMaterial(inputLayoutId, terrainVertexShaderId, terrainPixelShaderId);
@@ -846,7 +846,7 @@ void KGV::System::ApplicationWin32::loadTextures() {
 
     Render::Texture2dConfigDX11 rockTextureConfig;
     rockTextureConfig.setColorTexture(rockTextureImage.getWidth(), rockTextureImage.getHeight());
-    rockTextureConfig.setFormat(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB);
+    rockTextureConfig.setFormat(DXGI_FORMAT_B8G8R8A8_UNORM);
     rockTextureConfig.setUsage(D3D11_USAGE_IMMUTABLE); // We don't intend to update this.
 
     D3D11_TEX2D_SRV srvDesc;
@@ -878,7 +878,7 @@ void KGV::System::ApplicationWin32::loadTextures() {
     
     Render::Texture2dConfigDX11 sandTextureConfig;
     sandTextureConfig.setColorTexture(sandTextureImage.getWidth(), sandTextureImage.getHeight());
-    sandTextureConfig.setFormat(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB);
+    sandTextureConfig.setFormat(DXGI_FORMAT_B8G8R8A8_UNORM);
     sandTextureConfig.setUsage(D3D11_USAGE_IMMUTABLE); // We don't intend to update this.
 
     ResourceData sandTexResourceData{};
@@ -903,7 +903,7 @@ void KGV::System::ApplicationWin32::loadTextures() {
 
     Render::Texture2dConfigDX11 grassTextureConfig;
     grassTextureConfig.setColorTexture(grassTextureImage.getWidth(), grassTextureImage.getHeight());
-    grassTextureConfig.setFormat(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB);
+    grassTextureConfig.setFormat(DXGI_FORMAT_B8G8R8A8_UNORM);
     grassTextureConfig.setUsage(D3D11_USAGE_IMMUTABLE); // We don't intend to update this.
 
     ResourceData grassTexResourceData{};
