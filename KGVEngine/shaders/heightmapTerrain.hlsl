@@ -131,10 +131,10 @@ Texture2D gSandTexture : register(t2);
 
 
 float4 PS(VertexOut input) : SV_TARGET {
-    const float gMinRockSlope = 0.7;
+    const float gMinRockSlope = 0.5;
     const float gMaxGrassSlope = 0.9;
-    const float gMinRockGrassHeight = 4.0f;
-    const float gMaxSandHeight = 6.0f;
+    const float gMinRockGrassHeight = 19.0f;
+    const float gMaxSandHeight = 20.0f;
     const float gMaxSnowHeight = 100.0f;
     input.normal = normalize(input.normal);
 
@@ -150,9 +150,9 @@ float4 PS(VertexOut input) : SV_TARGET {
     diffuse += D;
     spec    += S;
 
-    float3 rockAlbedo = gRockTexture.Sample(gColorSampler, input.texcoord * 256);
-    float3 grassAlbedo = gGrassTexture.Sample(gColorSampler, input.texcoord * 256);
-    float3 sandAlbedo = gSandTexture.Sample(gColorSampler, input.texcoord * 256);
+    float3 rockAlbedo = gRockTexture.Sample(gColorSampler, input.texcoord * 64);
+    float3 grassAlbedo = gGrassTexture.Sample(gColorSampler, input.texcoord * 64);
+    float3 sandAlbedo = gSandTexture.Sample(gColorSampler, input.texcoord * 64);
 
     float rockGrassWeighting = input.normal.y;
 
@@ -161,7 +161,7 @@ float4 PS(VertexOut input) : SV_TARGET {
     rockGrassWeighting -= gMinRockSlope;
     rockGrassWeighting /= gMaxGrassSlope - gMinRockSlope;
 
-    float sandRockGrassWeighting = input.position.y;
+    float sandRockGrassWeighting = input.worldPosition.y;
     sandRockGrassWeighting = max(gMinRockGrassHeight, sandRockGrassWeighting);
     sandRockGrassWeighting = min(gMaxSandHeight, sandRockGrassWeighting);
     sandRockGrassWeighting -= gMinRockGrassHeight;

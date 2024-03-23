@@ -101,10 +101,10 @@ namespace KGV::Render {
         }
     }
 
-    std::shared_ptr<ResourceViewDX11> RenderDeviceDX11::createTexture2D(Texture2dConfigDX11 &texConfig, ResourceData *data,
-                                                                        ShaderResourceViewConfigDX11 *srvConfig,
-                                                                        RenderTargetViewConfigDX11 *rtvConfig,
-                                                                        DepthStencilViewConfigDX11 *dsvConfig) {
+    std::shared_ptr<ResourceViewDX11> RenderDeviceDX11::terrainTextureSRVConfig(Texture2dConfigDX11 &texConfig, ResourceData *data,
+                                                                                ShaderResourceViewConfigDX11 *srvConfig,
+                                                                                RenderTargetViewConfigDX11 *rtvConfig,
+                                                                                DepthStencilViewConfigDX11 *dsvConfig) {
         ComPtr<ID3D11Texture2D> tex;
         HRESULT hr = device->CreateTexture2D(&texConfig.desc, reinterpret_cast<D3D11_SUBRESOURCE_DATA *>(data), tex.GetAddressOf());
 

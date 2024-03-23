@@ -19,6 +19,7 @@ namespace KGV::Engine {
         DirectX::XMFLOAT4A diffuse;
         DirectX::XMFLOAT4A specular {0.1f, 0.1f, 0.1f, 16};
         float displacement;
+//        float
         std::shared_ptr<Render::ResourceViewDX11> mapTexture;
         std::vector<std::shared_ptr<Render::ResourceViewDX11>> colorTextures;
         std::vector<S32> samplerIds;

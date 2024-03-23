@@ -196,10 +196,10 @@ bool KGV::System::ApplicationWin32::init() {
     entities.emplace_back(cube);
 
     auto light = std::make_shared<Engine::Entity>();
-    light->transform.rotation.x = XMConvertToRadians(30);
-    light->transform.rotation.y = XMConvertToRadians(5.15);
+    light->transform.rotation.x = XMConvertToRadians(45);
+    light->transform.rotation.y = XMConvertToRadians(0);
     light->light = std::make_unique<Engine::LightComponent>();
-    light->light->ambient = {0.2f, 0.2f, 0.2f, 1.0f };
+    light->light->ambient = {0.4f, 0.4f, 0.4f, 1.0f };
     light->light->diffuse = {1.0f, 1.0f, 1.0f, 1.0f };
     light->light->specular = { 0.1f, 0.1f, 0.1f, 1.0f };
 
@@ -430,14 +430,14 @@ void KGV::System::ApplicationWin32::generateHeightMaps(int _textureSize, int _se
     Procedural::PerlinNoise perlinNoise;
     Procedural::fBmConfig conf{};
     conf.octaves = 8;
-    conf.persistence = 0.5;
+    conf.persistence = 0.45;
     conf.amplitude = 1;
     conf.frequency = 1;
     conf.lacunarity = 2;
 
     // Combine all of the noise layers into a single buffer.
-    const double sharpness = -.5;
-    const double sharpnessEnhance = 4;
+    const double sharpness = -1;
+    const double sharpnessEnhance = 2;
 
     auto lerp = [](double a, double b, double t) -> double {
         return a + t * (b - a);
@@ -474,18 +474,18 @@ void KGV::System::ApplicationWin32::generateHeightMaps(int _textureSize, int _se
 //            auto y = (yf) / _scale * freq + octaveOffsets[i].y;
             auto noise = perlinNoise.noiseDP(x, y);
 
-//            auto billowNoise = std::abs(noise);
-//            auto ridgeNoise = 1 - billowNoise;
+            auto billowNoise = std::abs(noise);
+            auto ridgeNoise = 1 - billowNoise;
 //            noise = noise + (ridgeNoise * billowNoise);
 
 //            noise = std::abs(noise);
 //            noise = lagrangianScale(-1, 1, 0, 1, noise);
 //            noise = lerp(-1, 1, noise);
 
-//            auto billowLerped = lerp(noise, billowNoise, abs(sharpness));
-//            noise = lerp(billowLerped, ridgeNoise, -sharpness);
+            auto billowLerped = lerp(noise, billowNoise, abs(sharpness));
+            noise = lerp(billowLerped, ridgeNoise, -sharpness);
 //            noise = sharpness >= 0 ? lerp(noise, billowNoise, sharpness) : lerp(noise, ridgeNoise, -sharpness);
-//            noise = noise * std::pow(std::abs(noise), sharpnessEnhance);
+            noise = noise * std::pow(std::abs(noise), sharpnessEnhance);
 
             sum += noise * amplitude;
             min -= amplitude;
@@ -654,7 +654,7 @@ void KGV::System::ApplicationWin32::createHeightMapBuffers(int textureSize) {
     srvDesc.MostDetailedMip = 0;
 
     terrainMapSrvConfig.setTexture2D(srvDesc);
-    terrainMapDisplacementTextureF32 = device->createTexture2D(terrainMapTexConfig, nullptr, &terrainMapSrvConfig);
+    terrainMapDisplacementTextureF32 = device->terrainTextureSRVConfig(terrainMapTexConfig, nullptr, &terrainMapSrvConfig);
 
     // Heightmap Display
     Render::Texture2dConfigDX11 terrainMapDisplayTexConfig;
@@ -665,13 +665,13 @@ void KGV::System::ApplicationWin32::createHeightMapBuffers(int textureSize) {
 
     Render::ShaderResourceViewConfigDX11 terrainMapDisplaySrvConfig{};
     terrainMapDisplaySrvConfig.setTexture2D(srvDesc);
-    terrainMapTextureFinalRGBA = device->createTexture2D(terrainMapDisplayTexConfig, nullptr, &terrainMapDisplaySrvConfig);
+    terrainMapTextureFinalRGBA = device->terrainTextureSRVConfig(terrainMapDisplayTexConfig, nullptr, &terrainMapDisplaySrvConfig);
 
-    terrainMapTextureRidgedRGBA = device->createTexture2D(terrainMapDisplayTexConfig, nullptr, &terrainMapDisplaySrvConfig);
+    terrainMapTextureRidgedRGBA = device->terrainTextureSRVConfig(terrainMapDisplayTexConfig, nullptr, &terrainMapDisplaySrvConfig);
 
-    terrainMapTextureBaseRGBA = device->createTexture2D(terrainMapDisplayTexConfig, nullptr, &terrainMapDisplaySrvConfig);
+    terrainMapTextureBaseRGBA = device->terrainTextureSRVConfig(terrainMapDisplayTexConfig, nullptr, &terrainMapDisplaySrvConfig);
 
-    terrainMapTextureBillowRGBA = device->createTexture2D(terrainMapDisplayTexConfig, nullptr, &terrainMapDisplaySrvConfig);
+    terrainMapTextureBillowRGBA = device->terrainTextureSRVConfig(terrainMapDisplayTexConfig, nullptr, &terrainMapDisplaySrvConfig);
 }
 
 void KGV::System::ApplicationWin32::setupPrimaryCamera(int width, int height, int topX, int topY) {
@@ -693,7 +693,7 @@ void KGV::System::ApplicationWin32::setupPrimaryCamera(int width, int height, in
     D3D11_TEX2D_DSV dsvState;
     dsvState.MipSlice = 0;
     dsvConfig.SetTexture2D(dsvState);
-    depthBuffer = device->createTexture2D(texConfig, nullptr, nullptr, nullptr, &dsvConfig);
+    depthBuffer = device->terrainTextureSRVConfig(texConfig, nullptr, nullptr, nullptr, &dsvConfig);
 
     D3D11_VIEWPORT viewport;
     viewport.Width = width;
@@ -788,7 +788,7 @@ void KGV::System::ApplicationWin32::setupTextureViewer(int width, int height, in
     textureViewingPlane->mesh->meshId = planeMeshId;
     textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
     textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, planePixelShaderId);
-    textureViewingPlane->mesh->render = true;
+    textureViewingPlane->mesh->render = false;
 //    textureViewingPlane->material->colorTextures = terrainMapTextureBillowRGBA;
     textureViewingPlane->material->colorTextures.emplace_back(grassTexture);
     textureViewingPlane->transform.position.x = 1.5;
@@ -868,7 +868,7 @@ void KGV::System::ApplicationWin32::loadTextures() {
         rockTexResourceData.Data = rockImageBuffer.get();
     }
     
-    rockTexture = device->createTexture2D(rockTextureConfig, &rockTexResourceData, &rockTextureSrvConfig);
+    rockTexture = device->terrainTextureSRVConfig(rockTextureConfig, &rockTexResourceData, &rockTextureSrvConfig);
 
     /**
      * Sand Texture
@@ -893,13 +893,13 @@ void KGV::System::ApplicationWin32::loadTextures() {
         sandTexResourceData.Data = sandImageBuffer.get();
     }
 
-    sandTexture = device->createTexture2D(sandTextureConfig, &sandTexResourceData, &rockTextureSrvConfig);
+    sandTexture = device->terrainTextureSRVConfig(sandTextureConfig, &sandTexResourceData, &rockTextureSrvConfig);
 
     /**
      * Grass Texture
      */
     Engine::TargaImage grassTextureImage;
-    Engine::LoadTargaFromFile("../assets/textures/ground_veg_1/ground_veg_1.tga", grassTextureImage);
+    Engine::LoadTargaFromFile("../assets/textures/ground_veg_19/ground_veg_19.tga", grassTextureImage);
 
     Render::Texture2dConfigDX11 grassTextureConfig;
     grassTextureConfig.setColorTexture(grassTextureImage.getWidth(), grassTextureImage.getHeight());
@@ -918,7 +918,32 @@ void KGV::System::ApplicationWin32::loadTextures() {
         grassTexResourceData.Data = grassImageBuffer.get();
     }
 
-    grassTexture = device->createTexture2D(grassTextureConfig, &grassTexResourceData, &rockTextureSrvConfig);
+    grassTexture = device->terrainTextureSRVConfig(grassTextureConfig, &grassTexResourceData, &rockTextureSrvConfig);
+
+    /**
+    * snow Texture
+    */
+    Engine::TargaImage snowTextureImage;
+    Engine::LoadTargaFromFile("../assets/textures/snow_2.tga", snowTextureImage);
+
+    Render::Texture2dConfigDX11 snowTextureConfig;
+    snowTextureConfig.setColorTexture(snowTextureImage.getWidth(), snowTextureImage.getHeight());
+    snowTextureConfig.setFormat(DXGI_FORMAT_B8G8R8A8_UNORM);
+    snowTextureConfig.setUsage(D3D11_USAGE_IMMUTABLE); // We don't intend to update this.
+
+    ResourceData snowTexResourceData{};
+    snowTexResourceData.Data = snowTextureImage.getData();
+    snowTexResourceData.memPitch = sizeof(unsigned int) * snowTextureImage.getWidth();
+
+    std::unique_ptr<unsigned int[]> snowImageBuffer;
+    if (snowTextureImage.getBitDepth() < 32) {
+        unsigned int numPixels = snowTextureImage.getWidth() * snowTextureImage.getHeight();
+        snowImageBuffer = std::make_unique<unsigned int[]>(numPixels);
+        Engine::Convert24BitTo32Bit(snowTextureImage.getData(), numPixels, snowImageBuffer.get());
+        snowTexResourceData.Data = snowImageBuffer.get();
+    }
+
+    snowTexture = device->terrainTextureSRVConfig(snowTextureConfig, &snowTexResourceData, &rockTextureSrvConfig);
 
     D3D11_SAMPLER_DESC samplerDesc{};
     samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
