@@ -133,7 +133,7 @@ float4 PS(VertexOut input) : SV_TARGET {
     const float gMinRockSlope = 0.5;
     const float gMaxGrassSlope = 0.9;
     const float gMaxSnowSlope = 0.9;
-    const float gMinRockSnowSlope = 0.2;
+    const float gMinRockSnowSlope = 0.7;
 
     const float gMaxGrassHeight = 80;
     const float gMinRockHeight = 79;

@@ -760,6 +760,7 @@ void KGV::System::ApplicationWin32::setupTextureViewer(int width, int height, in
     textureViewingPlane->mesh->render = true;
     textureViewingPlane->material->colorTextures.emplace_back(terrainMapTextureFinalRGBA);
     textureViewingPlane->transform.position.x = -1.5;
+    textureViewingPlane->transform.rotation.z = 180;
 
     texturePlaneEntity = textureViewingPlane;
     texturePlanes.emplace_back(textureViewingPlane);
