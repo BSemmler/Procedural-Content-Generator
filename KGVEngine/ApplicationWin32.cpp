@@ -196,7 +196,7 @@ bool KGV::System::ApplicationWin32::init() {
     entities.emplace_back(cube);
 
     auto light = std::make_shared<Engine::Entity>();
-    light->transform.rotation.x = XMConvertToRadians(45);
+    light->transform.rotation.x = XMConvertToRadians(60);
     light->transform.rotation.y = XMConvertToRadians(0);
     light->light = std::make_unique<Engine::LightComponent>();
     light->light->ambient = {0.4f, 0.4f, 0.4f, 1.0f };
@@ -230,6 +230,7 @@ bool KGV::System::ApplicationWin32::init() {
     grid->material->colorTextures.emplace_back(rockTexture);
     grid->material->colorTextures.emplace_back(grassTexture);
     grid->material->colorTextures.emplace_back(sandTexture);
+    grid->material->colorTextures.emplace_back(snowTexture);
     grid->material->samplerIds.emplace_back(terrainWrapSampler);
 
     grid->mesh = std::make_unique<Engine::MeshComponent>();
