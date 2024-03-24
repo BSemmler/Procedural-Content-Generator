@@ -27,6 +27,7 @@ namespace KGV::System
         void setupPrimaryCamera(int width, int height, int topX, int topY);
         void setupTextureViewer(int width, int height, int topX, int topY);
         void loadTextures();
+        void DrawGUI();
 
 		// Inherited via IWndProc
 		virtual LRESULT CALLBACK wndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam ) override;
