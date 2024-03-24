@@ -26,8 +26,8 @@ namespace KGV::System
         void generateHeightMaps(int textureSize, int seed, double scale, double xOffset = 0, double yOffset = 0);
         void createHeightMapBuffers(int textureSize);
 
-        void setupPrimaryCamera(int width, int height, int topX, int topY);
-        void setupTextureViewer(int width, int height, int topX, int topY);
+//        void setupPrimaryCamera(int width, int height, int topX, int topY);
+//        void setupTextureViewer(int width, int height, int topX, int topY);
         void DrawGUI();
 
 		// Inherited via IWndProc
@@ -41,26 +41,23 @@ namespace KGV::System
         std::unique_ptr<Engine::IScene> terrainScene;
         S32 swapChainId;
         S32 rtvId;
-        S32 inputLayoutId;
         std::shared_ptr<Render::ResourceViewDX11> depthBuffer;
         std::shared_ptr<Render::ResourceViewDX11> terrainMapDisplacementTextureF32;
         std::shared_ptr<Render::ResourceViewDX11> terrainMapTextureFinalRGBA;
         std::shared_ptr<Engine::IShaderManager> shaderManager;
-        S32 viewPortId;
-        std::vector<std::shared_ptr<Engine::Entity>> cameras;
-        std::vector<std::shared_ptr<Engine::Entity>> lights;
-        std::vector<std::shared_ptr<Engine::Entity>> entities;
-        std::vector<std::shared_ptr<Engine::Entity>> texturePlanes;
-        std::shared_ptr<Engine::Entity> texturePlaneEntity;
-        std::shared_ptr<Engine::Entity> texturePlaneCamera;
-        std::shared_ptr<Engine::Entity> waterPlane;
-        S32 gridMeshId;
         std::chrono::high_resolution_clock::time_point lastTime;
         F64 waterKeyDebounceTime = 0;
         F64 seedChangeKeyDebounce = 0;
         F64 mapScale = 1024;
         S32 mapSize = 1024;
         S32 selectedScene = 0;
+        S32 terrainOctaves = 8;
+        F32 terrainAmplitude = 1.0f;
+        F32 terrainFrequency = 1.0f;
+        F32 terrainPersistence = 0.45f;
+        F32 terrainLacunarity = 2.0f;
+        F32 terrainSharpness = 0.0f;
+        S32 terrainSharpnessEnhance = 2;
         unsigned int mapSeed = 0;
         bool keyDown[0xFF];
 

@@ -8,6 +8,7 @@
 #include "SimpleRenderer.h"
 #include "TargaImage.h"
 #include "GeometryFactory.h"
+#include "imgui.h"
 
 using namespace DirectX;
 
@@ -28,6 +29,11 @@ void KGV::Engine::TerrainScene::Shutdown() {
 }
 
 void KGV::Engine::TerrainScene::Tick(float deltaTime) {
+    ImGui::Text("Terrain Height");
+    ImGui::SliderFloat("##TerrainHeight", &entities[0]->transform.position.y, -256, 256);
+
+    ImGui::Checkbox("Draw Water", &entities[1]->mesh->render);
+
     if (auto renderer = graphicsRenderer.lock()) {
         renderer->renderScene(entities, cameras, &lights, deltaTime);
     }
