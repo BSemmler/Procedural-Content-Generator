@@ -53,12 +53,12 @@ bool KGV::System::ApplicationWin32::init() {
     ImGui_ImplWin32_Init(window1->getWin32Handle());
     ImGui_ImplDX11_Init(device->getID3D11Device().Get(), device->getID3D11DeviceContext1().Get());
 
-    vertexShaderId = device->loadShader("../KGVEngine/shaders/basicLighting.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
-    terrainVertexShaderId = device->loadShader("../KGVEngine/shaders/heightmapTerrain.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
-    terrainPixelShaderId = device->loadShader("../KGVEngine/shaders/heightmapTerrain.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
-    pixelShaderId = device->loadShader("../KGVEngine/shaders/basicLighting.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
-    planeVertexShaderId = device->loadShader("../KGVEngine/shaders/texturePlane.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
-    planePixelShaderId = device->loadShader("../KGVEngine/shaders/texturePlane.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
+    vertexShaderId = device->loadShader("../shaders/basicLighting.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
+    terrainVertexShaderId = device->loadShader("../shaders/heightmapTerrain.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
+    terrainPixelShaderId = device->loadShader("../shaders/heightmapTerrain.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
+    pixelShaderId = device->loadShader("../shaders/basicLighting.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
+    planeVertexShaderId = device->loadShader("../shaders/texturePlane.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
+    planePixelShaderId = device->loadShader("../shaders/texturePlane.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
 
     std::vector<D3D11_INPUT_ELEMENT_DESC> inputElements = {
             {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
