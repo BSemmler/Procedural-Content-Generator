@@ -200,6 +200,17 @@ void KGV::System::ApplicationWin32::draw(F32 deltaTime) {
 
     ImGui::ShowDemoWindow();
     ImGui::Begin("Engine");
+
+
+    ImGui::Text("Select Scene");
+    if (ImGui::RadioButton("Terrain Scene", selectedScene == 0)) {
+        selectedScene = 0;
+    } else if (ImGui::RadioButton("Heightmap Scene", selectedScene == 1)) {
+        selectedScene = 1;
+    } else if (ImGui::RadioButton("Wave Scene", selectedScene == 2)) {
+        selectedScene = 2;
+    }
+
 //    ImGui::
 //    ImGui::
 
@@ -208,7 +219,14 @@ void KGV::System::ApplicationWin32::draw(F32 deltaTime) {
     deviceContext->clearColorBuffers({0.1f, 0.1f, 0.1f, 1.0f});
     deviceContext->clearDepthStencilBuffers();
 
-    terrainScene->Tick(deltaTime);
+    switch (selectedScene) {
+        case 0:
+            terrainScene->Tick(deltaTime);
+            break;
+        default:
+            break;
+    }
+//    terrainScene->Tick(deltaTime);
 //    renderer->renderScene(entities, cameras, &lights, deltaTime);
 
     std::vector tC = {texturePlaneCamera};

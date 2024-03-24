@@ -56,11 +56,13 @@ namespace KGV::System
         std::shared_ptr<Engine::Entity> waterPlane;
         S32 gridMeshId;
         std::chrono::high_resolution_clock::time_point lastTime;
+        F64 waterKeyDebounceTime = 0;
+        F64 seedChangeKeyDebounce = 0;
+        F64 mapScale = 1024;
+        S32 mapSize = 1024;
+        S32 selectedScene = 0;
         unsigned int mapSeed = 0;
         bool keyDown[0xFF];
-        double waterKeyDebounceTime = 0;
-        double seedChangeKeyDebounce = 0;
-        double mapScale = 1024;
-        int mapSize = 1024;
+
 	};
 }
