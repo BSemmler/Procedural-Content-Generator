@@ -1,7 +1,7 @@
 #include <random>
 #include "ApplicationWin32.h"
 #include "GeometryFactory.h"
-#include "NoiseBufferGenerator.h"
+#include "MultithreadedNoiseExecutor.h"
 #include "TargaImage.h"
 #include "Scenes/TerrainScene.h"
 #include "Scenes/HeightMapScene.h"
@@ -283,7 +283,7 @@ void KGV::System::ApplicationWin32::generateHeightMaps(int _textureSize, int _se
 //        return (highScale - 0)*((value - lowRaw)/(highRaw - lowRaw)) + lowScale;
 //    };
 
-    Procedural::NoiseBufferGenerator nbg;
+    Procedural::MultithreadedNoiseExecutor nbg;
     Procedural::PerlinNoise perlinNoise;
     Procedural::fBmConfig conf{};
     conf.octaves = terrainOctaves;

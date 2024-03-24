@@ -2,8 +2,8 @@
 // Created by Brett on 2024-03-16.
 //
 
-#ifndef ENGINE_NOISEBUFFERGENERATOR_H
-#define ENGINE_NOISEBUFFERGENERATOR_H
+#ifndef ENGINE_MULTITHREADEDNOISEEXECUTOR_H
+#define ENGINE_MULTITHREADEDNOISEEXECUTOR_H
 
 
 #include "pch.h"
@@ -30,15 +30,10 @@ namespace KGV::Procedural {
     typedef std::function<double(double, double, double, double, int, int)> Combine2NoiseOp;
     typedef std::function<double(double, double, double, double, double, int, int)> Combine3NoiseOp;
 
-    class NoiseBufferGenerator {
+    class MultithreadedNoiseExecutor {
     public:
-        NoiseBufferGenerator();
-        NoiseBufferGenerator(unsigned int threadCount);
-        void generateNoiseTexture2D(fBmConfig& fBmConf, float* buffer, double xPosOffset = 0, double yPosOffset = 0, int width = 256, int height = 256);
-        void generateNoiseTexture2D(fBmConfig& fBmConf, double* buffer, double xPosOffset = 0, double yPosOffset = 0, int width = 256, int height = 256);
-//        void generateNoise3DSP(fBmConfig& fBm, void* buffer, int stride, int memOffset, double xPosOffset = 0, double yPosOffset = 0, double zPosOffset = 0, int width = 256, int height = 256, int depth = 256);
-//        void generateNoise3DDP(fBmConfig& fBm, void* buffer, int stride, int memOffset, double xPosOffset = 0, double yPosOffset = 0, double zPosOffset = 0, int width = 256, int height = 256, int depth = 256);
-
+        MultithreadedNoiseExecutor();
+        MultithreadedNoiseExecutor(unsigned int numThreads);
         void execOp(float* buffer, int width, int height, const NoiseOp& func);
         void execOp(double* buffer, int width, int height, const NoiseOp& func);
         void combine(double *a, double *b, double *out, int width, int height, const Combine2NoiseOp& func);
@@ -47,12 +42,6 @@ namespace KGV::Procedural {
         void createPixelBufferFromData(unsigned int* out, float* in, int width, int height, ImageOp& func);
 
     protected:
-        double fBm(fBmConfig& fBmConf, double x, double y);
-        double octaveNoise(double x, double y, double z, double frequency, double amplitude);
-        double octaveNoise(double x, double y, double frequency, double amplitude);
-        unsigned int threadCount;
-
-        PerlinNoise noiseGen;
         unsigned int maxThreads;
         std::vector<std::thread> threadPool;
     };
@@ -60,4 +49,4 @@ namespace KGV::Procedural {
 
 
 
-#endif //ENGINE_NOISEBUFFERGENERATOR_H
+#endif //ENGINE_MULTITHREADEDNOISEEXECUTOR_H

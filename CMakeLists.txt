@@ -132,8 +132,8 @@ add_executable(Engine
         KGVEngine/PerlinNoise.cpp
         KGVEngine/SamplerStateDX11.cpp
         KGVEngine/SamplerStateDX11.h
-        KGVEngine/NoiseBufferGenerator.cpp
-        KGVEngine/NoiseBufferGenerator.h
+        KGVEngine/MultithreadedNoiseExecutor.cpp
+        KGVEngine/MultithreadedNoiseExecutor.h
         KGVEngine/TargaImage.cpp
         KGVEngine/TargaImage.h
         KGVEngine/IScene.cpp
