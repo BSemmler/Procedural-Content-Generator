@@ -4,6 +4,7 @@
 #include "NoiseBufferGenerator.h"
 #include "TargaImage.h"
 #include "Scenes/TerrainScene.h"
+#include "Scenes/HeightMapScene.h"
 
 using namespace DirectX;
 
@@ -82,18 +83,8 @@ bool KGV::System::ApplicationWin32::init() {
 
     shaderManager->setInputLayoutForShader(displacementVs, layoutId);
 
-
-//    basicShaderVs = device->loadShader("../shaders/basicTransformVertexShader.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
-//    displacementShaderVs = device->loadShader("../shaders/displacementVertexShader.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
-//    textureGradientShaderPs = device->loadShader("../shaders/gradientPixelShader.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
-//    basicLightingShaderPs = device->loadShader("../shaders/basicLightingPixelShader.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
-//    unlitTexturedShaderPs = device->loadShader("../shaders/unlitTexturedPixelShader.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
-
     createHeightMapBuffers(mapSize);
     generateHeightMaps(mapSize, static_cast<S32>(mapSeed), mapScale);
-
-    float viewPortHeightRatio = 0.25f;
-    float viewPortWidthRatio = 1.0f;
 
     Render::SwapChainConfigDX11 swapChainConf;
     swapChainConf.setWidth(window1->getWidth());
@@ -103,18 +94,17 @@ bool KGV::System::ApplicationWin32::init() {
     rtvId = swapChain->getResource()->getRtvId();
 
     terrainScene = std::make_unique<Engine::TerrainScene>();
+    heightMapScene = std::make_unique<Engine::HeightMapScene>();
 
     {
         auto t = dynamic_cast<Engine::TerrainScene*>(terrainScene.get());
         t->Init(device, renderer, rtvId, window1->getWidth(),
                 window1->getHeight(), shaderManager, terrainMapDisplacementTextureF32, mapSize);
+
+        auto h = dynamic_cast<Engine::HeightMapScene*>(heightMapScene.get());
+        h->Init(device, renderer, rtvId, window1->getWidth(),
+                window1->getHeight(), shaderManager, terrainMapTextureFinalRGBA);
     }
-
-
-
-
-//    setupPrimaryCamera(window1->getWidth(), window1->getHeight(), 0, 0);
-//    setupTextureViewer(window1->getWidth() * viewPortWidthRatio, window1->getWidth() * viewPortHeightRatio, 0, 0);
 
     return true;
 }
@@ -253,8 +243,6 @@ void KGV::System::ApplicationWin32::draw(F32 deltaTime) {
 
     }
 
-
-
     deviceContext->clearColorBuffers({0.1f, 0.1f, 0.1f, 1.0f});
     deviceContext->clearDepthStencilBuffers();
 
@@ -262,6 +250,8 @@ void KGV::System::ApplicationWin32::draw(F32 deltaTime) {
         case 0:
             terrainScene->Tick(deltaTime);
             break;
+        case 1:
+            heightMapScene->Tick(deltaTime);
         default:
             break;
     }
@@ -281,50 +271,11 @@ void KGV::System::ApplicationWin32::draw(F32 deltaTime) {
         cumulativeTime = 0.0f;
     }
 
-
-    if (keyDown[VK_UP] && seedChangeKeyDebounce > 0.3) {
-        mapSeed++;
-        seedChangeKeyDebounce = 0;
-        regenMap = true;
-    } else if (keyDown[VK_DOWN] && seedChangeKeyDebounce > 0.3) {
-        mapSeed--;
-        seedChangeKeyDebounce = 0;
-        regenMap = true;
-    }
-
-    static double xOffset = 0.0;
-    static double yOffset = 0.0;
-    if (keyDown[0x55]) {
-        yOffset += 30 * deltaTime;
-        regenMap = true;
-    } else if (keyDown[0x4A]) {
-        yOffset -= 30 * deltaTime;
-        regenMap = true;
-    }
-
-    if (keyDown[0x48]) {
-        xOffset += 30 * deltaTime;
-        regenMap = true;
-    } else if (keyDown[0x4B]) {
-        xOffset -= 30 * deltaTime;
-        regenMap = true;
-    }
-
-    if (keyDown[VK_RIGHT]) {
-        mapScale += 10 * deltaTime;
-        regenMap = true;
-    } else if (keyDown[VK_LEFT]) {
-        mapScale -= 10 * deltaTime;
-        regenMap = true;
-    }
-
     if (regenMap) {
-        generateHeightMaps(mapSize, mapSeed, mapScale, xOffset, yOffset);
+        generateHeightMaps(mapSize, mapSeed, mapScale, 0, 0);
         regenMap = false;
     }
 
-    seedChangeKeyDebounce += deltaTime;
-    waterKeyDebounceTime += deltaTime;
 }
 
 void KGV::System::ApplicationWin32::generateHeightMaps(int _textureSize, int _seed, double _scale, double xOffset, double yOffset) {
@@ -376,7 +327,7 @@ void KGV::System::ApplicationWin32::generateHeightMaps(int _textureSize, int _se
         for (int i = 0; i < conf.octaves; ++i) {
             auto x = (xf * freq + octaveOffsets[i].x ) / _scale;
             auto y = (yf * freq + octaveOffsets[i].y) / _scale;
-            auto noise = perlinNoise.noiseDP(x, y);
+            auto noise = perlinNoise.noiseDP(x, y) * amplitude;
 
             auto billowNoise = std::abs(noise);
             auto ridgeNoise = 1 - billowNoise;
@@ -385,7 +336,7 @@ void KGV::System::ApplicationWin32::generateHeightMaps(int _textureSize, int _se
             noise = lerp(billowLerped, ridgeNoise, -sharpness);
             noise = noise * std::pow(std::abs(noise), sharpnessEnhance);
 
-            sum += noise * amplitude;
+            sum += noise;
             min -= amplitude;
             max += amplitude;
             freq *= conf.lacunarity;
@@ -483,70 +434,6 @@ void KGV::System::ApplicationWin32::createHeightMapBuffers(int textureSize) {
     terrainMapDisplaySrvConfig.setTexture2D(srvDesc);
     terrainMapTextureFinalRGBA = device->CreateTexture2D(terrainMapDisplayTexConfig, nullptr, &terrainMapDisplaySrvConfig);
 }
-
-//void KGV::System::ApplicationWin32::setupTextureViewer(int width, int height, int topX, int topY) {
-//    std::vector<Render::Vertex> planeVertices;
-//    std::vector<U32> planeIndices;
-//    Engine::GeometryFactory::getPlane(planeVertices, planeIndices);
-//
-//    // TODO: Need to fix material change detection to include textures so that single material pipeline definition can be reused.
-//    auto planeMeshId = renderer->createMesh({planeVertices}, planeIndices, Render::kImmutable);
-//
-//    auto textureViewingPlane = std::make_shared<Engine::Entity>();
-//    textureViewingPlane->mesh = std::make_unique<Engine::MeshComponent>();
-//    textureViewingPlane->mesh->meshId = planeMeshId;
-//    textureViewingPlane->material = std::make_unique<Engine::MaterialComponent>();
-////    textureViewingPlane->material->materialId = renderer->createMaterial(inputLayoutId, planeVertexShaderId, unlitTexturedShaderPs);
-//    textureViewingPlane->mesh->render = false;
-////    textureViewingPlane->material->colorTextures.emplace_back(terrainMapTextureFinalRGBA);
-//    textureViewingPlane->transform.position.x = -1.5;
-//    textureViewingPlane->transform.rotation.z = 180;
-//
-//    texturePlaneEntity = textureViewingPlane;
-//    texturePlanes.emplace_back(textureViewingPlane);
-//
-//    D3D11_VIEWPORT vp;
-//    vp.MinDepth = 0;
-//    vp.MaxDepth = 1;
-//    vp.TopLeftX = topX;
-//    vp.TopLeftY = topY;
-//    vp.Width = width;
-//    vp.Height = height;
-//
-//    D3D11_DEPTH_STENCIL_DESC dsDesc;
-//    // Depth test parameters
-//    dsDesc.DepthEnable = true;
-//    dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-//    dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
-//
-//// Stencil test parameters
-//    dsDesc.StencilEnable = true;
-//    dsDesc.StencilReadMask = 0xFF;
-//    dsDesc.StencilWriteMask = 0xFF;
-//
-//// Stencil operations if pixel is front-facing
-//    dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-//    dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-//    dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-//    dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-//
-//// Stencil operations if pixel is back-facing
-//    dsDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-//    dsDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-//    dsDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-//    dsDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-//
-//    auto heightMapCamera = std::make_shared<Engine::Entity>();
-//    heightMapCamera->camera = std::make_unique<Engine::Camera>();
-//    heightMapCamera->camera->setDsvStateId(device->createDepthStencilState(dsDesc));
-//    heightMapCamera->camera->setDsvId(depthBuffer->getDsvId());
-//    heightMapCamera->camera->setRtvId(rtvId);
-//    heightMapCamera->camera->setViewPortId(device->createViewPort(vp));
-//    heightMapCamera->camera->setOrthographicProject(texturePlanes.size(), 1, 0.01, 5);
-//    heightMapCamera->camera->setIsActive(true);
-//    heightMapCamera->transform.position.z = -1;
-//    texturePlaneCamera = heightMapCamera;
-//}
 
 void KGV::System::ApplicationWin32::DrawGUI() {
     ImGui::Begin("Engine");

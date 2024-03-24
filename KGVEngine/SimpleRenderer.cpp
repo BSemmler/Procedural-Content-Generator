@@ -111,16 +111,17 @@ KGV::Render::SimpleRenderer::SimpleRenderer(Render::RenderDeviceDX11* device, Re
 void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine::Entity>>& entities, std::vector<std::shared_ptr<Engine::Entity>>& cameras, std::vector<std::shared_ptr<Engine::Entity>>* lights, F32 deltaTime) {
     FrameConstantsDef fcd{};
     fcd.deltaTime = deltaTime;
-    auto lightEntity = (*lights)[0];
-    auto light = lightEntity->light.get();
-    fcd.directionalLight.ambient = light->ambient;
-    fcd.directionalLight.diffuse = light->diffuse;
-    fcd.directionalLight.specular = light->specular;
+    if (lights) {
+        auto lightEntity = (*lights)[0];
+        auto light = lightEntity->light.get();
+        fcd.directionalLight.ambient = light->ambient;
+        fcd.directionalLight.diffuse = light->diffuse;
+        fcd.directionalLight.specular = light->specular;
 
-    // Calculate direction of the light.
-    auto lightRotation = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3A(&lightEntity->transform.rotation));
-    XMStoreFloat3(&fcd.directionalLight.direction, XMVector3Rotate(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), lightRotation));
-
+        // Calculate direction of the light.
+        auto lightRotation = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3A(&lightEntity->transform.rotation));
+        XMStoreFloat3(&fcd.directionalLight.direction, XMVector3Rotate(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), lightRotation));
+    }
 
     auto frameConstants = deviceContext->mapResource(vsFrameConstantsBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0);
     memcpy(frameConstants.pData, &fcd, sizeof(FrameConstantsDef));

@@ -10,6 +10,7 @@ struct VertexOut
     float4 position : SV_POSITION;
     float4 worldPosition : WORLD_POSITION;
     float4 normal : NORMAL;
+    float2 texcoord : TEXCOORD0;
 };
 
 cbuffer ObjectConstants : register(b0) {
@@ -31,6 +32,7 @@ VertexOut main(VertexIn input)
 
     // Transform the normals to homogeneous clip space.
     output.normal = mul(input.normal, gWorldInvTranspose);
+    output.texcoord = input.texcoord;
 
 	return output;
 }

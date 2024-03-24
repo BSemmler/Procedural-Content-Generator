@@ -306,7 +306,6 @@ void KGV::Engine::TerrainScene::SetupEntities() {
         water->mesh = std::make_unique<Engine::MeshComponent>();
         water->mesh->meshId = gridMeshId;
         water->mesh->render = true;
-        waterPlane = water;
         entities.emplace_back(water);
     }
 

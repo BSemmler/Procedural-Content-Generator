@@ -43,7 +43,6 @@ namespace KGV::Engine {
         std::shared_ptr<Render::ResourceViewDX11> grassTexture;
         std::shared_ptr<Render::ResourceViewDX11> snowTexture;
         std::shared_ptr<Render::ResourceViewDX11> depthBuffer;
-        std::shared_ptr<Entity> waterPlane;
         std::shared_ptr<IShaderManager> shaderManager;
         S32 terrainWrapSampler;
 

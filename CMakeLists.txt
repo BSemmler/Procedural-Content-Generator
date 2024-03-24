@@ -144,6 +144,8 @@ add_executable(Engine
         KGVEngine/IShaderManager.h
         KGVEngine/ShaderManager.cpp
         KGVEngine/ShaderManager.h
+        KGVEngine/Scenes/HeightMapScene.cpp
+        KGVEngine/Scenes/HeightMapScene.h
 )
 
 target_link_libraries(Engine PRIVATE spdlog::spdlog imgui::imgui  d3d11.lib dxgi.lib d3dcompiler.lib)

@@ -39,6 +39,7 @@ namespace KGV::System
         std::shared_ptr<Render::PipelineManagerDX11> deviceContext;
         std::shared_ptr<Render::SimpleRenderer> renderer;
         std::unique_ptr<Engine::IScene> terrainScene;
+        std::unique_ptr<Engine::IScene> heightMapScene;
         S32 swapChainId;
         S32 rtvId;
         std::shared_ptr<Render::ResourceViewDX11> depthBuffer;
