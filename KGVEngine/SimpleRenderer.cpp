@@ -128,9 +128,7 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
 
     for (const auto& cameraEntity : cameras) {
         // If the entity doesn't have a cameraEntity setup then ignore, likewise if a cameraEntity is disabled.
-        if (!cameraEntity->camera) {
-            continue;
-        } else if (!cameraEntity->camera->isActive()) {
+        if (!cameraEntity->camera || !cameraEntity->camera->isActive()) {
             continue;
         }
 
@@ -145,7 +143,7 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
         auto viewProj = view * cameraEntity->camera->getProjectionMatrix();
         auto cameraConstantsBuff = deviceContext->mapResource(vsCameraConstantsBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0);
 
-        CameraConstantsDef ccd;
+        CameraConstantsDef ccd{};
         ccd.cameraPos = camPos;
         ccd.viewProjectionMatrix = viewProj;
         memcpy(cameraConstantsBuff.pData, &ccd, sizeof(CameraConstantsDef));
@@ -163,7 +161,7 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
         bool changeOmState = true;
 
         // Render each entity;
-        for (auto entity : entities) {
+        for (const auto& entity : entities) {
             auto mesh = entity->mesh.get();
             auto material = entity->material.get();
             if (!mesh || !material || !mesh->render) {
@@ -235,7 +233,7 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
 
                 if (!material->colorTextures.empty()) {
                     std::vector<S32> srvIds;
-                    for(auto texture : material->colorTextures) {
+                    for(const auto& texture : material->colorTextures) {
                         srvIds.emplace_back(texture->getSrvId());
                     }
 
@@ -273,7 +271,7 @@ void KGV::Render::SimpleRenderer::updateMesh(S32 id, const std::vector<std::vect
             break;
         }
         case kDefault: {
-            for (auto vBuffer : mesh->vertexBuffers) {
+            for (const auto& vBuffer : mesh->vertexBuffers) {
                 deviceContext->updateSubresource(vBuffer.get(), 0, nullptr, vertices.data(), 0, 0);
             }
 

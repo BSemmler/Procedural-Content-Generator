@@ -136,6 +136,14 @@ add_executable(Engine
         KGVEngine/NoiseBufferGenerator.h
         KGVEngine/TargaImage.cpp
         KGVEngine/TargaImage.h
+        KGVEngine/IScene.cpp
+        KGVEngine/IScene.h
+        KGVEngine/Scenes/TerrainScene.cpp
+        KGVEngine/Scenes/TerrainScene.h
+        KGVEngine/IShaderManager.cpp
+        KGVEngine/IShaderManager.h
+        KGVEngine/ShaderManager.cpp
+        KGVEngine/ShaderManager.h
 )
 
 target_link_libraries(Engine PRIVATE spdlog::spdlog imgui::imgui  d3d11.lib dxgi.lib d3dcompiler.lib)

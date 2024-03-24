@@ -13,16 +13,13 @@ namespace KGV::Render {
 
     }
 
-    RenderDeviceDX11::~RenderDeviceDX11() {
-
-    }
+    RenderDeviceDX11::~RenderDeviceDX11() = default;
 
     void RenderDeviceDX11::shutdown() {
 
     }
 
     ComPtr<IDXGIAdapter1> RenderDeviceDX11::getOptimalAdapter(const ComPtr<IDXGIFactory2> &pFactory) {
-        HRESULT hr;
         auto adapters = getAdapters(pFactory);
 
         if (adapters.empty()) {
@@ -40,7 +37,8 @@ namespace KGV::Render {
         std::vector<ComPtr<IDXGIAdapter1>> adapters;
 
         HRESULT hr;
-        if (SUCCEEDED(hr = pFactory.As(&pFactory6))) {
+        hr = pFactory.As(&pFactory6);
+        if (SUCCEEDED(hr)) {
             adapters.emplace_back();
             for (auto i = 0; DXGI_ERROR_NOT_FOUND != pFactory6->EnumAdapterByGpuPreference(
                     i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, __uuidof(IDXGIAdapter1), &adapters[i]); i++) {
@@ -83,36 +81,37 @@ namespace KGV::Render {
         D3D_FEATURE_LEVEL createdLevel;
         ComPtr<IDXGIAdapter> pAdapter;
         pAdapter1.As(&pAdapter);
-        if (FAILED(hr = D3D11CreateDevice(pAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, deviceCreateFlags,
-                          &featureLevel, 1, D3D11_SDK_VERSION,device.GetAddressOf(),
-                          &createdLevel, context.GetAddressOf()))) {
+        hr = D3D11CreateDevice(pAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, deviceCreateFlags,
+                               &featureLevel, 1, D3D11_SDK_VERSION,device.GetAddressOf(),
+                               &createdLevel, context.GetAddressOf());
+        if (FAILED(hr)) {
             logger->critical("Failed to create ID3D11Device. ({:0X})", hr);
             throw std::exception("Failed to create ID3D11Device");
         }
 
-        if(FAILED(hr = device.As(&device1))) {
+        hr = device.As(&device1);
+        if(FAILED(hr)) {
             logger->critical("Failed to create ID3D11Device1. ({:0X})", hr);
             throw std::exception("Failed to create ID3D11Device1");
         }
 
-        if(FAILED(hr = context.As(&context1))) {
+        hr = context.As(&context1);
+        if(FAILED(hr)) {
             logger->critical("Failed to create ID3D11DeviceContext1. ({:0X})", hr);
             throw std::exception("Failed to create ID3D11DeviceContext1");
         }
     }
 
-    std::shared_ptr<ResourceViewDX11> RenderDeviceDX11::terrainTextureSRVConfig(Texture2dConfigDX11 &texConfig, ResourceData *data,
-                                                                                ShaderResourceViewConfigDX11 *srvConfig,
-                                                                                RenderTargetViewConfigDX11 *rtvConfig,
-                                                                                DepthStencilViewConfigDX11 *dsvConfig) {
+    std::shared_ptr<ResourceViewDX11> RenderDeviceDX11::CreateTexture2D(Texture2dConfigDX11 &texConfig, ResourceData *data,
+                                                                        ShaderResourceViewConfigDX11 *srvConfig,
+                                                                        RenderTargetViewConfigDX11 *rtvConfig,
+                                                                        DepthStencilViewConfigDX11 *dsvConfig) {
         ComPtr<ID3D11Texture2D> tex;
         HRESULT hr = device->CreateTexture2D(&texConfig.desc, reinterpret_cast<D3D11_SUBRESOURCE_DATA *>(data), tex.GetAddressOf());
 
         if (FAILED(hr)) {
             logger->error("Failed to create D3D11 Texture2D, ({:X})", (unsigned int)hr);
-
-            // Trigger a breakpoint if we're in a debug build.
-            // KGV_debugBreak();
+            throw std::runtime_error("Failed to create D3D11 Texture2D");
         }
 
         auto texture = std::make_unique<Texture2dDX11>(tex);
@@ -124,15 +123,15 @@ namespace KGV::Render {
     S32 RenderDeviceDX11::createSwapChain(void *hwnd, SwapChainConfigDX11 &config) {
         ComPtr<IDXGIDevice> dxgiDevice;
 
-        HRESULT hr;
-        if (FAILED(hr = device.CopyTo(dxgiDevice.GetAddressOf()))) {
+        HRESULT hr = device.CopyTo(dxgiDevice.GetAddressOf());
+        if (FAILED(hr)) {
             logger->error("Failed to acquire DXGIDevice, reason: {:0X}", hr);
             return -1;
         }
 
         ComPtr<IDXGIFactory2> dxgiFactory2;
-        if (FAILED(hr = CreateDXGIFactory2(
-                0, __uuidof(IDXGIFactory2), reinterpret_cast<void **>(dxgiFactory2.GetAddressOf())))) {
+        hr = CreateDXGIFactory2(0, __uuidof(IDXGIFactory2), reinterpret_cast<void **>(dxgiFactory2.GetAddressOf()));
+        if (FAILED(hr)) {
             logger->error("Failed to acquire DXGIFactory2 interface, reason: {:0X}", hr);
             return -1;
         }
@@ -140,8 +139,9 @@ namespace KGV::Render {
         
         ComPtr<IDXGISwapChain1> swapChain;
         auto desc = config.getDesc();
-        if (FAILED(hr = dxgiFactory2->CreateSwapChainForHwnd(device.Get(), static_cast<HWND>(hwnd), &desc, nullptr, nullptr,
-                                                             swapChain.GetAddressOf()))) {
+        hr = dxgiFactory2->CreateSwapChainForHwnd(device.Get(), static_cast<HWND>(hwnd), &desc, nullptr,
+                                                  nullptr,swapChain.GetAddressOf());
+        if (FAILED(hr)) {
             logger->error("Failed to create DXGI swap chain, reason: {:0X}", hr);
             return -1;
         }
@@ -253,10 +253,7 @@ namespace KGV::Render {
 
     S32 RenderDeviceDX11::storeResource(std::unique_ptr<ResourceDX11> resource) {
         S32 nextId;
-        if (!availableResourceIds.empty())
-            nextId = availableResourceIds.back();
-        else
-            nextId = resources.size();
+        nextId = !availableResourceIds.empty() ? static_cast<S32>(availableResourceIds.back()) : static_cast<S32>(resources.size());
 
         resources.emplace_back(std::move(resource));
         return nextId;
@@ -588,8 +585,8 @@ namespace KGV::Render {
     S32 RenderDeviceDX11::createDepthStencilState(D3D11_DEPTH_STENCIL_DESC &desc) {
         ComPtr<ID3D11DepthStencilState> depthState;
 
-        HRESULT hr;
-        if (FAILED(hr = device->CreateDepthStencilState(&desc, depthState.GetAddressOf()))) {
+        HRESULT hr = device->CreateDepthStencilState(&desc, depthState.GetAddressOf());
+        if (FAILED(hr)) {
             logger->error("Failed to create depth stencil state.");
             return -1;
         }
@@ -608,8 +605,8 @@ namespace KGV::Render {
     S32 RenderDeviceDX11::createSamplerState(D3D11_SAMPLER_DESC &desc) {
         ComPtr<ID3D11SamplerState> sampler;
 
-        HRESULT hr;
-        if (FAILED(hr = device->CreateSamplerState(&desc, sampler.GetAddressOf()))) {
+        HRESULT hr = device->CreateSamplerState(&desc, sampler.GetAddressOf());
+        if (FAILED(hr)) {
             logger->error("Failed to create sampler state.");
             return -1;
         }

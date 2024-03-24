@@ -1,10 +1,3 @@
-struct VertexIn
-{
-    float3 position : POSITION0;
-    float3 normal : NORMAL;
-    float2 texcoord : TEXCOORD0;
-};
-
 struct VertexOut
 {
     float4 position : SV_POSITION;
@@ -27,10 +20,6 @@ struct Material {
      float4 specular;
 };
 
-cbuffer ObjectConstants : register(b0) {
-    matrix gWorldMatrix;
-    matrix gWorldInvTranspose;
-};
 
 cbuffer CameraConstants : register(b1) {
     matrix gViewProjectionMatrix;
@@ -49,18 +38,6 @@ cbuffer MaterialConstants : register(b3) {
     Material gMaterial;
 };
 
-VertexOut VS(VertexIn input)
-{
-    VertexOut output;
-
-    output.worldPosition = mul(float4(input.position, 1.0f), gWorldMatrix);
-    output.position = mul(output.worldPosition, gViewProjectionMatrix);
-
-    // Transform the normals to homogeneous clip space.
-    output.normal = mul(input.normal, gWorldInvTranspose);
-
-	return output;
-}
 
 void calcDirectionalLighting(Material mat, DirectionalLight light, float3 normal, float3 toEye,
                             out float4 ambient, out float4 diffuse, out float4 spec) {
@@ -84,7 +61,7 @@ void calcDirectionalLighting(Material mat, DirectionalLight light, float3 normal
     }
 }
 
-float4 PS(VertexOut input) : SV_TARGET {
+float4 main(VertexOut input) : SV_TARGET {
     input.normal = normalize(input.normal);
 
     float3 toEyeW = normalize(gCameraPos - input.worldPosition);

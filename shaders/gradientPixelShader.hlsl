@@ -1,10 +1,3 @@
-struct VertexIn
-{
-    float3 position : POSITION0;
-    float3 normal : NORMAL;
-    float2 texcoord : TEXCOORD0;
-};
-
 struct VertexOut
 {
     float4 position : SV_POSITION;
@@ -32,11 +25,6 @@ struct Material {
      float pad3;
 };
 
-cbuffer ObjectConstants : register(b0) {
-    matrix gWorldMatrix;
-    matrix gWorldInvTranspose;
-};
-
 cbuffer CameraConstants : register(b1) {
     matrix gViewProjectionMatrix;
     float4 gCameraPos;
@@ -53,51 +41,6 @@ cbuffer FrameConstantsDef : register(b2) {
 cbuffer MaterialConstants : register(b3) {
     Material gMaterial;
 };
-
-Texture2D<float> gHeightMap : register(t0);
-SamplerState gHeightMapSampler : register(s0);
-
-// Function to sample heightmap texture at a given UV coordinate
-float SampleHeightMap(float2 uv) {
-    return gHeightMap.SampleLevel(gHeightMapSampler, uv, 0); // Sample the heightmap at the given UV coordinate
-}
-
-// Function to get the height difference between a texel and its neighboring texels
-float GetHeightDifference(float2 uv, float2 offset) {
-    float centerHeight = SampleHeightMap(uv).r * max(gMaterial.displacement, 1.0f);
-    float neighborHeight = SampleHeightMap(uv + offset).r * max(gMaterial.displacement, 1.0f);
-    return neighborHeight - centerHeight;
-}
-
-VertexOut VS(VertexIn input)
-{
-    VertexOut output;
-
-    float width = 0.0f;
-    float height = 0.0f;
-    gHeightMap.GetDimensions(width, height);
-    float2 uv = input.texcoord;
-    float2 offset = float2(1.0f / width, 1.0f / height);
-    input.position.y = gHeightMap.SampleLevel(gHeightMapSampler, uv, 0).r * max(gMaterial.displacement, 1.0f) - (max(gMaterial.displacement, 1.0f) / 2);
-
-    output.worldPosition = mul(float4(input.position, 1.0f), gWorldMatrix);
-    output.position = mul(output.worldPosition, gViewProjectionMatrix);
-
-    float heightDifferenceLeft = GetHeightDifference(uv, float2(-offset.x, 0));
-    float heightDifferenceRight = GetHeightDifference(uv, float2(offset.x, 0));
-    float heightDifferenceUp = GetHeightDifference(uv, float2(0, offset.y));
-    float heightDifferenceDown = GetHeightDifference(uv, float2(0, -offset.y));
-
-    // Transform the normals to homogeneous clip space.
-    float3 normal;
-    normal.x = heightDifferenceLeft - heightDifferenceRight;
-    normal.y = 2.0;
-    normal.z = heightDifferenceDown - heightDifferenceUp;
-    output.normal = normalize(mul(float4(normal, 0), gWorldInvTranspose));
-    output.texcoord = uv;
-
-	return output;
-}
 
 void calcDirectionalLighting(Material mat, DirectionalLight light, float3 normal, float3 toEye,
                             out float4 ambient, out float4 diffuse, out float4 spec) {
@@ -121,7 +64,6 @@ void calcDirectionalLighting(Material mat, DirectionalLight light, float3 normal
     }
 }
 
-
 Texture2D gRockTexture : register(t0);
 SamplerState gColorSampler : register(s0);
 Texture2D gGrassTexture : register(t1);
@@ -129,7 +71,7 @@ Texture2D gSandTexture : register(t2);
 Texture2D gSnowTexture : register(t3);
 
 // TODO: Move these to constant buffer so they're adjustable.
-float4 PS(VertexOut input) : SV_TARGET {
+float4 main(VertexOut input) : SV_TARGET {
     const float gMinRockSlope = 0.5;
     const float gMaxGrassSlope = 0.9;
     const float gMaxSnowSlope = 0.9;
@@ -166,7 +108,7 @@ float4 PS(VertexOut input) : SV_TARGET {
     rock_GrassSlopeWeighting = min(gMaxGrassSlope, rock_GrassSlopeWeighting);
     rock_GrassSlopeWeighting -= gMinRockSlope;
     rock_GrassSlopeWeighting /= gMaxGrassSlope - gMinRockSlope;
-    
+
     float rock_RockGrassWeighting = input.worldPosition.y;
     rock_RockGrassWeighting = max(gMinRockHeight, rock_RockGrassWeighting);
     rock_RockGrassWeighting = min(gMaxRockGrassHeight, rock_RockGrassWeighting);
@@ -203,4 +145,3 @@ float4 PS(VertexOut input) : SV_TARGET {
 //     return float4(sandAlbedo, 1.0f);
 //     return float4(finalColor, 1.0f);
 }
-

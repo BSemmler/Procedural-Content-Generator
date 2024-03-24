@@ -40,10 +40,10 @@ namespace KGV::Render {
         ComPtr<IDXGIAdapter1> getOptimalAdapter(const ComPtr<IDXGIFactory2>& _pFactory = nullptr);
         std::vector<ComPtr<IDXGIAdapter1>> getAdapters(const ComPtr<IDXGIFactory2>& pFactory = nullptr);
 
-        std::shared_ptr<ResourceViewDX11> terrainTextureSRVConfig(Texture2dConfigDX11 &texConfig, ResourceData *data,
-                                                                  ShaderResourceViewConfigDX11 *srvConfig = nullptr,
-                                                                  RenderTargetViewConfigDX11 *rtvConfig = nullptr,
-                                                                  DepthStencilViewConfigDX11 *dsvConfig = nullptr);
+        std::shared_ptr<ResourceViewDX11> CreateTexture2D(Texture2dConfigDX11 &texConfig, ResourceData *data,
+                                                          ShaderResourceViewConfigDX11 *srvConfig = nullptr,
+                                                          RenderTargetViewConfigDX11 *rtvConfig = nullptr,
+                                                          DepthStencilViewConfigDX11 *dsvConfig = nullptr);
 
         std::shared_ptr<ResourceViewDX11> createVertexBuffer(BufferConfigDX11 &config, ResourceData *data);
         std::shared_ptr<ResourceViewDX11> createIndexBuffer(BufferConfigDX11 &config, ResourceData *data);
