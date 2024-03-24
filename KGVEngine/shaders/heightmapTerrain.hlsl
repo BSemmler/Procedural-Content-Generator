@@ -135,13 +135,12 @@ float4 PS(VertexOut input) : SV_TARGET {
     const float gMaxSnowSlope = 0.9;
     const float gMinRockSnowSlope = 0.7;
 
-    const float gMaxGrassHeight = 80;
-    const float gMinRockHeight = 79;
-
     const float gMinRockGrassHeight = 4.0f;
     const float gMaxSandHeight = 5.0f;
 
-    const float gMaxRockGrassHeight = 100.0f;
+    const float gMinRockHeight = 79;
+    const float gMaxRockHeight = 100;
+    const float gMaxRockGrassHeight = 80.0f;
     const float gMinSnowRockHeight = 99.0f;
     input.normal = normalize(input.normal);
 
@@ -167,6 +166,12 @@ float4 PS(VertexOut input) : SV_TARGET {
     rock_GrassSlopeWeighting = min(gMaxGrassSlope, rock_GrassSlopeWeighting);
     rock_GrassSlopeWeighting -= gMinRockSlope;
     rock_GrassSlopeWeighting /= gMaxGrassSlope - gMinRockSlope;
+    
+    float rock_RockGrassWeighting = input.worldPosition.y;
+    rock_RockGrassWeighting = max(gMinRockHeight, rock_RockGrassWeighting);
+    rock_RockGrassWeighting = min(gMaxRockGrassHeight, rock_RockGrassWeighting);
+    rock_RockGrassWeighting -= gMinRockHeight;
+    rock_RockGrassWeighting /= gMaxRockGrassHeight - gMinRockHeight;
 
     float snow_RockSlopeWeighting = input.normal.y;
     snow_RockSlopeWeighting = max(gMinRockSnowSlope, snow_RockSlopeWeighting);
@@ -174,11 +179,11 @@ float4 PS(VertexOut input) : SV_TARGET {
     snow_RockSlopeWeighting -= gMinRockSnowSlope;
     snow_RockSlopeWeighting /= gMaxSnowSlope - gMinRockSnowSlope;
 
-    float rockGrass_SnowRockWeighting = input.worldPosition.y;
-    rockGrass_SnowRockWeighting = max(gMinSnowRockHeight, rockGrass_SnowRockWeighting);
-    rockGrass_SnowRockWeighting = min(gMaxRockGrassHeight, rockGrass_SnowRockWeighting);
-    rockGrass_SnowRockWeighting -= gMinSnowRockHeight;
-    rockGrass_SnowRockWeighting /= gMaxRockGrassHeight - gMinSnowRockHeight;
+    float rock_SnowRockWeighting = input.worldPosition.y;
+    rock_SnowRockWeighting = max(gMinSnowRockHeight, rock_SnowRockWeighting);
+    rock_SnowRockWeighting = min(gMaxRockHeight, rock_SnowRockWeighting);
+    rock_SnowRockWeighting -= gMinSnowRockHeight;
+    rock_SnowRockWeighting /= gMaxRockHeight - gMinSnowRockHeight;
 
     float sand_RockGrassHeightWeighting = input.worldPosition.y;
     sand_RockGrassHeightWeighting = max(gMinRockGrassHeight, sand_RockGrassHeightWeighting);
@@ -188,8 +193,9 @@ float4 PS(VertexOut input) : SV_TARGET {
 
     float3 snowRockAlbedo = lerp(snowAlbedo, rockAlbedo, snow_RockSlopeWeighting);
     float3 rockGrassAlbedo = lerp(rockAlbedo, grassAlbedo, rock_GrassSlopeWeighting);
-    float3 rockGrass_SnowRockAlbedo = lerp(rockGrassAlbedo, snowRockAlbedo, rockGrass_SnowRockWeighting);
-    float3 finalColor = lerp(sandAlbedo, rockGrass_SnowRockAlbedo, sand_RockGrassHeightWeighting);
+    float3 rock_RockGrassAlbedo = lerp(rockGrassAlbedo, rockAlbedo, rock_RockGrassWeighting);
+    float3 rock_SnowRockAlbedo = lerp(rock_RockGrassAlbedo, snowRockAlbedo, rock_SnowRockWeighting);
+    float3 finalColor = lerp(sandAlbedo, rock_SnowRockAlbedo, sand_RockGrassHeightWeighting);
 
     float3 litColor = finalColor * (ambient.rgb + diffuse.rgb) + spec.rgb;
     return float4(litColor, 1);
