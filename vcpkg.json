@@ -14,5 +14,12 @@
   }, {
     "name" : "vcpkg-cmake",
     "version>=" : "2023-05-04"
+  }, {
+    "name" : "imgui",
+    "version>=" : "1.90.2",
+    "features": [
+      "win32-binding",
+      "dx11-binding"
+    ]
   } ]
 }

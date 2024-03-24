@@ -6,6 +6,9 @@
 //#include "Camera.h"
 //#include "Entity.h"
 #include "SimpleRenderer.h"
+#include <imgui.h>
+#include <imgui_impl_win32.h>
+#include <imgui_impl_dx11.h>
 
 namespace KGV::System
 {

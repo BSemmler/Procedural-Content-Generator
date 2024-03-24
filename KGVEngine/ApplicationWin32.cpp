@@ -141,6 +141,17 @@ bool KGV::System::ApplicationWin32::init() {
     renderer = std::make_unique<Render::SimpleRenderer>(device.get(), deviceContext.get());
     spdlog::get("engine")->info("Initialization complete!");
 
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+//    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
+
+// Setup Platform/Renderer backends
+    ImGui_ImplWin32_Init(window1->getWin32Handle());
+    ImGui_ImplDX11_Init(device->getID3D11Device().Get(), device->getID3D11DeviceContext1().Get());
+
     vertexShaderId = device->loadShader("../KGVEngine/shaders/basicLighting.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
     terrainVertexShaderId = device->loadShader("../KGVEngine/shaders/heightmapTerrain.hlsl", Render::eShaderType::kVertex, false, "VS", "vs_5_0");
     terrainPixelShaderId = device->loadShader("../KGVEngine/shaders/heightmapTerrain.hlsl", Render::eShaderType::kPixel, false, "PS", "ps_5_0");
@@ -257,6 +268,9 @@ bool KGV::System::ApplicationWin32::init() {
 
 void KGV::System::ApplicationWin32::shutdown()
 {
+    ImGui_ImplDX11_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
 }
 
 int KGV::System::ApplicationWin32::run() {
@@ -317,6 +331,10 @@ LRESULT KGV::System::ApplicationWin32::wndProc( HWND hWnd, UINT msg, WPARAM wPar
             break;
     }
 
+    extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+    if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+        return true;
+
     return DefWindowProc( hWnd, msg, wParam, lParam );
 }
 
@@ -325,6 +343,12 @@ float gAvgFrameTime = 0;
 float cumulativeTime = 0;
 
 void KGV::System::ApplicationWin32::draw(F32 dt) {
+    ImGui_ImplDX11_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
+    ImGui::ShowDemoWindow();
+
+
     deviceContext->clearColorBuffers({0.1f, 0.1f, 0.1f, 1.0f});
     deviceContext->clearDepthStencilBuffers();
     renderer->renderScene(entities, cameras, &lights, dt);
@@ -355,6 +379,9 @@ void KGV::System::ApplicationWin32::draw(F32 dt) {
         entities[0]->transform.rotation.y -= 360.0f;
     else if (entities[0]->transform.rotation.y < 0)
         entities[0]->transform.rotation.y += 360.0f;
+
+    ImGui::Render();
+    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
     device->presentSwapChain(swapChainId, 1, 0);
     gAvgFps = static_cast<S32>(1.0f/dt + static_cast<F32>(gAvgFps)) / 2;

@@ -624,4 +624,20 @@ namespace KGV::Render {
 
         return nullptr;
     }
+
+    ComPtr<ID3D11Device> RenderDeviceDX11::getID3D11Device() {
+        return device;
+    }
+
+    ComPtr<ID3D11Device1> RenderDeviceDX11::getID3D11Device1() {
+        return device1;
+    }
+
+    ComPtr<ID3D11DeviceContext> RenderDeviceDX11::getID3D11DeviceContext() {
+        return context;
+    }
+
+    ComPtr<ID3D11DeviceContext1> RenderDeviceDX11::getID3D11DeviceContext1() {
+        return context1;
+    }
 }

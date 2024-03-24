@@ -23,6 +23,8 @@ if(NOT TARGET spdlog)
     find_package(spdlog REQUIRED)
 endif()
 
+find_package(imgui CONFIG REQUIRED)
+
 add_executable(Engine
         KGVEngine/Application.cpp
         KGVEngine/Application.h
@@ -136,4 +138,4 @@ add_executable(Engine
         KGVEngine/TargaImage.h
 )
 
-target_link_libraries(Engine PRIVATE spdlog::spdlog d3d11.lib dxgi.lib d3dcompiler.lib)
+target_link_libraries(Engine PRIVATE spdlog::spdlog imgui::imgui  d3d11.lib dxgi.lib d3dcompiler.lib)

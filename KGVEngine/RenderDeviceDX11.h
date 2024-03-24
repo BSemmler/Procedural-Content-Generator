@@ -106,6 +106,11 @@ namespace KGV::Render {
 
         std::shared_ptr<PipelineManagerDX11> getPipelineManager();
 
+        ComPtr<ID3D11Device> getID3D11Device();
+        ComPtr<ID3D11Device1> getID3D11Device1();
+        ComPtr<ID3D11DeviceContext> getID3D11DeviceContext();
+        ComPtr<ID3D11DeviceContext1> getID3D11DeviceContext1();
+
     protected:
         ComPtr<ID3D11Device> device;
         ComPtr<ID3D11Device1> device1;

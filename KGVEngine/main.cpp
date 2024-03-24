@@ -38,6 +38,7 @@ int main(int argc, const char **argv) {
         return 1;
 
     app.run();
+    app.shutdown();
 
     return 0;
 }
