@@ -180,7 +180,6 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
             // TODO: Move this logic of keep unchanged state elements to the individual stages.
             // Get current IA state in case it changes.
             InputAssemblerStateDX11 iaState{};
-            iaState.setTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             iaState.setIndexFormat(DXGI_FORMAT_R32_UINT);
             if (currentMaterial >= 0 || currentMesh >= 0) {
                 iaState.setInputLayout(materials[currentMaterial].inputLayoutId);
@@ -192,6 +191,7 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
             RenderMesh* renderMesh = &meshes[mesh->meshId];
             if (currentMesh != mesh->meshId) {
                 currentMesh = mesh->meshId;
+                iaState.setTopology(renderMesh->topology);
                 iaState.setIndexBuffer(renderMesh->indexBuffer->getResourceId());
                 iaState.setVertexBuffers(renderMesh->vertexBuffers, {sizeof(Vertex)}, {0});
                 changeIaState = true;
@@ -294,7 +294,7 @@ void KGV::Render::SimpleRenderer::updateMesh(S32 id, const std::vector<std::vect
     }
 }
 
-S32 KGV::Render::SimpleRenderer::createMesh(const std::vector<std::vector<Vertex>>& vertices, std::vector<U32>& indices, eBufferUpdateType update) {
+S32 KGV::Render::SimpleRenderer::createMesh(const std::vector<std::vector<Vertex>>& vertices, std::vector<U32>& indices, eBufferUpdateType update, D3D11_PRIMITIVE_TOPOLOGY topology) {
 
     std::vector<std::shared_ptr<ResourceViewDX11>> vertexBuffers;
     for (const auto& vertexSet : vertices) {
@@ -322,7 +322,7 @@ S32 KGV::Render::SimpleRenderer::createMesh(const std::vector<std::vector<Vertex
 
     mesh.indexBuffer = indexResource;
     mesh.vertexBuffers = vertexBuffers;
-
+    mesh.topology = topology;
     meshes.emplace_back(std::move(mesh));
     return mesh.id;
 }

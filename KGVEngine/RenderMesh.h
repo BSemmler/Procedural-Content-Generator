@@ -18,6 +18,7 @@ namespace KGV::Render {
         S32 indexCount;
         S32 offset;
         eBufferUpdateType updateType;
+        D3D11_PRIMITIVE_TOPOLOGY topology;
     };
 }
 
