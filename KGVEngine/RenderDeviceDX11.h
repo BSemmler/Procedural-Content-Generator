@@ -3,8 +3,8 @@
 
 #include "pch.h"
 #include "Texture2dDX11.h"
-#include "BufferDX11.h"
-#include "BufferConfigDX11.h"
+#include "render/BufferDX11.h"
+#include "render/BufferConfigDX11.h"
 #include "Texture2dConfigDX11.h"
 #include "ResourceData.h"
 #include "SwapChainConfigDX11.h"
@@ -13,12 +13,13 @@
 #include "ResourceViewDX11.h"
 #include "ShaderResourceViewConfigDX11.h"
 #include "RenderTargetViewConfigDX11.h"
-#include "DepthStencilViewConfigDX11.h"
+#include "render/DepthStencilViewConfigDX11.h"
 #include "RenderTargetViewDX11.h"
 #include "ShaderResourceViewDX11.h"
 #include "ShaderDX11.h"
 #include "PipelineManagerDX11.h"
-#include "DepthStencilViewDX11.h"
+#include "render/DepthStencilViewDX11.h"
+#include "Texture1dConfigDX11.h"
 
 namespace KGV::Render {
     class ResourceViewDX11;
@@ -39,6 +40,10 @@ namespace KGV::Render {
 
         ComPtr<IDXGIAdapter1> getOptimalAdapter(const ComPtr<IDXGIFactory2>& _pFactory = nullptr);
         std::vector<ComPtr<IDXGIAdapter1>> getAdapters(const ComPtr<IDXGIFactory2>& pFactory = nullptr);
+
+        std::shared_ptr<ResourceViewDX11> CreateTexture1D(Texture1dConfigDX11 &texConfig, ResourceData *data,
+                                                          ShaderResourceViewConfigDX11 *srvConfig = nullptr,
+                                                          RenderTargetViewConfigDX11 *rtvConfig = nullptr);
 
         std::shared_ptr<ResourceViewDX11> CreateTexture2D(Texture2dConfigDX11 &texConfig, ResourceData *data,
                                                           ShaderResourceViewConfigDX11 *srvConfig = nullptr,

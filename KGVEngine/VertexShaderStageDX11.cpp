@@ -5,7 +5,7 @@
 #include "VertexShaderStageDX11.h"
 #include "RenderDeviceDX11.h"
 #include "VertexShaderDX11.h"
-#include "ConstantBufferDX11.h"
+#include "render/ConstantBufferDX11.h"
 
 const KGV::Render::ShaderStageStateDX11 &KGV::Render::VertexShaderStageDX11::getCurrentState() const {
     return currentState;

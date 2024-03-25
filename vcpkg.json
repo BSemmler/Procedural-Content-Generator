@@ -17,9 +17,9 @@
   }, {
     "name" : "imgui",
     "version>=" : "1.90.2",
-    "features": [
-      "win32-binding",
-      "dx11-binding"
-    ]
+    "features" : [ "win32-binding", "dx11-binding" ]
+  }, {
+    "name" : "nlohmann-json",
+    "version>=" : "3.11.3"
   } ]
 }

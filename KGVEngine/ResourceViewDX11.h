@@ -4,7 +4,7 @@
 #include "RenderDeviceDX11.h"
 #include "ShaderResourceViewConfigDX11.h"
 #include "RenderTargetViewConfigDX11.h"
-#include "DepthStencilViewConfigDX11.h"
+#include "render/DepthStencilViewConfigDX11.h"
 
 namespace KGV::Render {
     class RenderDeviceDX11;
@@ -12,12 +12,17 @@ namespace KGV::Render {
     class RenderTargetViewConfigDX11;
     class ShaderResourceViewConfigDX11;
     class DepthStencilViewConfigDX11;
+    class Texture1dConfigDX11;
     class Texture2dConfigDX11;
 
     class ResourceViewDX11 {
     public:
         ResourceViewDX11(S32 _resourceId, BufferConfigDX11 *_config, RenderDeviceDX11 *_device,
                          ShaderResourceViewConfigDX11 *_srvConfig = nullptr, RenderTargetViewConfigDX11 *_rtvConfig = nullptr);
+
+        ResourceViewDX11(S32 _resourceId, Texture1dConfigDX11 *_config, RenderDeviceDX11* _device,
+                         ShaderResourceViewConfigDX11 *_srvConfig = nullptr,
+                         RenderTargetViewConfigDX11 *_rtvConfig = nullptr);
 
         ResourceViewDX11(S32 _resourceId, Texture2dConfigDX11 *_config, RenderDeviceDX11* _device,
                          ShaderResourceViewConfigDX11 *_srvConfig = nullptr,
@@ -53,6 +58,7 @@ namespace KGV::Render {
         std::unique_ptr<RenderTargetViewConfigDX11> rtvConfig;
         std::unique_ptr<DepthStencilViewConfigDX11> dsvConfig;
         std::unique_ptr<BufferConfigDX11> bufferConfig;
+        std::unique_ptr<Texture1dConfigDX11> texture1dConfig;
         std::unique_ptr<Texture2dConfigDX11> texture2dConfig;
     };
 }

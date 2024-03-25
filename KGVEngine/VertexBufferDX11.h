@@ -1,6 +1,6 @@
 #ifndef VERTEX_BUFFER_DX11_H_
 #define VERTEX_BUFFER_DX11_H_
-#include "BufferDX11.h"
+#include "render/BufferDX11.h"
 
 
 namespace KGV::Render {

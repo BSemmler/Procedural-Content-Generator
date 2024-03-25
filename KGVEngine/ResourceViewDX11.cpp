@@ -13,6 +13,16 @@ namespace KGV::Render {
         *bufferConfig = *_config;
     }
 
+    ResourceViewDX11::ResourceViewDX11(S32 _resourceId, Texture1dConfigDX11 *_config, RenderDeviceDX11 *_device,
+                                       ShaderResourceViewConfigDX11 *_srvConfig, RenderTargetViewConfigDX11 *_rtvConfig) {
+
+        D3D11_TEXTURE1D_DESC desc = _config->getDesc();
+        initResource(desc.BindFlags, _resourceId, _device, _srvConfig, _rtvConfig);
+
+        texture1dConfig = std::make_unique<Texture1dConfigDX11>();
+        *texture1dConfig = *_config;
+    }
+
     ResourceViewDX11::ResourceViewDX11(S32 _resourceId, Texture2dConfigDX11 *_config, RenderDeviceDX11 *_device, ShaderResourceViewConfigDX11 *_srvConfig,
                                        RenderTargetViewConfigDX11 *_rtvConfig, DepthStencilViewConfigDX11 *_dsvConfig) {
         D3D11_TEXTURE2D_DESC desc = _config->getDesc();

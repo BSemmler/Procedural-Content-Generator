@@ -6,7 +6,7 @@
 #define ENGINE_PIXELSHADERSTAGEDX11_H
 
 #include "pch.h"
-#include "IPipelineStageDX11.h"
+#include "render/IPipelineStageDX11.h"
 #include "ShaderStageStateDX11.h"
 
 namespace KGV::Render {

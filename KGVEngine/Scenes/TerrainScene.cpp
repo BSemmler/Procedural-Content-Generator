@@ -12,15 +12,29 @@
 
 using namespace DirectX;
 
-bool KGV::Engine::TerrainScene::Init(std::weak_ptr<Render::RenderDeviceDX11> device, std::weak_ptr<Render::SimpleRenderer> renderer,
+bool KGV::Engine::TerrainScene::Init(std::weak_ptr<Render::RenderDeviceDX11> device, std::weak_ptr<Render::PipelineManagerDX11> deviceContext,
+                                     std::weak_ptr<Render::SimpleRenderer> renderer, std::shared_ptr<IShaderManager> shaderManager,
                                      S32 renderTargetId, S32 windowWidth, S32 windowHeight) {
 
     graphicsDevice = device;
     graphicsRenderer = renderer;
+    graphicsDeviceContext = deviceContext;
+    this->shaderManager = std::move(shaderManager);
     LoadTextures();
     SetupPrimaryCamera(windowWidth, windowHeight, renderTargetId);
     SetupEntities();
 
+    return true;
+}
+
+bool KGV::Engine::TerrainScene::Init(std::weak_ptr<Render::RenderDeviceDX11> device, std::weak_ptr<Render::PipelineManagerDX11> deviceContext,
+                                     std::weak_ptr<Render::SimpleRenderer> renderer, std::shared_ptr<IShaderManager> shaderManager,
+                                     S32 renderTargetId, S32 windowWidth, S32 windowHeight,
+                                     const std::shared_ptr<Render::ResourceViewDX11>& displacementTexture, S32 mapSize) {
+
+    terrainMapDisplacementTextureF32 = displacementTexture;
+    this->mapSize = mapSize;
+    Init(std::move(device), std::move(deviceContext), std::move(renderer), std::move(shaderManager), renderTargetId, windowWidth, windowHeight);
     return true;
 }
 
@@ -39,16 +53,6 @@ void KGV::Engine::TerrainScene::Tick(float deltaTime) {
     }
 }
 
-bool KGV::Engine::TerrainScene::Init(std::weak_ptr<Render::RenderDeviceDX11> device, std::weak_ptr<Render::SimpleRenderer> renderer,
-                                     S32 renderTargetId, S32 windowWidth, S32 windowHeight, std::shared_ptr<IShaderManager> shaderManager,
-                                     const std::shared_ptr<Render::ResourceViewDX11>& displacementTexture, S32 mapSize) {
-
-    terrainMapDisplacementTextureF32 = displacementTexture;
-    this->shaderManager = std::move(shaderManager);
-    this->mapSize = mapSize;
-    Init(std::move(device), std::move(renderer), renderTargetId, windowWidth, windowHeight);
-    return true;
-}
 
 bool KGV::Engine::TerrainScene::LoadTextures() {
 
@@ -179,6 +183,11 @@ bool KGV::Engine::TerrainScene::SetupPrimaryCamera(S32 width, S32 height, S32 re
         Render::Texture2dConfigDX11 texConfig;
         texConfig.setDepthTexture(width, height);
         texConfig.setFormat(DXGI_FORMAT_D32_FLOAT);
+
+        DXGI_SAMPLE_DESC sampleDesc;
+        sampleDesc.Quality = D3D11_STANDARD_MULTISAMPLE_PATTERN;
+        sampleDesc.Count = 4;
+        texConfig.setSampleDesc(sampleDesc);
 
         Render::DepthStencilViewConfigDX11 dsvConfig;
         dsvConfig.setFormat(DXGI_FORMAT_D32_FLOAT);

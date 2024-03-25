@@ -5,6 +5,7 @@
 #include "TargaImage.h"
 #include "Scenes/TerrainScene.h"
 #include "Scenes/HeightMapScene.h"
+#include "Scenes/WaveformScene.h"
 
 using namespace DirectX;
 
@@ -71,6 +72,12 @@ bool KGV::System::ApplicationWin32::init() {
     shaderManager->loadShader( "../shaders/unlitTexturedPixelShader.hlsl",  "main",
                                "unlitShaderPs", Render::eShaderType::kPixel,  "ps_5_0");
 
+    auto lineVertexShader = shaderManager->loadShader("../shaders/displacementLineVertexShader.hlsl",  "main",
+                                                    "LineVertexShader", Render::eShaderType::kVertex,  "vs_5_0");
+
+    shaderManager->loadShader( "../shaders/unlitLineShader.hlsl",  "main",
+                               "LinePixelShader", Render::eShaderType::kPixel,  "ps_5_0");
+
     std::vector<D3D11_INPUT_ELEMENT_DESC> inputElements = {
             {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
             {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -82,6 +89,7 @@ bool KGV::System::ApplicationWin32::init() {
         return false;
 
     shaderManager->setInputLayoutForShader(displacementVs, layoutId);
+    shaderManager->setInputLayoutForShader(lineVertexShader, layoutId);
 
     createHeightMapBuffers(mapSize);
     generateHeightMaps(mapSize, static_cast<S32>(mapSeed), mapScale);
@@ -89,21 +97,27 @@ bool KGV::System::ApplicationWin32::init() {
     Render::SwapChainConfigDX11 swapChainConf;
     swapChainConf.setWidth(window1->getWidth());
     swapChainConf.setHeight(window1->getHeight());
+    swapChainConf.setSampleCount(4);
+    swapChainConf.setSampleQuality(D3D11_STANDARD_MULTISAMPLE_PATTERN);
     swapChainId = device->createSwapChain(window1->getWin32Handle(), swapChainConf);
     auto swapChain = device->getSwapChainById(swapChainId);
     rtvId = swapChain->getResource()->getRtvId();
 
     terrainScene = std::make_unique<Engine::TerrainScene>();
     heightMapScene = std::make_unique<Engine::HeightMapScene>();
+    waveformScene = std::make_unique<Engine::WaveformScene>();
+
+    waveformScene->Init(device, deviceContext, renderer, shaderManager, rtvId, window1->getWidth(),
+                        window1->getHeight());
 
     {
         auto t = dynamic_cast<Engine::TerrainScene*>(terrainScene.get());
-        t->Init(device, renderer, rtvId, window1->getWidth(),
-                window1->getHeight(), shaderManager, terrainMapDisplacementTextureF32, mapSize);
+        t->Init(device, deviceContext, renderer, shaderManager, rtvId, window1->getWidth(),
+                window1->getHeight(), terrainMapDisplacementTextureF32, mapSize);
 
         auto h = dynamic_cast<Engine::HeightMapScene*>(heightMapScene.get());
-        h->Init(device, renderer, rtvId, window1->getWidth(),
-                window1->getHeight(), shaderManager, terrainMapTextureFinalRGBA);
+        h->Init(device, deviceContext, renderer, shaderManager, rtvId, window1->getWidth(),
+                window1->getHeight(), terrainMapTextureFinalRGBA);
     }
 
     return true;
@@ -252,6 +266,10 @@ void KGV::System::ApplicationWin32::draw(F32 deltaTime) {
             break;
         case 1:
             heightMapScene->Tick(deltaTime);
+            break;
+        case 2:
+            waveformScene->Tick(deltaTime);
+            break;
         default:
             break;
     }
@@ -433,10 +451,5 @@ void KGV::System::ApplicationWin32::createHeightMapBuffers(int textureSize) {
     Render::ShaderResourceViewConfigDX11 terrainMapDisplaySrvConfig{};
     terrainMapDisplaySrvConfig.setTexture2D(srvDesc);
     terrainMapTextureFinalRGBA = device->CreateTexture2D(terrainMapDisplayTexConfig, nullptr, &terrainMapDisplaySrvConfig);
-}
-
-void KGV::System::ApplicationWin32::DrawGUI() {
-    ImGui::Begin("Engine");
-
 }
 

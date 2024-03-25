@@ -11,13 +11,19 @@
 namespace KGV::Render {
     class RenderDeviceDX11;
     class SimpleRenderer;
-
+    class PipelineManagerDX11;
 }
+
 namespace KGV::Engine {
+    class IShaderManager;
+
+
     class IScene {
     public:
-        virtual bool Init(std::weak_ptr<Render::RenderDeviceDX11> device, std::weak_ptr<Render::SimpleRenderer> renderer,
+        virtual bool Init(std::weak_ptr<Render::RenderDeviceDX11> device, std::weak_ptr<Render::PipelineManagerDX11> deviceContext,
+                          std::weak_ptr<Render::SimpleRenderer> renderer, std::shared_ptr<Engine::IShaderManager> shaderManager,
                           S32 renderTargetId, S32 windowWidth, S32 windowHeight) = 0;
+
         virtual void Shutdown() = 0;
         virtual void Tick(float deltaTime) = 0;
     };

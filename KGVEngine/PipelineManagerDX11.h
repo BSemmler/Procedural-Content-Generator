@@ -7,7 +7,7 @@
 
 #include "pch.h"
 //#include "RenderDeviceDX11.h"
-#include "InputAssemblerStageDX11.h"
+#include "render/InputAssemblerStageDX11.h"
 #include "VertexShaderStageDX11.h"
 #include "PixelShaderStageDX11.h"
 #include "RasterizerStageDX11.h"

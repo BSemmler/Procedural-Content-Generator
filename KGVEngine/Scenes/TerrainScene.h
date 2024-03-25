@@ -12,12 +12,13 @@
 namespace KGV::Engine {
     class TerrainScene : public IScene {
     public:
-        bool Init(std::weak_ptr<Render::RenderDeviceDX11> device, std::weak_ptr<Render::SimpleRenderer> renderer,
+        bool Init(std::weak_ptr<Render::RenderDeviceDX11> device, std::weak_ptr<Render::PipelineManagerDX11> deviceContext,
+                  std::weak_ptr<Render::SimpleRenderer> renderer, std::shared_ptr<IShaderManager> shaderManager,
                   S32 renderTargetId, S32 windowWidth, S32 windowHeight) override;
 
 
-        bool Init(std::weak_ptr<Render::RenderDeviceDX11> device, std::weak_ptr<Render::SimpleRenderer> renderer,
-                  S32 renderTargetId, S32 windowWidth, S32 windowHeight, std::shared_ptr<IShaderManager> shaderManager,
+        bool Init(std::weak_ptr<Render::RenderDeviceDX11> device, std::weak_ptr<Render::PipelineManagerDX11> deviceContext,
+                  std::weak_ptr<Render::SimpleRenderer> renderer, std::shared_ptr<IShaderManager> shaderManager, S32 renderTargetId, S32 windowWidth, S32 windowHeight,
                   const std::shared_ptr<Render::ResourceViewDX11>& displacementTexture, S32 mapSize);
 
         void Shutdown() override;
@@ -34,6 +35,7 @@ namespace KGV::Engine {
 
         std::weak_ptr<Render::RenderDeviceDX11> graphicsDevice;
         std::weak_ptr<Render::SimpleRenderer> graphicsRenderer;
+        std::weak_ptr<Render::PipelineManagerDX11> graphicsDeviceContext;
         std::vector<std::shared_ptr<Entity>> cameras;
         std::vector<std::shared_ptr<Entity>> lights;
         std::vector<std::shared_ptr<Entity>> entities;

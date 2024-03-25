@@ -185,6 +185,7 @@ void KGV::Render::SimpleRenderer::renderScene(std::vector<std::shared_ptr<Engine
                 iaState.setInputLayout(materials[currentMaterial].inputLayoutId);
                 iaState.setVertexBuffers(meshes[currentMesh].vertexBuffers, {sizeof(Vertex)}, {0});
                 iaState.setIndexBuffer(meshes[currentMesh].indexBuffer->getResourceId());
+                iaState.setTopology(meshes[currentMesh].topology);
             }
 
             bool changeIaState = false;

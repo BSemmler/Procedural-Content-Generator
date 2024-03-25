@@ -3,10 +3,11 @@
 #include <utility>
 #include "StringUtil.h"
 #include "VertexBufferDX11.h"
-#include "IndexBufferDX11.h"
+#include "render/IndexBufferDX11.h"
 #include "VertexShaderDX11.h"
 #include "PixelShaderDX11.h"
-#include "ConstantBufferDX11.h"
+#include "render/ConstantBufferDX11.h"
+#include "Texture1dDX11.h"
 
 namespace KGV::Render {
     RenderDeviceDX11::RenderDeviceDX11(std::shared_ptr<spdlog::logger> logger) : logger(std::move(logger)) {
@@ -118,6 +119,23 @@ namespace KGV::Render {
         texture->desiredDesc = texConfig.desc;
         S32 resourceId = storeResource(std::move(texture));
         return std::make_shared<ResourceViewDX11>(resourceId, &texConfig, this, srvConfig, rtvConfig, dsvConfig);
+    }
+
+    std::shared_ptr<ResourceViewDX11> RenderDeviceDX11::CreateTexture1D(Texture1dConfigDX11 &texConfig, ResourceData *data,
+                                                                        ShaderResourceViewConfigDX11 *srvConfig,
+                                                                        RenderTargetViewConfigDX11 *rtvConfig) {
+        ComPtr<ID3D11Texture1D> tex;
+        HRESULT hr = device->CreateTexture1D(&texConfig.desc, reinterpret_cast<D3D11_SUBRESOURCE_DATA *>(data), tex.GetAddressOf());
+
+        if (FAILED(hr)) {
+            logger->error("Failed to create D3D11 Texture2D, ({:X})", (unsigned int)hr);
+            throw std::runtime_error("Failed to create D3D11 Texture2D");
+        }
+
+        auto texture = std::make_unique<Texture1dDX11>(tex);
+        texture->desiredDesc = texConfig.desc;
+        S32 resourceId = storeResource(std::move(texture));
+        return std::make_shared<ResourceViewDX11>(resourceId, &texConfig, this, srvConfig, rtvConfig);
     }
 
     S32 RenderDeviceDX11::createSwapChain(void *hwnd, SwapChainConfigDX11 &config) {

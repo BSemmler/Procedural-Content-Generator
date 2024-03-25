@@ -7,7 +7,7 @@
 //#include "Entity.h"
 #include "SimpleRenderer.h"
 #include "ShaderManager.h"
-#include "IScene.h"
+#include "Scenes/IScene.h"
 #include <imgui.h>
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
@@ -26,10 +26,6 @@ namespace KGV::System
         void generateHeightMaps(int textureSize, int seed, double scale, double xOffset = 0, double yOffset = 0);
         void createHeightMapBuffers(int textureSize);
 
-//        void setupPrimaryCamera(int width, int height, int topX, int topY);
-//        void setupTextureViewer(int width, int height, int topX, int topY);
-        void DrawGUI();
-
 		// Inherited via IWndProc
 		virtual LRESULT CALLBACK wndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam ) override;
 
@@ -40,6 +36,7 @@ namespace KGV::System
         std::shared_ptr<Render::SimpleRenderer> renderer;
         std::unique_ptr<Engine::IScene> terrainScene;
         std::unique_ptr<Engine::IScene> heightMapScene;
+        std::unique_ptr<Engine::IScene> waveformScene;
         S32 swapChainId;
         S32 rtvId;
         std::shared_ptr<Render::ResourceViewDX11> depthBuffer;
@@ -47,8 +44,6 @@ namespace KGV::System
         std::shared_ptr<Render::ResourceViewDX11> terrainMapTextureFinalRGBA;
         std::shared_ptr<Engine::IShaderManager> shaderManager;
         std::chrono::high_resolution_clock::time_point lastTime;
-        F64 waterKeyDebounceTime = 0;
-        F64 seedChangeKeyDebounce = 0;
         F64 mapScale = 1024;
         S32 mapSize = 1024;
         S32 selectedScene = 0;

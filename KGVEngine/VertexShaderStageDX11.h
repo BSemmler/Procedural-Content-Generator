@@ -7,7 +7,7 @@
 
 #include "pch.h"
 #include "ShaderStageStateDX11.h"
-#include "IPipelineStageDX11.h"
+#include "render/IPipelineStageDX11.h"
 
 namespace KGV::Render {
     class IPipelineStageDX11;
