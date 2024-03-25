@@ -3,8 +3,8 @@
 //
 
 #include "HeightMapScene.h"
-#include "SimpleRenderer.h"
-#include "GeometryFactory.h"
+#include "render/renderers/simple/SimpleRenderer.h"
+#include "utility/GeometryFactory.h"
 
 bool KGV::Engine::HeightMapScene::Init(std::weak_ptr<Render::RenderDeviceDX11> device, std::weak_ptr<Render::PipelineManagerDX11> deviceContext,
                                        std::weak_ptr<Render::SimpleRenderer> renderer, std::shared_ptr<IShaderManager> shaderManager,

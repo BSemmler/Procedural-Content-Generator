@@ -6,9 +6,9 @@
 #define ENGINE_WAVEFORMSCENE_H
 
 #include "IScene.h"
-#include "Entity.h"
-#include "IShaderManager.h"
-#include "PerlinNoise.h"
+#include "engine/Entity.h"
+#include "engine/IShaderManager.h"
+#include "procedural/PerlinNoise.h"
 
 namespace KGV::Engine {
     class WaveformScene : public IScene {
@@ -42,7 +42,7 @@ namespace KGV::Engine {
         F32 terrainFrequency = 1.0f;
         F32 terrainPersistence = 0.45f;
         F32 terrainLacunarity = 2.0f;
-        S32 numVertices = 160;
+        S32 numVertices = 320;
     };
 }
 

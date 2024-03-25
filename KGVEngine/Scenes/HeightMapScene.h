@@ -6,8 +6,8 @@
 #define ENGINE_HEIGHTMAPSCENE_H
 
 #include "IScene.h"
-#include "IShaderManager.h"
-#include "Entity.h"
+#include "engine/IShaderManager.h"
+#include "engine/Entity.h"
 
 namespace KGV::Engine {
     class HeightMapScene : public IScene {

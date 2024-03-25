@@ -5,9 +5,9 @@
 #include "TerrainScene.h"
 
 #include <utility>
-#include "SimpleRenderer.h"
-#include "TargaImage.h"
-#include "GeometryFactory.h"
+#include "render/renderers/simple/SimpleRenderer.h"
+#include "utility/TargaImage.h"
+#include "utility/GeometryFactory.h"
 #include "imgui.h"
 
 using namespace DirectX;

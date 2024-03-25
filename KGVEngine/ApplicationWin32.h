@@ -5,8 +5,8 @@
 //#include "RenderDeviceDX11.h"
 //#include "Camera.h"
 //#include "Entity.h"
-#include "SimpleRenderer.h"
-#include "ShaderManager.h"
+#include "render/renderers/simple/SimpleRenderer.h"
+#include "render/shader/ShaderManager.h"
 #include "Scenes/IScene.h"
 #include <imgui.h>
 #include <imgui_impl_win32.h>

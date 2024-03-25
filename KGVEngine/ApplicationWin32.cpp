@@ -1,8 +1,8 @@
 #include <random>
 #include "ApplicationWin32.h"
-#include "GeometryFactory.h"
-#include "MultithreadedNoiseExecutor.h"
-#include "TargaImage.h"
+#include "utility/GeometryFactory.h"
+#include "procedural/MultithreadedNoiseExecutor.h"
+#include "utility/TargaImage.h"
 #include "Scenes/TerrainScene.h"
 #include "Scenes/HeightMapScene.h"
 #include "Scenes/WaveformScene.h"

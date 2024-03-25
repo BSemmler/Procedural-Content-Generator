@@ -6,8 +6,8 @@
 #define ENGINE_TERRAINSCENE_H
 
 #include "IScene.h"
-#include "Entity.h"
-#include "IShaderManager.h"
+#include "engine/Entity.h"
+#include "engine/IShaderManager.h"
 
 namespace KGV::Engine {
     class TerrainScene : public IScene {

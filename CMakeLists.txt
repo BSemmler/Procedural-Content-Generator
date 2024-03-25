@@ -30,127 +30,127 @@ add_executable(Engine
         KGVEngine/Application.h
         KGVEngine/ApplicationWin32.cpp
         KGVEngine/ApplicationWin32.h
-        KGVEngine/render/BufferConfigDX11.cpp
-        KGVEngine/render/BufferConfigDX11.h
-        KGVEngine/render/BufferDX11.cpp
-        KGVEngine/render/BufferDX11.h
-        KGVEngine/Error.h
-        KGVEngine/render/IndexBufferDX11.cpp
-        KGVEngine/render/IndexBufferDX11.h
+        KGVEngine/render/resources/config/BufferConfigDX11.cpp
+        KGVEngine/render/resources/config/BufferConfigDX11.h
+        KGVEngine/render/resources/containers/BufferDX11.cpp
+        KGVEngine/render/resources/containers/BufferDX11.h
+        KGVEngine/utility/Error.h
+        KGVEngine/render/resources/containers/IndexBufferDX11.cpp
+        KGVEngine/render/resources/containers/IndexBufferDX11.h
         KGVEngine/IWndProc.h
         KGVEngine/main.cpp
         KGVEngine/pch.cpp
         KGVEngine/pch.h
         KGVEngine/Platform.h
-        KGVEngine/RenderDeviceDX11.cpp
-        KGVEngine/RenderDeviceDX11.h
-        KGVEngine/RenderTargetViewDX11.h
-        KGVEngine/ResourceViewDX11.h
-        KGVEngine/ResourceData.h
-        KGVEngine/ShaderResourceViewDX11.h
-        KGVEngine/SwapChainConfigDX11.h
-        KGVEngine/Texture2dConfigDX11.cpp
-        KGVEngine/Texture2dConfigDX11.h
-        KGVEngine/Texture2dDX11.cpp
-        KGVEngine/Texture2dDX11.h
+        KGVEngine/render/RenderDeviceDX11.cpp
+        KGVEngine/render/RenderDeviceDX11.h
+        KGVEngine/render/resources/views/RenderTargetViewDX11.h
+        KGVEngine/render/resources/ResourceViewDX11.h
+        KGVEngine/render/resources/ResourceData.h
+        KGVEngine/render/resources/views/ShaderResourceViewDX11.h
+        KGVEngine/render/resources/config/SwapChainConfigDX11.h
+        KGVEngine/render/resources/config/Texture2dConfigDX11.cpp
+        KGVEngine/render/resources/config/Texture2dConfigDX11.h
+        KGVEngine/render/resources/containers/Texture2dDX11.cpp
+        KGVEngine/render/resources/containers/Texture2dDX11.h
         KGVEngine/Types.h
-        KGVEngine/VertexBufferDX11.cpp
-        KGVEngine/VertexBufferDX11.h
+        KGVEngine/render/resources/containers/VertexBufferDX11.cpp
+        KGVEngine/render/resources/containers/VertexBufferDX11.h
         KGVEngine/Window.cpp
         KGVEngine/Window.h
         KGVEngine/WindowWin32.cpp
         KGVEngine/WindowWin32.h
-        KGVEngine/SwapChainConfigDX11.cpp
-        KGVEngine/ShaderResourceViewConfigDX11.cpp
-        KGVEngine/ShaderResourceViewConfigDX11.h
-        KGVEngine/RenderTargetViewConfigDX11.cpp
-        KGVEngine/RenderTargetViewConfigDX11.h
-        KGVEngine/ResourceViewDX11.cpp
-        KGVEngine/ResourceDX11.cpp
-        KGVEngine/ResourceDX11.h
-        KGVEngine/RenderTargetViewDX11.cpp
-        KGVEngine/ShaderResourceViewDX11.cpp
-        KGVEngine/StringUtil.h
-        KGVEngine/SwapChainDX11.cpp
-        KGVEngine/SwapChainDX11.h
-        KGVEngine/ShaderDX11.cpp
-        KGVEngine/ShaderDX11.h
-        KGVEngine/VertexShaderDX11.cpp
-        KGVEngine/VertexShaderDX11.h
-        KGVEngine/PixelShaderDX11.cpp
-        KGVEngine/PixelShaderDX11.h
-        KGVEngine/render/InputAssemblerStateDX11.cpp
-        KGVEngine/render/InputAssemblerStateDX11.h
-        KGVEngine/ShaderStageStateDX11.cpp
-        KGVEngine/ShaderStageStateDX11.h
-        KGVEngine/RasterizerStageStateDX11.cpp
-        KGVEngine/RasterizerStageStateDX11.h
-        KGVEngine/OutputMergerStageStateDX11.cpp
-        KGVEngine/OutputMergerStageStateDX11.h
-        KGVEngine/render/InputAssemblerStageDX11.cpp
-        KGVEngine/render/InputAssemblerStageDX11.h
-        KGVEngine/VertexShaderStageDX11.cpp
-        KGVEngine/VertexShaderStageDX11.h
-        KGVEngine/render/IPipelineStageDX11.h
-        KGVEngine/render/ConstantBufferDX11.cpp
-        KGVEngine/render/ConstantBufferDX11.h
-        KGVEngine/PipelineManagerDX11.cpp
-        KGVEngine/PipelineManagerDX11.h
-        KGVEngine/PixelShaderStageDX11.cpp
-        KGVEngine/PixelShaderStageDX11.h
-        KGVEngine/RasterizerStageDX11.cpp
-        KGVEngine/RasterizerStageDX11.h
-        KGVEngine/OutputMergerStageDX11.cpp
-        KGVEngine/OutputMergerStageDX11.h
-        KGVEngine/PipelineStateDX11.h
-        KGVEngine/Entity.cpp
-        KGVEngine/Entity.h
-        KGVEngine/MeshComponent.cpp
-        KGVEngine/MeshComponent.h
-        KGVEngine/TransformComponent.cpp
-        KGVEngine/TransformComponent.h
-        KGVEngine/Camera.cpp
-        KGVEngine/Camera.h
-        KGVEngine/SimpleRenderer.cpp
-        KGVEngine/SimpleRenderer.h
-        KGVEngine/RenderMesh.cpp
-        KGVEngine/RenderMesh.h
-        KGVEngine/RenderMaterial.cpp
-        KGVEngine/RenderMaterial.h
-        KGVEngine/MaterialComponent.cpp
-        KGVEngine/MaterialComponent.h
-        KGVEngine/LightComponent.cpp
-        KGVEngine/LightComponent.h
-        KGVEngine/GeometryFactory.cpp
-        KGVEngine/GeometryFactory.h
-        KGVEngine/render/DepthStencilViewConfigDX11.cpp
-        KGVEngine/render/DepthStencilViewConfigDX11.h
-        KGVEngine/render/DepthStencilViewDX11.cpp
-        KGVEngine/render/DepthStencilViewDX11.h
-        KGVEngine/PerlinNoise.h
-        KGVEngine/PerlinNoise.cpp
-        KGVEngine/SamplerStateDX11.cpp
-        KGVEngine/SamplerStateDX11.h
-        KGVEngine/MultithreadedNoiseExecutor.cpp
-        KGVEngine/MultithreadedNoiseExecutor.h
-        KGVEngine/TargaImage.cpp
-        KGVEngine/TargaImage.h
-        KGVEngine/IScene.cpp
+        KGVEngine/render/resources/config/SwapChainConfigDX11.cpp
+        KGVEngine/render/resources/views/ShaderResourceViewConfigDX11.cpp
+        KGVEngine/render/resources/views/ShaderResourceViewConfigDX11.h
+        KGVEngine/render/resources/views/RenderTargetViewConfigDX11.cpp
+        KGVEngine/render/resources/views/RenderTargetViewConfigDX11.h
+        KGVEngine/render/resources/ResourceViewDX11.cpp
+        KGVEngine/render/resources/ResourceDX11.cpp
+        KGVEngine/render/resources/ResourceDX11.h
+        KGVEngine/render/resources/views/RenderTargetViewDX11.cpp
+        KGVEngine/render/resources/views/ShaderResourceViewDX11.cpp
+        KGVEngine/utility/StringUtil.h
+        KGVEngine/render/resources/containers/SwapChainDX11.cpp
+        KGVEngine/render/resources/containers/SwapChainDX11.h
+        KGVEngine/render/shader/ShaderDX11.cpp
+        KGVEngine/render/shader/ShaderDX11.h
+        KGVEngine/render/resources/containers/VertexShaderDX11.cpp
+        KGVEngine/render/resources/containers/VertexShaderDX11.h
+        KGVEngine/render/shader/PixelShaderDX11.cpp
+        KGVEngine/render/shader/PixelShaderDX11.h
+        KGVEngine/render/pipeline/InputAssemblerStateDX11.cpp
+        KGVEngine/render/pipeline/InputAssemblerStateDX11.h
+        KGVEngine/render/pipeline/ShaderStageStateDX11.cpp
+        KGVEngine/render/pipeline/ShaderStageStateDX11.h
+        KGVEngine/render/pipeline/RasterizerStageStateDX11.cpp
+        KGVEngine/render/pipeline/RasterizerStageStateDX11.h
+        KGVEngine/render/pipeline/OutputMergerStageStateDX11.cpp
+        KGVEngine/render/pipeline/OutputMergerStageStateDX11.h
+        KGVEngine/render/pipeline/InputAssemblerStageDX11.cpp
+        KGVEngine/render/pipeline/InputAssemblerStageDX11.h
+        KGVEngine/render/shader/VertexShaderStageDX11.cpp
+        KGVEngine/render/shader/VertexShaderStageDX11.h
+        KGVEngine/render/pipeline/IPipelineStageDX11.h
+        KGVEngine/render/resources/containers/ConstantBufferDX11.cpp
+        KGVEngine/render/resources/containers/ConstantBufferDX11.h
+        KGVEngine/render/pipeline/PipelineManagerDX11.cpp
+        KGVEngine/render/pipeline/PipelineManagerDX11.h
+        KGVEngine/render/pipeline/PixelShaderStageDX11.cpp
+        KGVEngine/render/pipeline/PixelShaderStageDX11.h
+        KGVEngine/render/pipeline/RasterizerStageDX11.cpp
+        KGVEngine/render/pipeline/RasterizerStageDX11.h
+        KGVEngine/render/pipeline/OutputMergerStageDX11.cpp
+        KGVEngine/render/pipeline/OutputMergerStageDX11.h
+        KGVEngine/render/pipeline/PipelineStateDX11.h
+        KGVEngine/engine/Entity.cpp
+        KGVEngine/engine/Entity.h
+        KGVEngine/engine/entitycomponents/MeshComponent.cpp
+        KGVEngine/engine/entitycomponents/MeshComponent.h
+        KGVEngine/engine/entitycomponents/TransformComponent.cpp
+        KGVEngine/engine/entitycomponents/TransformComponent.h
+        KGVEngine/engine/Camera.cpp
+        KGVEngine/engine/Camera.h
+        KGVEngine/render/renderers/simple/SimpleRenderer.cpp
+        KGVEngine/render/renderers/simple/SimpleRenderer.h
+        KGVEngine/render/renderers/simple/RenderMesh.cpp
+        KGVEngine/render/renderers/simple/RenderMesh.h
+        KGVEngine/render/renderers/simple/RenderMaterial.cpp
+        KGVEngine/render/renderers/simple/RenderMaterial.h
+        KGVEngine/engine/entitycomponents/MaterialComponent.cpp
+        KGVEngine/engine/entitycomponents/MaterialComponent.h
+        KGVEngine/engine/entitycomponents/LightComponent.cpp
+        KGVEngine/engine/entitycomponents/LightComponent.h
+        KGVEngine/utility/GeometryFactory.cpp
+        KGVEngine/utility/GeometryFactory.h
+        KGVEngine/render/resources/config/DepthStencilViewConfigDX11.cpp
+        KGVEngine/render/resources/config/DepthStencilViewConfigDX11.h
+        KGVEngine/render/resources/containers/DepthStencilViewDX11.cpp
+        KGVEngine/render/resources/containers/DepthStencilViewDX11.h
+        KGVEngine/procedural/PerlinNoise.h
+        KGVEngine/procedural/PerlinNoise.cpp
+        KGVEngine/render/resources/config/SamplerStateDX11.cpp
+        KGVEngine/render/resources/config/SamplerStateDX11.h
+        KGVEngine/procedural/MultithreadedNoiseExecutor.cpp
+        KGVEngine/procedural/MultithreadedNoiseExecutor.h
+        KGVEngine/utility/TargaImage.cpp
+        KGVEngine/utility/TargaImage.h
+        KGVEngine/Scenes/IScene.cpp
         KGVEngine/Scenes/IScene.h
         KGVEngine/Scenes/TerrainScene.cpp
         KGVEngine/Scenes/TerrainScene.h
-        KGVEngine/IShaderManager.cpp
-        KGVEngine/IShaderManager.h
-        KGVEngine/ShaderManager.cpp
-        KGVEngine/ShaderManager.h
+        KGVEngine/engine/IShaderManager.cpp
+        KGVEngine/engine/IShaderManager.h
+        KGVEngine/render/shader/ShaderManager.cpp
+        KGVEngine/render/shader/ShaderManager.h
         KGVEngine/Scenes/HeightMapScene.cpp
         KGVEngine/Scenes/HeightMapScene.h
         KGVEngine/Scenes/WaveformScene.cpp
         KGVEngine/Scenes/WaveformScene.h
-        KGVEngine/Texture1dConfigDX11.cpp
-        KGVEngine/Texture1dConfigDX11.h
-        KGVEngine/Texture1dDX11.cpp
-        KGVEngine/Texture1dDX11.h
+        KGVEngine/render/resources/config/Texture1dConfigDX11.cpp
+        KGVEngine/render/resources/config/Texture1dConfigDX11.h
+        KGVEngine/render/resources/containers/Texture1dDX11.cpp
+        KGVEngine/render/resources/containers/Texture1dDX11.h
 )
 
 target_link_libraries(Engine PRIVATE spdlog::spdlog imgui::imgui  d3d11.lib dxgi.lib d3dcompiler.lib)

@@ -4,7 +4,7 @@
 
 #include "WaveformScene.h"
 #include "imgui.h"
-#include "SimpleRenderer.h"
+#include "render/renderers/simple/SimpleRenderer.h"
 
 bool KGV::Engine::WaveformScene::Init(std::weak_ptr<Render::RenderDeviceDX11> device, std::weak_ptr<Render::PipelineManagerDX11> deviceContext,
                                       std::weak_ptr<Render::SimpleRenderer> renderer, std::shared_ptr<IShaderManager> shaderManager,
@@ -112,7 +112,7 @@ void KGV::Engine::WaveformScene::SetupPrimaryCamera(S32 width, S32 height, S32 r
         heightMapCamera->camera->setRtvId(renderTargetId);
         heightMapCamera->camera->setViewPortId(device->createViewPort(vp));
         heightMapCamera->camera->setOrthographicProject(160,
-                                                        40, 0.01, 5);
+                                                        90, 0.01, 5);
         heightMapCamera->camera->setIsActive(true);
         heightMapCamera->transform.position.z = -1;
 //        heightMapCamera->transform.position.x = numVertices / 2;
@@ -126,7 +126,7 @@ void KGV::Engine::WaveformScene::SetupEntities() {
         vertices.resize(numVertices);
 
         for (int i = 0; i < numVertices; ++i) {
-            vertices[i].position = {static_cast<F32>(i - (numVertices / 2)) , 0, 0};
+            vertices[i].position = {static_cast<F32>(i - (numVertices / 2)) / 2, 0, 0};
             vertices[i].normal = { 0, 0, 0 };
             vertices[i].texCoord = { static_cast<F32>(i) / static_cast<F32>(numVertices), 0 };
         }
