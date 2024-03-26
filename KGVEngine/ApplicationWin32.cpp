@@ -1,4 +1,3 @@
-#include <random>
 #include "ApplicationWin32.h"
 #include "utility/GeometryFactory.h"
 #include "procedural/MultithreadedNoiseExecutor.h"
@@ -202,7 +201,6 @@ void KGV::System::ApplicationWin32::draw(F32 deltaTime) {
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::ShowDemoWindow();
     ImGui::Begin("Engine");
 
     ImGui::SeparatorText("Select Scene");

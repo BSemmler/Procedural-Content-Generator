@@ -31,19 +31,54 @@ void KGV::Engine::WaveformScene::Shutdown() {
 void KGV::Engine::WaveformScene::Tick(float deltaTime) {
     auto regenWaveForm = false;
     ImGui::SeparatorText("Fractal Brownian Motion");
-    if (ImGui::SliderInt("Octaves", &terrainOctaves, 1, 16)) {
-        regenWaveForm = true;
+    if (isGradientNoise) {
+        if (ImGui::SliderInt("Octaves", &terrainOctaves, 1, 16)) {
+            regenWaveForm = true;
+        }
+
     }
+
     if (ImGui::SliderFloat("Amplitude", &terrainAmplitude, 0.01f, 8.0f)) {
         regenWaveForm = true;
     }
     if (ImGui::SliderFloat("Frequency", &terrainFrequency, 0.01f, 8.0f)) {
         regenWaveForm = true;
     }
-    if (ImGui::SliderFloat("Gain/Persistence", &terrainPersistence, 0.01f, 4.0f)) {
-        regenWaveForm = true;
+
+    if (isGradientNoise) {
+        if (ImGui::SliderFloat("Gain/Persistence", &terrainPersistence, 0.01f, 4.0f)) {
+            regenWaveForm = true;
+        }
+        if (ImGui::SliderFloat("Lacunarity", &terrainLacunarity, 0.01f, 4.0f)) {
+            regenWaveForm = true;
+        }
     }
-    if (ImGui::SliderFloat("Lacunarity", &terrainLacunarity, 0.01f, 4.0f)) {
+
+
+    ImGui::SeparatorText("Noise Waveform");
+    if (ImGui::RadioButton("Gradient", isGradientNoise)) {
+        isGradientNoise = true;
+        isRandomNoise = false;
+        isCosNoise = false;
+        isSinNoise = false;
+        regenWaveForm = true;
+    } else if (ImGui::RadioButton("Random", isRandomNoise)) {
+        isGradientNoise = false;
+        isRandomNoise = true;
+        isCosNoise = false;
+        isSinNoise = false;
+        regenWaveForm = true;
+    } else if (ImGui::RadioButton("Cos", isCosNoise)) {
+        isGradientNoise = false;
+        isRandomNoise = false;
+        isCosNoise = true;
+        isSinNoise = false;
+        regenWaveForm = true;
+    } else if (ImGui::RadioButton("Sin", isSinNoise)) {
+        isGradientNoise = false;
+        isRandomNoise = false;
+        isCosNoise = false;
+        isSinNoise = true;
         regenWaveForm = true;
     }
 
@@ -176,24 +211,42 @@ void KGV::Engine::WaveformScene::SetupEntities() {
 }
 
 void KGV::Engine::WaveformScene::GenerateWaveForm() {
-    for (int j = 0; j < numVertices; ++j) {
-        auto freq = terrainFrequency;
-        auto amplitude = terrainAmplitude;
-        double sum = 0;
-        double min = 0;
-        double max = 0;
-        for (int i = 0; i < terrainOctaves; ++i) {
-            auto x = (static_cast<F32>(j) * freq) / static_cast<F32>(numVertices);
-            auto noise = perlinNoiseGenerator.noiseDP(x, 0.5) * amplitude;
-            sum += noise;
-            min -= amplitude;
-            max += amplitude;
-            freq *= terrainLacunarity;
-            amplitude *= terrainPersistence;
-        }
+    if (isGradientNoise) {
+        for (int j = 0; j < numVertices; ++j) {
+            auto freq = terrainFrequency;
+            auto amplitude = terrainAmplitude;
+            double sum = 0;
+            double min = 0;
+            double max = 0;
+            for (int i = 0; i < terrainOctaves; ++i) {
+                auto x = (static_cast<F32>(j) * freq) / static_cast<F32>(numVertices);
+                auto noise = perlinNoiseGenerator.noiseDP(x, 0.5) * amplitude;
+                sum += noise;
+                min -= amplitude;
+                max += amplitude;
+                freq *= terrainLacunarity;
+                amplitude *= terrainPersistence;
+            }
 
-        heightMapBuffer[j] = static_cast<F32>(sum / max);
+            heightMapBuffer[j] = static_cast<F32>(sum / max);
+        }
+    } else if (isRandomNoise) {
+        std::mt19937 mt(0);
+        std::uniform_real_distribution<> distrib(-1.0,1.0);
+        for (int i = 0; i < numVertices; ++i) {
+            heightMapBuffer[i] = static_cast<F32>(distrib(mt)) * terrainAmplitude;
+        }
+    } else if (isSinNoise) {
+        double step = 80 / 320;
+        for (int i = 0; i < numVertices; ++i) {
+            heightMapBuffer[i] = std::sin(static_cast<F64>(i) / ((numVertices / 16.0) * terrainFrequency)) * terrainAmplitude;
+        }
+    } else if (isCosNoise) {
+        for (int i = 0; i < numVertices; ++i) {
+            heightMapBuffer[i] = std::cos(static_cast<F64>(i) / ((numVertices / 16.0) * terrainFrequency)) * terrainAmplitude;
+        }
     }
+
 
     if (auto deviceContext = graphicsDeviceContext.lock()) {
 

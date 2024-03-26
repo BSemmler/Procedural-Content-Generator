@@ -43,6 +43,10 @@ namespace KGV::Engine {
         F32 terrainPersistence = 0.45f;
         F32 terrainLacunarity = 2.0f;
         S32 numVertices = 320;
+        bool isRandomNoise = false;
+        bool isGradientNoise = true;
+        bool isSinNoise = false;
+        bool isCosNoise = false;
     };
 }
 
