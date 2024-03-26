@@ -27,7 +27,10 @@ bool KGV::System::ApplicationWin32::init() {
     wc.hIconSm = LoadIcon( nullptr, IDI_APPLICATION );
     
     WindowWin32::registerClass( wc );
-    window1 = std::make_unique<WindowWin32>( this, "KGV_Win32", 1600, 900, 0, 0, "Hello World 1!", true );
+    int w = GetSystemMetrics(SM_CXSCREEN);
+    int h = GetSystemMetrics(SM_CYSCREEN);
+
+    window1 = std::make_unique<WindowWin32>( this, "KGV_Win32", w, h, 0, 0, "Hello World 1!", true );
 
     if ( !window1->getWin32Handle() ) {
         return false;
@@ -246,7 +249,7 @@ void KGV::System::ApplicationWin32::draw(F32 deltaTime) {
         ImGui::Text("Sharpness Enhance");
         ImGui::Text("Rough");
         ImGui::SameLine();
-        if (ImGui::SliderInt("##sharpenessEnhance", &terrainSharpnessEnhance, 1, 16)) {
+        if (ImGui::SliderInt("##sharpenessEnhance", &terrainSharpnessEnhance, 0, 16)) {
             regenMap = true;
         }
         ImGui::SameLine();
