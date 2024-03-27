@@ -211,7 +211,7 @@ void KGV::System::ApplicationWin32::draw(F32 deltaTime) {
         selectedScene = 0;
     } else if (ImGui::RadioButton("Heightmap Scene", selectedScene == 1)) {
         selectedScene = 1;
-    } else if (ImGui::RadioButton("Wave Scene", selectedScene == 2)) {
+    } else if (ImGui::RadioButton("Wave Generator Scene", selectedScene == 2)) {
         selectedScene = 2;
     }
 
